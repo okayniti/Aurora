@@ -15,6 +15,11 @@
 
 AURORA is not a productivity app. It is a **human-performance operating system** — a research-grade platform that treats daily execution as an optimization problem, combining time-series forecasting, gradient-boosted classification, deep reinforcement learning, and NLP embeddings into a unified adaptive system.
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ee3c16cf-653e-4f6d-9ba2-612566829c41" />
+
+
+
+
 ---
 
 ## 📋 Table of Contents
