@@ -24,6 +24,10 @@
   It is a <strong>human-performance operating system</strong> — a research-grade platform that treats daily execution as an optimization problem.
 </p>
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ee3c16cf-653e-4f6d-9ba2-612566829c41" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c3ada2f6-67ae-4cef-bfd5-9aa2317035a6" />
+
 ---
 
 ## 🧠 What Makes It Different
