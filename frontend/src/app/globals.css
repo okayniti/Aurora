@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-surface text-gray-100 font-sans antialiased;
+    min-height: 100vh;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-400;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-aurora-700 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-aurora-600;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-surface-300/50 backdrop-blur-xl border border-white/5 rounded-2xl;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300;
+  }
+  .glass-card-hover:hover {
+    @apply border-aurora-700/30 shadow-glow;
+    transform: translateY(-2px);
+  }
+
+  .metric-value {
+    @apply text-3xl font-bold tracking-tight font-mono;
+  }
+
+  .metric-label {
+    @apply text-sm text-gray-400 font-medium uppercase tracking-wider;
+  }
+
+  .status-dot {
+    @apply w-2 h-2 rounded-full inline-block;
+  }
+
+  .status-low { @apply bg-accent-green; }
+  .status-moderate { @apply bg-accent-amber; }
+  .status-high { @apply bg-accent-rose; }
+  .status-critical { @apply bg-red-500 animate-pulse; }
+
+  .nav-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 
+           transition-all duration-200 text-sm font-medium;
+  }
+  .nav-link:hover {
+    @apply text-gray-100 bg-surface-300/50;
+  }
+  .nav-link.active {
+    @apply text-aurora-400 bg-aurora-950/50 border border-aurora-800/30;
+  }
+
+  .section-title {
+    @apply text-lg font-semibold text-gray-200 tracking-tight;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  .badge-info { @apply bg-aurora-900/50 text-aurora-300 border border-aurora-700/30; }
+  .badge-success { @apply bg-emerald-900/50 text-emerald-300 border border-emerald-700/30; }
+  .badge-warning { @apply bg-amber-900/50 text-amber-300 border border-amber-700/30; }
+  .badge-danger { @apply bg-rose-900/50 text-rose-300 border border-rose-700/30; }
+}
+
+@layer utilities {
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-aurora-400 to-accent-cyan;
+  }
+
+  .glow-border {
+    @apply border border-aurora-700/20;
+    box-shadow: inset 0 0 20px rgba(92, 124, 250, 0.05);
+  }
+}
