@@ -371,12 +371,6 @@ python scripts/train_all.py
 
 ---
 
-## 📝 Resume-Ready Summary
-
-> **AURORA** is a full-stack AI behavioral intelligence platform that optimizes daily human performance through machine learning. The system combines an **LSTM-based energy forecasting engine** (PyTorch), an **XGBoost burnout classifier with SHAP explainability**, a **Deep Q-Network reinforcement learning scheduler** that learns optimal task ordering through multi-component reward signals (completion, identity alignment, burnout avoidance), and an **NLP-powered identity alignment engine** using sentence-transformer embeddings. Built with a production-grade architecture — **FastAPI** microservices, **PostgreSQL** (8-table normalized schema), **Next.js** analytical dashboard, and **Docker** orchestration — AURORA demonstrates end-to-end ML system design: from feature engineering and model training pipelines to real-time inference APIs with heuristic fallbacks, automated replanning triggers, and comprehensive evaluation frameworks. The project showcases expertise in time-series modeling, gradient-boosted classification, reinforcement learning environment design, NLP embeddings, async API development, and modern frontend data visualization.
-
----
-
 <p align="center">
   <sub>Designed and engineered as a flagship AI system.</sub><br>
   <sub>AURORA — Because execution should be adaptive, not arbitrary.</sub>
