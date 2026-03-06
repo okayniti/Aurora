@@ -1,17 +1,21 @@
 "use client";
 
+import { useUser } from "@/lib/UserContext";
+import { useApi } from "@/lib/useApi";
+import { api } from "@/lib/api";
 import MetricCard from "@/components/layout/MetricCard";
+import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
 import {
     LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
     Tooltip, ResponsiveContainer, Cell, PieChart, Pie,
 } from "recharts";
 
-const burnoutTrend = Array.from({ length: 30 }, (_, i) => ({
+const demoTrend = Array.from({ length: 30 }, (_, i) => ({
     day: i + 1,
     probability: +(0.15 + Math.sin(i / 5) * 0.15 + Math.random() * 0.12).toFixed(3),
 }));
 
-const featureData = [
+const demoFeatures = [
     { name: "Stress Trend", value: 0.32, color: "#fb7185" },
     { name: "Sleep Quality", value: 0.25, color: "#5c7cfa" },
     { name: "Cognitive Load", value: 0.20, color: "#fbbf24" },
@@ -19,7 +23,7 @@ const featureData = [
     { name: "Energy Variance", value: 0.10, color: "#a78bfa" },
 ];
 
-const riskDistribution = [
+const demoRiskDist = [
     { name: "Low", value: 12, fill: "#34d399" },
     { name: "Moderate", value: 10, fill: "#fbbf24" },
     { name: "High", value: 6, fill: "#fb7185" },
@@ -43,20 +47,67 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function BurnoutPage() {
-    const latest = burnoutTrend[burnoutTrend.length - 1].probability;
+    const { userId } = useUser();
+
+    const { data: trendData, error } = useApi(
+        async () => {
+            if (!userId) throw new Error("no user");
+            const trend: any = await api.getBurnoutTrend(userId, 30);
+            return trend.map((t: any, i: number) => ({
+                day: i + 1,
+                probability: +t.burnout_probability.toFixed(3),
+            }));
+        },
+        demoTrend,
+        [userId]
+    );
+
+    const { data: featureData } = useApi(
+        async () => {
+            if (!userId) throw new Error("no user");
+            const risk: any = await api.getBurnoutRisk(userId);
+            if (!risk.feature_importance) return demoFeatures;
+            return Object.entries(risk.feature_importance).map(([name, value], i) => ({
+                name: name.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()),
+                value: +(value as number).toFixed(3),
+                color: ["#fb7185", "#5c7cfa", "#fbbf24", "#34d399", "#a78bfa"][i % 5],
+            }));
+        },
+        demoFeatures,
+        [userId]
+    );
+
+    const isDemo = !!error;
+    const latest = (trendData || demoTrend)[(trendData || demoTrend).length - 1]?.probability || 0.34;
     const riskLevel = latest < 0.25 ? "Low" : latest < 0.5 ? "Moderate" : latest < 0.75 ? "High" : "Critical";
     const riskColor = latest < 0.25 ? "green" : latest < 0.5 ? "amber" : "rose";
 
+    // Compute risk distribution from trend
+    const riskDist = (trendData || demoTrend).reduce(
+        (acc: any[], d: any) => {
+            const level = d.probability < 0.25 ? 0 : d.probability < 0.5 ? 1 : d.probability < 0.75 ? 2 : 3;
+            acc[level] = { ...acc[level], value: acc[level].value + 1 };
+            return acc;
+        },
+        [
+            { name: "Low", value: 0, fill: "#34d399" },
+            { name: "Moderate", value: 0, fill: "#fbbf24" },
+            { name: "High", value: 0, fill: "#fb7185" },
+            { name: "Critical", value: 0, fill: "#ef4444" },
+        ]
+    );
+
     return (
         <div className="space-y-8 animate-fade-in">
-            <div>
+            <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-bold tracking-tight">
                     Burnout <span className="gradient-text">Monitor</span>
                 </h1>
-                <p className="text-gray-500 mt-1 text-sm">
-                    XGBoost classifier · SHAP explainability · Real-time risk monitoring
-                </p>
+                {isDemo && <DemoBadge />}
             </div>
+            <p className="text-gray-500 -mt-6 text-sm">XGBoost classifier · SHAP explainability · Real-time risk monitoring</p>
+
+            {isDemo && <ErrorBanner message="Using simulated burnout data" />}
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <MetricCard title="Burnout Risk" value={latest.toFixed(3)} icon="🛡" color={riskColor as any} subtitle={riskLevel} />
@@ -70,7 +121,7 @@ export default function BurnoutPage() {
                     <h2 className="section-title mb-1">30-Day Burnout Trend</h2>
                     <p className="text-xs text-gray-500 mb-4">Burnout probability over time · Threshold at 0.5</p>
                     <ResponsiveContainer width="100%" height={280}>
-                        <LineChart data={burnoutTrend}>
+                        <LineChart data={trendData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                             <XAxis dataKey="day" stroke="#475569" fontSize={10} />
                             <YAxis domain={[0, 1]} stroke="#475569" fontSize={10} />
@@ -91,7 +142,7 @@ export default function BurnoutPage() {
                             <YAxis type="category" dataKey="name" width={120} stroke="#475569" fontSize={11} />
                             <Tooltip content={<CustomTooltip />} />
                             <Bar dataKey="value" radius={[0, 6, 6, 0]} name="SHAP Value">
-                                {featureData.map((entry, i) => (
+                                {(featureData || demoFeatures).map((entry: any, i: number) => (
                                     <Cell key={i} fill={entry.color} />
                                 ))}
                             </Bar>
@@ -106,8 +157,8 @@ export default function BurnoutPage() {
                 <div className="flex items-center gap-8">
                     <ResponsiveContainer width="40%" height={200}>
                         <PieChart>
-                            <Pie data={riskDistribution} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3}>
-                                {riskDistribution.map((entry, i) => (
+                            <Pie data={riskDist} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3}>
+                                {riskDist.map((entry: any, i: number) => (
                                     <Cell key={i} fill={entry.fill} />
                                 ))}
                             </Pie>
@@ -115,7 +166,7 @@ export default function BurnoutPage() {
                         </PieChart>
                     </ResponsiveContainer>
                     <div className="flex-1 space-y-3">
-                        {riskDistribution.map((item) => (
+                        {riskDist.map((item: any) => (
                             <div key={item.name} className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.fill }} />

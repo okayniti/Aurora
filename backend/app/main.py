@@ -79,3 +79,20 @@ async def create_user(email: str, name: str, identity_desc: str = None):
         await session.commit()
         await session.refresh(user)
         return {"id": str(user.id), "email": email, "name": name}
+
+
+@app.get("/api/users", tags=["Users"])
+async def list_users():
+    """List all users — used by frontend to auto-discover demo user."""
+    from sqlalchemy import select
+    from app.database.connection import async_session_factory
+    from app.database.models import User
+
+    async with async_session_factory() as session:
+        result = await session.execute(select(User))
+        users = result.scalars().all()
+        return [
+            {"id": str(u.id), "email": u.email, "name": u.name}
+            for u in users
+        ]
+
