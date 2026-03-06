@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="docs/screenshots/dashboard.png" alt="AURORA Dashboard" width="800" />
-</p>
-
 <h1 align="center">🌅 AURORA</h1>
 
 <h3 align="center">Adaptive Unified Reinforcement Optimized Routine Architect</h3>
