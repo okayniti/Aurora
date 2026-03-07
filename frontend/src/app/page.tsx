@@ -64,9 +64,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export default function Dashboard() {
     const { userId } = useUser();
-    const [time, setTime] = useState(new Date());
+    const [time, setTime] = useState<Date | null>(null);
+    const [energyModelType, setEnergyModelType] = useState("heuristic");
 
     useEffect(() => {
+        setTime(new Date());
         const timer = setInterval(() => setTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
@@ -83,6 +85,7 @@ export default function Dashboard() {
         async () => {
             if (!userId) throw new Error("no user");
             const forecast: any = await api.getEnergyForecast(userId);
+            if (forecast.model_type) setEnergyModelType(forecast.model_type);
             return forecast.hourly_predictions?.map((p: any) => ({
                 hour: `${String(p.hour).padStart(2, "0")}:00`,
                 predicted: +p.energy.toFixed(1),
@@ -98,9 +101,11 @@ export default function Dashboard() {
         async () => {
             if (!userId) throw new Error("no user");
             const trend: any = await api.getBurnoutTrend(userId);
-            return trend.map((t: any, i: number) => ({
+            const points = trend.data_points || trend;
+            if (!Array.isArray(points) || points.length === 0) return demoBurnout;
+            return points.map((t: any, i: number) => ({
                 day: `Day ${i + 1}`,
-                probability: +t.burnout_probability.toFixed(3),
+                probability: +(t.probability ?? t.burnout_probability ?? 0).toFixed(3),
             }));
         },
         demoBurnout,
@@ -143,12 +148,12 @@ export default function Dashboard() {
                 </div>
                 <div className="text-right">
                     <p className="text-2xl font-mono text-gray-300">
-                        {time.toLocaleTimeString("en-US", { hour12: false })}
+                        {time ? time.toLocaleTimeString("en-US", { hour12: false }) : "--:--:--"}
                     </p>
                     <p className="text-xs text-gray-600">
-                        {time.toLocaleDateString("en-US", {
+                        {time ? time.toLocaleDateString("en-US", {
                             weekday: "long", year: "numeric", month: "long", day: "numeric",
-                        })}
+                        }) : ""}
                     </p>
                 </div>
             </div>
@@ -170,7 +175,9 @@ export default function Dashboard() {
                         <h2 className="section-title">Energy Forecast vs Actual</h2>
                         <p className="text-xs text-gray-500 mt-1">LSTM-predicted energy levels · Heuristic fallback active</p>
                     </div>
-                    <span className="badge badge-info">Heuristic Model</span>
+                    <span className={`badge ${energyModelType === "lstm" ? "badge-success" : "badge-info"}`}>
+                        {energyModelType === "lstm" ? "LSTM Model" : "Heuristic Model"}
+                    </span>
                 </div>
                 <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={energyData}>

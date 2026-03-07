@@ -53,9 +53,11 @@ export default function BurnoutPage() {
         async () => {
             if (!userId) throw new Error("no user");
             const trend: any = await api.getBurnoutTrend(userId, 30);
-            return trend.map((t: any, i: number) => ({
+            const points = trend.data_points || trend;
+            if (!Array.isArray(points) || points.length === 0) return demoTrend;
+            return points.map((t: any, i: number) => ({
                 day: i + 1,
-                probability: +t.burnout_probability.toFixed(3),
+                probability: +(t.probability ?? t.burnout_probability ?? 0).toFixed(3),
             }));
         },
         demoTrend,

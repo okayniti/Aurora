@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const navItems = [
     { href: "/", label: "Dashboard", icon: "◉" },
@@ -15,6 +18,52 @@ const navItems = [
 
 export default function Sidebar() {
     const pathname = usePathname();
+    const [status, setStatus] = useState<"online" | "offline">("offline");
+    const [modelInfo, setModelInfo] = useState("Checking...");
+
+    useEffect(() => {
+        async function checkBackend() {
+            try {
+                const res = await fetch(`${API_BASE}/api/health`, {
+                    signal: AbortSignal.timeout(3000),
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setStatus("online");
+
+                    // Check which models are loaded via a quick energy forecast call
+                    try {
+                        const userId = localStorage.getItem("aurora_user_id");
+                        if (userId) {
+                            const eRes = await fetch(`${API_BASE}/api/energy/forecast/${userId}`, {
+                                signal: AbortSignal.timeout(3000),
+                            });
+                            if (eRes.ok) {
+                                const eData = await eRes.json();
+                                const models: string[] = [];
+                                if (eData.model_type === "lstm") models.push("LSTM");
+                                else models.push("Heuristic");
+                                setModelInfo(models.join(" · "));
+                            } else {
+                                setModelInfo("Heuristic");
+                            }
+                        } else {
+                            setModelInfo("No user");
+                        }
+                    } catch {
+                        setModelInfo("Heuristic");
+                    }
+                }
+            } catch {
+                setStatus("offline");
+                setModelInfo("Offline");
+            }
+        }
+
+        checkBackend();
+        const interval = setInterval(checkBackend, 30000); // Check every 30s
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <aside className="fixed left-0 top-0 h-screen w-64 bg-surface-400/80 backdrop-blur-xl border-r border-white/5 flex flex-col z-50">
@@ -57,11 +106,13 @@ export default function Sidebar() {
             <div className="p-4 border-t border-white/5">
                 <div className="glass-card p-3 rounded-xl">
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="status-dot status-low animate-pulse-slow" />
-                        <span className="text-xs text-gray-400">System Online</span>
+                        <span className={`status-dot ${status === "online" ? "status-low" : "status-critical"} animate-pulse-slow`} />
+                        <span className="text-xs text-gray-400">
+                            {status === "online" ? "System Online" : "System Offline"}
+                        </span>
                     </div>
                     <p className="text-[10px] text-gray-600 font-mono">
-                        v1.0.0 • Models: Heuristic
+                        v1.0.0 • Models: {modelInfo}
                     </p>
                 </div>
             </div>

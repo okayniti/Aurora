@@ -87,7 +87,7 @@ def _calculate_auc_roc(y_true: np.ndarray, y_scores: np.ndarray) -> float:
         tpr_list.append(tp_count / total_pos)
         fpr_list.append(fp_count / total_neg)
 
-    auc = np.trapz(tpr_list, fpr_list)
+    auc = np.trapezoid(tpr_list, fpr_list)
     return float(auc)
 
 

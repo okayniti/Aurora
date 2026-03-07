@@ -61,6 +61,45 @@ def train_energy_model():
     logger.info(f"Energy model metrics: {metrics}")
 
 
+def train_burnout_model():
+    """Train the XGBoost burnout classifier on synthetic data."""
+    import numpy as np
+    from app.ml.burnout_model.train import BurnoutTrainer
+
+    logger.info("═" * 50)
+    logger.info("Training Burnout Risk Classifier (XGBoost + SHAP)")
+    logger.info("═" * 50)
+
+    np.random.seed(42)
+    n_samples = 2000
+
+    # Synthetic features: sleep_trend, deep_work_streak, stress_trend, energy_variance, cognitive_load
+    X = np.column_stack([
+        np.random.uniform(4.0, 9.0, n_samples),    # sleep_trend
+        np.random.randint(0, 7, n_samples),          # deep_work_streak
+        np.random.uniform(0.0, 1.0, n_samples),     # stress_trend
+        np.random.uniform(0.3, 5.0, n_samples),     # energy_variance
+        np.random.uniform(2.0, 25.0, n_samples),    # cognitive_load
+    ])
+
+    # Burnout labels: stressed + exhausted = burnout
+    burnout_score = (
+        -0.3 * X[:, 0]      # less sleep → more burnout
+        + 0.15 * X[:, 1]    # long deep work streaks → more burnout
+        + 0.35 * X[:, 2]    # stress → burnout
+        + 0.1 * X[:, 3]     # high energy variance → burnout
+        + 0.02 * X[:, 4]    # cognitive load → burnout
+        + np.random.normal(0, 0.3, n_samples)  # noise
+    )
+    y = (burnout_score > np.percentile(burnout_score, 65)).astype(int)
+
+    logger.info(f"Dataset: {n_samples} samples, {y.sum()} burnout positives ({y.mean():.1%})")
+
+    trainer = BurnoutTrainer()
+    metrics = trainer.train(X, y, save_path="models/burnout_model.joblib")
+    logger.info(f"Burnout model metrics: {metrics}")
+
+
 def train_rl_agent():
     """Train the DQN scheduling agent."""
     from app.ml.rl_scheduler.train import RLTrainer
@@ -85,11 +124,14 @@ def main():
     logger.info("=" * 60)
 
     train_energy_model()
+    train_burnout_model()
     train_rl_agent()
 
     logger.info("=" * 60)
     logger.info("✅ All training complete!")
+    logger.info("Models saved to: models/energy_model.pt, models/burnout_model.joblib, models/rl_agent.pt")
 
 
 if __name__ == "__main__":
     main()
+
