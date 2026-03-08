@@ -25,10 +25,8 @@ class AnalyticsService:
         """Aggregate all dashboard metrics for today."""
         today = date.today()
 
-        # Tasks stats
-        task_query = select(Task).where(
-            and_(Task.user_id == user_id, Task.created_at >= datetime.combine(today, datetime.min.time()))
-        )
+        # Tasks stats (all tasks, not just today)
+        task_query = select(Task).where(Task.user_id == user_id)
         result = await session.execute(task_query)
         tasks = result.scalars().all()
         total_tasks = len(tasks)

@@ -39,3 +39,10 @@ Thumbs.db
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Database
+*.db
+*.sqlite3
+
+# Misc
+.gemini/

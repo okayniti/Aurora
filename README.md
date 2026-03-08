@@ -1,315 +1,284 @@
-<h1 align="center">🌅 AURORA</h1>
+<p align="center">
+  <img src="https://img.shields.io/badge/AURORA-Behavioral%20AI-5c7cfa?style=for-the-badge&logo=brain&logoColor=white" alt="AURORA Badge"/>
+</p>
 
-<h3 align="center">Adaptive Unified Reinforcement Optimized Routine Architect</h3>
+<h1 align="center">🌌 AURORA — Adaptive User-aware Resource Orchestration & Realtime Analytics</h1>
 
 <p align="center">
-  <em>An AI-powered behavioral intelligence system that predicts cognitive energy, schedules tasks dynamically, aligns daily execution with long-term identity goals, and prevents burnout using machine learning and reinforcement learning.</em>
+  <strong>An AI-powered behavioral intelligence platform that prevents burnout before it happens.</strong><br/>
+  Combines LSTM energy forecasting, XGBoost burnout detection, and Reinforcement Learning task scheduling — all adapting to <em>your</em> cognitive patterns.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.11+-3776ab?style=for-the-badge&logo=python&logoColor=white" />
-  <img src="https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js" />
-  <img src="https://img.shields.io/badge/PyTorch-2.5-ee4c2c?style=for-the-badge&logo=pytorch&logoColor=white" />
-  <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
-  <img src="https://img.shields.io/badge/XGBoost-SHAP-blue?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Docker-Ready-2496ed?style=for-the-badge&logo=docker&logoColor=white" />
+  <img src="https://img.shields.io/badge/Python-3.13-blue?logo=python&logoColor=white" alt="Python"/>
+  <img src="https://img.shields.io/badge/Next.js-14-black?logo=next.js" alt="Next.js"/>
+  <img src="https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi&logoColor=white" alt="FastAPI"/>
+  <img src="https://img.shields.io/badge/PyTorch-2.0+-ee4c2c?logo=pytorch&logoColor=white" alt="PyTorch"/>
+  <img src="https://img.shields.io/badge/XGBoost-SHAP-orange" alt="XGBoost"/>
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="License"/>
 </p>
 
-<p align="center">
-  <strong>AURORA is not a productivity app.</strong><br>
-  It is a <strong>human-performance operating system</strong> — a research-grade platform that treats daily execution as an optimization problem.
-</p>
+---
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ee3c16cf-653e-4f6d-9ba2-612566829c41" />
+## 🧠 What is AURORA?
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c3ada2f6-67ae-4cef-bfd5-9aa2317035a6" />
+AURORA is a **full-stack AI/ML application** that acts as a personal cognitive companion. It monitors your behavioral patterns — energy levels, task completion, stress indicators — and uses machine learning to:
+
+- **Predict** when your energy will peak or crash (LSTM time-series model)
+- **Detect** early signs of burnout before you feel them (XGBoost + SHAP explainability)
+- **Schedule** your tasks at optimal times using your energy forecast (Deep Q-Network RL agent)
+- **Align** tasks with your personal identity and values (Sentence Transformers embeddings)
+- **Replan** dynamically when unexpected changes occur (rule-based trigger system)
+
+> Think of it as **Spotify Wrapped for your productivity** — but in real-time, with predictions.
 
 ---
 
-## 🧠 What Makes It Different
-
-Most "AI productivity apps" are glorified todo lists with GPT wrappers. AURORA is built from the ground up with **real ML models**:
-
-| Problem | AURORA's Approach | Model |
-|---------|------------------|-------|
-| "When am I most productive?" | Predicts hourly cognitive energy using historical behavioral patterns | **LSTM** (PyTorch) |
-| "Am I burning out?" | Classifies burnout risk with explainable factors | **XGBoost + SHAP** |
-| "What should I do next?" | Learns optimal task ordering through trial and reward | **Double DQN** (RL) |
-| "Does this align with who I want to be?" | Measures task-identity similarity via semantic embeddings | **Sentence Transformers** |
-| "What if my plan falls apart?" | Detects deviations and auto-reschedules in real-time | **Rule-Based + RL** |
-
----
-
-## 📸 Live Screenshots
-
-<table>
-  <tr>
-    <td width="50%">
-      <img src="docs/screenshots/dashboard.png" alt="Cognitive Dashboard" />
-      <p align="center"><strong>Cognitive Dashboard</strong><br><sub>Real-time metrics, energy forecast, burnout trend, SHAP feature importance</sub></p>
-    </td>
-    <td width="50%">
-      <img src="docs/screenshots/energy.png" alt="Energy Forecasting" />
-      <p align="center"><strong>Energy Forecasting Engine</strong><br><sub>24-hour LSTM-predicted energy with circadian rhythm modeling</sub></p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <img src="docs/screenshots/burnout.png" alt="Burnout Monitor" />
-      <p align="center"><strong>Burnout Risk Monitor</strong><br><sub>XGBoost classifier with per-prediction SHAP explainability</sub></p>
-    </td>
-    <td width="50%">
-      <img src="docs/screenshots/scheduler.png" alt="RL Scheduler" />
-      <p align="center"><strong>RL Task Scheduler</strong><br><sub>Deep Q-Network agent with energy-difficulty matching and reward breakdown</sub></p>
-    </td>
-  </tr>
-</table>
-
----
-
-## 🏗 Architecture
+## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     Next.js Frontend                         │
-│   Dashboard │ Energy │ Burnout │ Scheduler │ Identity │ Analytics │
-│                         │ REST API                           │
-└─────────────────────────┼───────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                    AURORA FRONTEND                       │
+│        Next.js 14 · React · TypeScript · Tailwind       │
+│   ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
+│   │Dashboard │ │ Energy   │ │ Burnout  │ │   RL     │  │
+│   │          │ │ Forecast │ │ Monitor  │ │Scheduler │  │
+│   └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘  │
+│        └─────────────┴─────────────┴─────────────┘      │
+│                         REST API                         │
+└─────────────────────────┬───────────────────────────────┘
                           │
-┌─────────────────────────┼───────────────────────────────────┐
-│                    FastAPI Backend                            │
-│  ┌────────────┐  ┌──────────┐  ┌─────────┐  ┌───────────┐  │
-│  │ Energy     │  │ Burnout  │  │ RL      │  │ Identity  │  │
-│  │ LSTM       │  │ XGBoost  │  │ DQN     │  │ Sentence  │  │
-│  │ (PyTorch)  │  │ + SHAP   │  │ Agent   │  │ Transformers │
-│  └────────────┘  └──────────┘  └─────────┘  └───────────┘  │
-│                          │                                   │
-│          Services Layer → Replanning Engine                   │
-│                          │                                   │
-│                    ┌─────┴──────┐                            │
-│                    │ PostgreSQL │ (SQLite for dev)            │
-│                    │ 8 Tables   │                            │
-│                    └────────────┘                            │
-└──────────────────────────────────────────────────────────────┘
+┌─────────────────────────┴───────────────────────────────┐
+│                    AURORA BACKEND                        │
+│          FastAPI · SQLAlchemy · AsyncIO · Pydantic       │
+│   ┌──────────────────────────────────────────────────┐  │
+│   │                 API Layer (7 routers)             │  │
+│   ├──────────────────────────────────────────────────┤  │
+│   │               Services Layer (6 services)        │  │
+│   ├──────────┬──────────┬───────────┬────────────────┤  │
+│   │  LSTM    │ XGBoost  │  DQN RL   │  Sentence     │  │
+│   │  Energy  │ Burnout  │ Scheduler │  Transformers  │  │
+│   │  Model   │ + SHAP   │  Agent    │  Embeddings    │  │
+│   └──────────┴──────────┴───────────┴────────────────┤  │
+│   │              SQLite / PostgreSQL                  │  │
+│   └──────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
 ```
-
-### Key Design Decisions
-
-- **Strict modular separation** — each ML module has `model.py`, `train.py`, `inference.py`, `features.py`, `evaluate.py`
-- **Training ≠ Inference** — completely separated pipelines
-- **Heuristic fallbacks** — every ML module works immediately via rule-based fallback (cold-start ready)
-- **Async throughout** — full async FastAPI with SQLAlchemy async sessions
 
 ---
 
-## 🧠 ML Modules Deep Dive
+## ✨ Features
 
-### 1. Energy Forecasting Engine
+### 🎯 Cognitive Dashboard
+- Real-time metrics: deep work hours, burnout risk, identity alignment, RL efficiency
+- Live clock with behavioral status indicators
+- Energy forecast chart + burnout trend visualization
 
-| Aspect | Detail |
-|--------|--------|
-| **Architecture** | Multi-layer LSTM with layer normalization |
-| **Input** | 168-hour sliding window (7 days) of behavioral features |
-| **Features** | Cyclically-encoded time (sin/cos), sleep, caffeine, exercise |
-| **Output** | 24-hour energy predictions (0–10 scale) |
-| **Fallback** | Circadian rhythm heuristic with sleep/caffeine modifiers |
+### ⚡ Energy Forecasting (LSTM)
+- 24-hour energy predictions using PyTorch LSTM
+- **Log your energy** with sleep, caffeine, and exercise inputs
+- Historical energy trends (peak, average, low by day)
+- Automatic fallback to heuristic model if LSTM unavailable
 
-### 2. Burnout Risk Predictor
+### 🛡 Burnout Monitor (XGBoost + SHAP)
+- Real-time burnout probability via XGBoost classifier
+- **SHAP-based explainability** — see which factors drive your risk
+- 30-day burnout trend visualization
+- Risk levels: low, moderate, high, critical
 
-| Aspect | Detail |
-|--------|--------|
-| **Architecture** | XGBoost gradient-boosted classifier |
-| **Features** | Sleep trend (7-day EMA), deep work streak, stress trend, energy variance, cognitive load |
-| **Explainability** | SHAP TreeExplainer — per-prediction feature importance |
-| **Class Balancing** | `scale_pos_weight=2.0` for imbalanced burnout labels |
-| **Fallback** | Weighted rule-based scoring system |
+### 📋 RL Task Scheduler (Deep Q-Network)
+- **Create tasks** with title, description, difficulty, priority, category
+- DQN agent schedules tasks at energy-optimal times
+- **Click-to-toggle** task status (pending → in progress → done)
+- Reward function: completion (+1.0), alignment (+0.5), burnout penalty (−1.5)
 
-### 3. RL Task Scheduler
+### 🧬 Identity Alignment (Sentence Transformers)
+- Define your identity/values as free text
+- Cosine similarity scoring between tasks and identity
+- Alignment visualization for all tasks
 
-```
-State:  s = (energy, burnout, time_left, tasks_left, avg_difficulty, cognitive_load)
-Action: a = select_task(i) ∈ {0, ..., N-1} ∪ {break}
-Reward: R = +1.0×completion + 0.5×alignment + 0.3×priority − 1.5×burnout − 1.0×overload
-```
+### 📊 Analytics Dashboard
+- Weekly performance trends
+- Task completion rates and cognitive patterns
+- Model performance metrics
 
-| Aspect | Detail |
-|--------|--------|
-| **Algorithm** | Double DQN with experience replay |
-| **Exploration** | ε-greedy with exponential decay (1.0 → 0.01) |
-| **Action Masking** | Invalid actions masked with −∞ Q-values |
-| **Target Network** | Hard update every 10 episodes |
-| **Fallback** | Priority-weighted greedy scheduler |
-
-### 4. Identity Alignment Engine
-
-| Aspect | Detail |
-|--------|--------|
-| **Embedding** | `all-MiniLM-L6-v2` (384 dimensions) |
-| **Method** | Encode identity → embed each task → cosine similarity |
-| **Output** | Alignment score per task (0–100%) |
-| **Fallback** | TF-IDF vectorization with L2 normalization |
-
-### 5. Dynamic Replanning
-
-| Trigger | Detection | Response |
-|---------|-----------|----------|
-| Missed Task | `status="pending" AND time > scheduled_end` | Re-invoke scheduler |
-| Energy Deviation | `|actual − predicted| > 2σ` | Reorder by difficulty |
-| Stress Spike | `burnout_prob > 0.8` | Insert recovery breaks |
+### 🎨 Design & UX
+- **Glassmorphism** dark theme with gradient accents
+- **7 micro-animations**: fadeInUp, pulseGlow, float, shimmer, countUp, slideInLeft, stagger
+- **Responsive** mobile sidebar with hamburger menu
+- **Empty states** for graceful no-data handling
 
 ---
 
-## ⚙ Tech Stack
+## 🤖 ML Models Deep Dive
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | Next.js 14 · TypeScript · Tailwind CSS · Recharts |
-| **Backend** | FastAPI · Pydantic · SQLAlchemy (async) |
-| **Database** | PostgreSQL / SQLite (dev) · 8 normalized tables |
-| **ML - Forecasting** | PyTorch LSTM |
-| **ML - Classification** | XGBoost + SHAP |
-| **ML - RL** | PyTorch Double DQN |
-| **ML - NLP** | Sentence Transformers |
-| **Infrastructure** | Docker · Docker Compose |
+| Model | Architecture | Input | Output | Training |
+|-------|-------------|-------|--------|----------|
+| **Energy** | 2-layer LSTM (hidden=64) | 168hr window × 6 features | 24hr energy forecast | 50 epochs, early stopping |
+| **Burnout** | XGBoost classifier | sleep, stress, energy variance, cognitive load | Burnout probability + SHAP values | 2000 samples, validation split |
+| **Scheduler** | Double DQN (ε-greedy) | Task features + energy + burnout state | Optimal task ordering | 500 episodes, target network updates |
+| **Identity** | Sentence Transformers | User identity text + task descriptions | Cosine similarity score | Pre-trained (all-MiniLM-L6-v2) |
 
----
-
-## 📡 API Endpoints (20+)
-
-Full interactive documentation at `/docs` (Swagger) when backend is running.
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/energy/forecast/{user_id}` | 24-hour energy predictions |
-| `POST` | `/api/energy/log` | Record actual energy reading |
-| `GET` | `/api/burnout/risk/{user_id}` | Burnout probability + SHAP values |
-| `GET` | `/api/burnout/trend/{user_id}` | 30-day burnout trend |
-| `POST` | `/api/scheduler/optimize/{user_id}` | RL-optimized schedule generation |
-| `POST` | `/api/scheduler/feedback` | RL reward signal |
-| `POST` | `/api/identity/align` | Task-identity alignment score |
-| `GET` | `/api/analytics/dashboard/{user_id}` | Full dashboard metrics |
-| `POST` | `/api/tasks/` | Create task |
-| `POST` | `/api/replan/trigger` | Trigger schedule replanning |
-| `GET` | `/api/health` | Health check |
+### Feature Engineering
+- **Cyclical encoding** for time features (hour, day-of-week) using sin/cos
+- **Sliding window** dataset creation for LSTM (7-day windows → 24hr forecasts)
+- **Custom reward function** for RL: completion, alignment, priority, burnout penalty
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.11+
-- Node.js 20+
+- Python 3.11+ 
+- Node.js 18+
+- Git
 
-### 1. Clone & Setup
-
+### 1. Clone the repo
 ```bash
 git clone https://github.com/okayniti/Aurora.git
 cd Aurora
-cp .env.example .env
 ```
 
-### 2. Backend
-
+### 2. Backend Setup
 ```bash
 cd backend
 python -m venv venv
-source venv/Scripts/activate    # Windows (Git Bash)
-# source venv/bin/activate      # macOS/Linux
+source venv/Scripts/activate   # Windows
+# source venv/bin/activate     # macOS/Linux
+
 pip install -r requirements.txt
+```
+
+### 3. Seed the Database
+```bash
+python scripts/seed_data.py
+```
+
+### 4. Train ML Models
+```bash
+python scripts/train_all.py
+# Takes ~3-5 minutes: Energy LSTM → Burnout XGBoost → RL DQN
+```
+
+### 5. Start Backend
+```bash
 uvicorn app.main:app --reload --port 8000
 ```
 
-### 3. Frontend
-
+### 6. Frontend Setup (new terminal)
 ```bash
 cd frontend
 npm install
 npm run dev
-# Open http://localhost:3000
 ```
 
-### 4. Docker (Production)
-
-```bash
-docker compose up --build
-# Frontend:  http://localhost:3000
-# Backend:   http://localhost:8000
-# API Docs:  http://localhost:8000/docs
-```
+### 7. Open the App
+Visit **http://localhost:3000** 🚀
 
 ---
 
-## 📊 Evaluation Metrics
-
-| Model | Metrics | Target |
-|-------|---------|--------|
-| Energy LSTM | MAE, RMSE, R², directional accuracy | MAE < 1.0, R² > 0.7 |
-| Burnout Classifier | AUC-ROC, F1, Precision, Recall | AUC > 0.85, F1 > 0.8 |
-| RL Scheduler | Episode reward, completion rate, burnout avoidance % | Completion > 80% |
-| Identity Engine | Pearson correlation, alignment MAE | Pearson > 0.7 |
-
----
-
-## 🗂 Project Structure (83 Files)
+## 📁 Project Structure
 
 ```
 Aurora/
 ├── backend/
 │   ├── app/
-│   │   ├── api/              # 7 route modules + master router
-│   │   ├── database/         # ORM models, schemas, connection
+│   │   ├── api/              # FastAPI route handlers (7 routers)
+│   │   │   ├── energy.py     # Energy forecast & logging endpoints
+│   │   │   ├── burnout.py    # Burnout risk & trend endpoints
+│   │   │   ├── scheduler.py  # RL schedule optimization
+│   │   │   ├── tasks.py      # CRUD for tasks
+│   │   │   ├── identity.py   # Identity alignment endpoints
+│   │   │   ├── analytics.py  # Dashboard aggregation
+│   │   │   └── replan.py     # Dynamic replanning triggers
+│   │   ├── database/
+│   │   │   ├── models.py     # SQLAlchemy ORM models
+│   │   │   ├── schemas.py    # Pydantic request/response schemas
+│   │   │   └── session.py    # Async database session
 │   │   ├── ml/
-│   │   │   ├── energy_model/ # LSTM model, features, train, inference, evaluate
-│   │   │   ├── burnout_model/# XGBoost + SHAP
-│   │   │   ├── rl_scheduler/ # DQN agent, Gym environment, reward
-│   │   │   ├── identity_engine/ # Sentence-transformer embeddings
-│   │   │   └── replanning/   # Triggers, engine, priority protection
-│   │   ├── services/         # 6 business logic services
-│   │   └── utils/            # Logger, metrics
-│   ├── scripts/              # Seed data, training orchestration
+│   │   │   ├── energy_model/ # LSTM model, trainer, features, inference
+│   │   │   ├── burnout_model/# XGBoost classifier, SHAP, trainer
+│   │   │   ├── rl_scheduler/ # DQN agent, environment, reward, trainer
+│   │   │   ├── identity_engine/ # Sentence Transformers embeddings
+│   │   │   └── replanning/   # Rule-based trigger engine
+│   │   ├── services/         # Business logic layer (6 services)
+│   │   ├── utils/            # Logger, metrics, config
+│   │   └── main.py           # FastAPI app entry point
+│   ├── scripts/
+│   │   ├── seed_data.py      # Database seeding script
+│   │   └── train_all.py      # ML training orchestrator
 │   ├── tests/                # Unit tests
-│   └── Dockerfile
+│   ├── Dockerfile
+│   └── requirements.txt
 ├── frontend/
 │   ├── src/
-│   │   ├── app/              # 6 pages: dashboard, energy, burnout, scheduler, identity, analytics
-│   │   ├── components/       # Sidebar, MetricCard
-│   │   ├── lib/              # API client, utilities
-│   │   └── types/            # TypeScript interfaces
-│   └── Dockerfile
+│   │   ├── app/
+│   │   │   ├── page.tsx          # Cognitive Dashboard
+│   │   │   ├── energy/page.tsx   # Energy Forecast + Log Energy
+│   │   │   ├── burnout/page.tsx  # Burnout Monitor
+│   │   │   ├── scheduler/page.tsx# RL Scheduler + Add Task
+│   │   │   ├── identity/page.tsx # Identity Alignment
+│   │   │   ├── analytics/page.tsx# Analytics Dashboard
+│   │   │   ├── layout.tsx        # App layout with sidebar
+│   │   │   └── globals.css       # Design system + animations
+│   │   ├── components/
+│   │   │   ├── layout/           # Sidebar, MetricCard
+│   │   │   └── ui/               # Skeleton, EmptyState
+│   │   └── lib/
+│   │       ├── api.ts            # API client (20+ endpoints)
+│   │       ├── useApi.ts         # React hook with fallback
+│   │       └── UserContext.tsx    # User state management
+│   ├── Dockerfile
+│   ├── package.json
+│   └── tailwind.config.ts
 ├── docker-compose.yml
+├── .gitignore
 └── README.md
 ```
 
 ---
 
-## 🌟 Why This Project Is Unique
+## 🔌 API Endpoints
 
-1. **Real ML, not API wrappers** — LSTM, XGBoost, DQN, and Sentence-Transformers built from scratch
-2. **Reinforcement learning for scheduling** — the agent _learns_ optimal ordering through multi-component rewards
-3. **Explainable AI** — SHAP values make burnout predictions transparent and interpretable
-4. **Identity alignment via NLP** — semantic embeddings ensure daily tasks align with who you _want to become_
-5. **Cold-start ready** — heuristic fallbacks work instantly; ML models improve as data accumulates
-6. **Production-grade** — async APIs, Docker deployment, structured logging, separated training/inference
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/health` | Health check |
+| `GET` | `/api/users` | List users |
+| `GET` | `/api/energy/forecast/{userId}` | 24hr energy prediction |
+| `POST` | `/api/energy/log` | Log actual energy level |
+| `GET` | `/api/energy/history/{userId}` | Historical energy data |
+| `GET` | `/api/burnout/risk/{userId}` | Current burnout probability |
+| `GET` | `/api/burnout/trend/{userId}` | 30-day burnout trend |
+| `POST` | `/api/tasks/` | Create a new task |
+| `GET` | `/api/tasks/{userId}` | List user tasks |
+| `PATCH` | `/api/tasks/{taskId}/status` | Update task status |
+| `POST` | `/api/scheduler/optimize/{userId}` | Generate optimized schedule |
+| `GET` | `/api/scheduler/schedule/{userId}` | Get today's schedule |
+| `POST` | `/api/identity/profile` | Update identity description |
+| `POST` | `/api/identity/align` | Compute task alignment |
+| `GET` | `/api/analytics/dashboard/{userId}` | Dashboard metrics |
 
 ---
 
-## 🔮 Future Scope
+## 🛠 Tech Stack
 
-- Wearable integration (Apple Watch / Fitbit HRV)
-- Temporal Fusion Transformer for energy forecasting
-- PPO agent upgrade from DQN
-- Multi-day planning and collaborative scheduling
-- Mobile companion app (React Native)
-- LLM-powered natural language task creation
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | Next.js 14, React 18, TypeScript, Tailwind CSS, Recharts |
+| **Backend** | FastAPI, SQLAlchemy 2.0 (async), Pydantic v2, Uvicorn |
+| **ML/AI** | PyTorch (LSTM), XGBoost + SHAP, Sentence Transformers, NumPy |
+| **RL** | Custom DQN with experience replay, target network, ε-greedy |
+| **Database** | SQLite (dev) / PostgreSQL (prod) |
+| **DevOps** | Docker, Docker Compose |
 
 ---
 
-## 📝 Resume-Ready Summary
+## 📜 License
 
-> **AURORA** is a full-stack AI behavioral intelligence platform that optimizes daily human performance through machine learning. The system combines an **LSTM energy forecasting engine** (PyTorch), an **XGBoost burnout classifier with SHAP explainability**, a **Deep Q-Network reinforcement learning scheduler** with multi-component reward signals, and a **sentence-transformer identity alignment engine**. Built with **FastAPI** microservices, **PostgreSQL** (8-table schema), a **Next.js** analytical dashboard with Recharts visualizations, and **Docker** orchestration. Demonstrates end-to-end ML system design: from feature engineering and training pipelines to real-time inference APIs with heuristic fallbacks, automated replanning triggers, and comprehensive evaluation frameworks.
+This project is licensed under the MIT License.
 
 ---
 
 <p align="center">
-  <sub><strong>AURORA</strong> — Because execution should be adaptive, not arbitrary.</sub>
+  Built with 🧠 by <a href="https://github.com/okayniti">@okayniti</a>
 </p>
