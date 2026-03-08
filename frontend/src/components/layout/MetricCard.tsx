@@ -32,24 +32,28 @@ export default function MetricCard({
 
     return (
         <div
-            className={`glass-card-hover p-5 bg-gradient-to-br ${colorClass} animate-fade-in`}
+            className={`glass-card-hover p-5 bg-gradient-to-br ${colorClass} animate-fade-in-up group`}
         >
             <div className="flex items-start justify-between mb-3">
                 <span className="metric-label">{title}</span>
-                {icon && <span className="text-xl opacity-60">{icon}</span>}
+                {icon && (
+                    <span className="text-xl opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
+                        {icon}
+                    </span>
+                )}
             </div>
 
-            <div className="metric-value mb-1">{value}</div>
+            <div className="metric-value mb-1 animate-count-up">{value}</div>
 
             {(subtitle || trendValue) && (
                 <div className="flex items-center gap-2 mt-2">
                     {trendValue && (
                         <span
                             className={`text-xs font-medium ${trend === "up"
-                                    ? "text-emerald-400"
-                                    : trend === "down"
-                                        ? "text-rose-400"
-                                        : "text-gray-500"
+                                ? "text-emerald-400"
+                                : trend === "down"
+                                    ? "text-rose-400"
+                                    : "text-gray-500"
                                 }`}
                         >
                             {trend === "up" ? "↑" : trend === "down" ? "↓" : "→"}{" "}

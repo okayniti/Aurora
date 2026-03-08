@@ -134,7 +134,7 @@ export default function Dashboard() {
     return (
         <div className="space-y-8 animate-fade-in">
             {/* Header */}
-            <div className="flex items-end justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
@@ -161,7 +161,7 @@ export default function Dashboard() {
             {isDemo && <ErrorBanner message="Backend API unreachable or no user seeded" onRetry={refetch} />}
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
                 <MetricCard title="Deep Work Hours" value={`${d.deep_work_hours}h`} icon="🧠" color="cyan" trend="up" trendValue="12% vs yesterday" />
                 <MetricCard title="Identity Alignment" value={`${d.identity_alignment_avg}%`} icon="🧬" color="green" trend="up" trendValue="8.2% this week" />
                 <MetricCard title="Burnout Risk" value={d.burnout_trend.toFixed(2)} icon="🛡" color="amber" trend="down" trendValue="Moderate" subtitle="stable" />
@@ -169,7 +169,7 @@ export default function Dashboard() {
             </div>
 
             {/* Energy Forecast */}
-            <div className="glass-card p-6">
+            <div className="glass-card p-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                 <div className="flex items-center justify-between mb-6">
                     <div>
                         <h2 className="section-title">Energy Forecast vs Actual</h2>
