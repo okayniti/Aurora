@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Sidebar from "@/components/layout/Sidebar";
+import Header from "@/components/layout/Header";
 import { UserProvider } from "@/lib/UserContext";
 
 export const metadata: Metadata = {
@@ -18,9 +18,9 @@ export default function RootLayout({
         <html lang="en">
             <body>
                 <UserProvider>
-                    <div className="flex min-h-screen">
-                        <Sidebar />
-                        <main className="flex-1 ml-64 p-8">
+                    <div className="flex flex-col min-h-screen">
+                        <Header />
+                        <main className="flex-1 w-full pt-28 pb-12 px-6">
                             <div className="max-w-7xl mx-auto">{children}</div>
                         </main>
                     </div>
