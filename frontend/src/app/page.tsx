@@ -67,9 +67,27 @@ export default function Dashboard() {
     const [time, setTime] = useState<Date | null>(null);
     const [energyModelType, setEnergyModelType] = useState("heuristic");
 
+    // Check-in state
+    const [needsCheckin, setNeedsCheckin] = useState(false);
+    const [checkingIn, setCheckingIn] = useState(false);
+    const [logData, setLogData] = useState({
+        energy_level: 7,
+        sleep_hours: 7.5,
+        caffeine_intake: 1,
+        exercise_mins: 30,
+    });
+
     useEffect(() => {
         setTime(new Date());
         const timer = setInterval(() => setTime(new Date()), 1000);
+
+        // Check local storage for daily checkin
+        const lastCheckin = localStorage.getItem("aurora_last_checkin_date");
+        const today = new Date().toDateString();
+        if (lastCheckin !== today) {
+            setNeedsCheckin(true);
+        }
+
         return () => clearInterval(timer);
     }, []);
 
@@ -128,8 +146,115 @@ export default function Dashboard() {
         [userId]
     );
 
+    const handleCheckin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!userId) {
+            // If demo mode or no user, just progress anyway
+            localStorage.setItem("aurora_last_checkin_date", new Date().toDateString());
+            setNeedsCheckin(false);
+            return;
+        }
+        setCheckingIn(true);
+        try {
+            await api.logEnergy({
+                user_id: userId,
+                ...logData
+            });
+            localStorage.setItem("aurora_last_checkin_date", new Date().toDateString());
+            setNeedsCheckin(false);
+            refetch();
+        } catch (err) {
+            console.error("Check-in failed:", err);
+            // Even if it fails (e.g. backend down), let them in for demo purposes
+            localStorage.setItem("aurora_last_checkin_date", new Date().toDateString());
+            setNeedsCheckin(false);
+        } finally {
+            setCheckingIn(false);
+        }
+    };
+
     const d = dashboard || demoDashboard;
     const isDemo = !!dashError;
+
+    if (needsCheckin) {
+        const energyEmoji = logData.energy_level >= 8 ? "🔥" : logData.energy_level >= 6 ? "⚡" : logData.energy_level >= 4 ? "😐" : "😴";
+        return (
+            <div className="min-h-[85vh] flex items-center justify-center animate-fade-in px-4">
+                <div className="glass-card max-w-xl w-full p-8 sm:p-10 border-cyan-700/30 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1/2 bg-cyan-500/10 blur-[100px] pointer-events-none transition-all duration-1000" />
+
+                    <div className="text-center mb-8 relative z-10">
+                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-aurora-500 flex items-center justify-center mx-auto mb-4 hover:scale-110 transition-transform shadow-glow">
+                            <span className="text-3xl">🌅</span>
+                        </div>
+                        <h1 className="text-3xl font-bold tracking-tight mb-2">Good morning</h1>
+                        <p className="text-sm text-gray-400">Let&apos;s calibrate today&apos;s cognitive models and optimize your schedule.</p>
+                    </div>
+
+                    <form onSubmit={handleCheckin} className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
+                        <div className="sm:col-span-2">
+                            <label className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-3 block text-center">
+                                Current Energy: {energyEmoji} {logData.energy_level}/10
+                            </label>
+                            <input
+                                type="range"
+                                min={1}
+                                max={10}
+                                value={logData.energy_level}
+                                onChange={(e) => setLogData({ ...logData, energy_level: +e.target.value })}
+                                className="w-full accent-cyan-500 h-2 cursor-pointer"
+                            />
+                            <div className="flex justify-between text-[10px] text-gray-500 mt-2 font-medium">
+                                <span>😴 Drained</span>
+                                <span>😐 OK</span>
+                                <span>🔥 Peak</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2 block">Sleep (hours)</label>
+                            <input
+                                type="number"
+                                min={0}
+                                max={14}
+                                step={0.5}
+                                value={logData.sleep_hours}
+                                onChange={(e) => setLogData({ ...logData, sleep_hours: +e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl bg-surface-400/80 border border-white/10 text-gray-200 text-base focus:outline-none focus:border-cyan-500 transition-colors placeholder-gray-600 text-center"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2 block">Caffeine (cups)</label>
+                            <input
+                                type="number"
+                                min={0}
+                                max={10}
+                                value={logData.caffeine_intake}
+                                onChange={(e) => setLogData({ ...logData, caffeine_intake: +e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl bg-surface-400/80 border border-white/10 text-gray-200 text-base focus:outline-none focus:border-cyan-500 transition-colors placeholder-gray-600 text-center"
+                            />
+                        </div>
+
+                        <div className="sm:col-span-2 pt-2 flex flex-col items-center gap-4">
+                            <button
+                                type="submit"
+                                disabled={checkingIn}
+                                className="w-full sm:w-2/3 px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-base font-semibold transition-all duration-200 hover:shadow-glow disabled:opacity-50"
+                            >
+                                {checkingIn ? "Calibrating..." : "Start My Day"}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setNeedsCheckin(false)}
+                                className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                            >
+                                Skip for now
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 animate-fade-in">
