@@ -4,12 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useUser } from "@/lib/UserContext";
 import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
-import MetricCard from "@/components/layout/MetricCard";
-import { ErrorBanner, DemoBadge, MetricSkeleton, ChartSkeleton } from "@/components/ui/Skeleton";
-import {
-    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-    ResponsiveContainer, BarChart, Bar, LineChart, Line, Cell,
-} from "recharts";
+import Link from "next/link";
 
 // ── Fallback demo data ──────────────────────────────────────
 const demoEnergy = Array.from({ length: 24 }, (_, i) => {
@@ -20,19 +15,6 @@ const demoEnergy = Array.from({ length: 24 }, (_, i) => {
         actual: i < new Date().getHours() ? +(base[i] + (Math.random() - 0.5) * 1.5).toFixed(1) : null,
     };
 });
-
-const demoBurnout = Array.from({ length: 30 }, (_, i) => ({
-    day: `Day ${i + 1}`,
-    probability: +(0.2 + Math.random() * 0.4).toFixed(2),
-}));
-
-const demoFeatures = [
-    { name: "Stress Trend", value: 0.32, fill: "#fb7185" },
-    { name: "Sleep Quality", value: 0.25, fill: "#5c7cfa" },
-    { name: "Cognitive Load", value: 0.20, fill: "#fbbf24" },
-    { name: "Deep Work Streak", value: 0.13, fill: "#34d399" },
-    { name: "Energy Variance", value: 0.10, fill: "#a78bfa" },
-];
 
 const demoDashboard = {
     deep_work_hours: 4.2,
@@ -45,27 +27,8 @@ const demoDashboard = {
     tasks_total: 10,
 };
 
-// ── Custom Tooltip ──────────────────────────────────────────
-const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload?.length) {
-        return (
-            <div className="glass-card p-3 text-xs border border-white/10">
-                <p className="text-gray-300 mb-1 font-medium">{label}</p>
-                {payload.map((p: any, i: number) => (
-                    <p key={i} style={{ color: p.color }} className="font-mono">
-                        {p.name}: {p.value}
-                    </p>
-                ))}
-            </div>
-        );
-    }
-    return null;
-};
-
 export default function Dashboard() {
     const { userId } = useUser();
-    const [time, setTime] = useState<Date | null>(null);
-    const [energyModelType, setEnergyModelType] = useState("heuristic");
 
     // Check-in state
     const [needsCheckin, setNeedsCheckin] = useState(false);
@@ -78,21 +41,16 @@ export default function Dashboard() {
     });
 
     useEffect(() => {
-        setTime(new Date());
-        const timer = setInterval(() => setTime(new Date()), 1000);
-
         // Check local storage for daily checkin
         const lastCheckin = localStorage.getItem("aurora_last_checkin_date");
         const today = new Date().toDateString();
         if (lastCheckin !== today) {
             setNeedsCheckin(true);
         }
-
-        return () => clearInterval(timer);
     }, []);
 
     // Fetch dashboard data from API (falls back to demo)
-    const { data: dashboard, error: dashError, refetch } = useApi(
+    const { data: dashboard, refetch } = useApi(
         () => api.getDashboard(userId!),
         demoDashboard,
         [userId]
@@ -103,7 +61,6 @@ export default function Dashboard() {
         async () => {
             if (!userId) throw new Error("no user");
             const forecast: any = await api.getEnergyForecast(userId);
-            if (forecast.model_type) setEnergyModelType(forecast.model_type);
             return forecast.hourly_predictions?.map((p: any) => ({
                 hour: `${String(p.hour).padStart(2, "0")}:00`,
                 predicted: +p.energy.toFixed(1),
@@ -111,38 +68,6 @@ export default function Dashboard() {
             })) || demoEnergy;
         },
         demoEnergy,
-        [userId]
-    );
-
-    // Fetch burnout trend
-    const { data: burnoutData } = useApi(
-        async () => {
-            if (!userId) throw new Error("no user");
-            const trend: any = await api.getBurnoutTrend(userId);
-            const points = trend.data_points || trend;
-            if (!Array.isArray(points) || points.length === 0) return demoBurnout;
-            return points.map((t: any, i: number) => ({
-                day: `Day ${i + 1}`,
-                probability: +(t.probability ?? t.burnout_probability ?? 0).toFixed(3),
-            }));
-        },
-        demoBurnout,
-        [userId]
-    );
-
-    // Fetch burnout risk (for feature importance)
-    const { data: features } = useApi(
-        async () => {
-            if (!userId) throw new Error("no user");
-            const risk: any = await api.getBurnoutRisk(userId);
-            if (!risk.feature_importance) return demoFeatures;
-            return Object.entries(risk.feature_importance).map(([name, value], i) => ({
-                name: name.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()),
-                value: +(value as number).toFixed(3),
-                fill: ["#fb7185", "#5c7cfa", "#fbbf24", "#34d399", "#a78bfa"][i % 5],
-            }));
-        },
-        demoFeatures,
         [userId]
     );
 
@@ -174,7 +99,8 @@ export default function Dashboard() {
     };
 
     const d = dashboard || demoDashboard;
-    const isDemo = !!dashError;
+    const currentHour = new Date().getHours();
+    const current = energyData?.[currentHour];
 
     if (needsCheckin) {
         const energyEmoji = logData.energy_level >= 8 ? "🔥" : logData.energy_level >= 6 ? "⚡" : logData.energy_level >= 4 ? "😐" : "😴";
@@ -257,117 +183,91 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="space-y-8 animate-fade-in">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="space-y-6 animate-fade-in pb-10">
+            {/* Header Text (optional, to keep some context) */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-2">
                 <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Cognitive <span className="gradient-text">Dashboard</span>
-                        </h1>
-                        {isDemo && <DemoBadge />}
-                    </div>
+                    <h1 className="text-3xl font-bold tracking-tight">
+                        Cognitive <span className="gradient-text">Dashboard</span>
+                    </h1>
                     <p className="text-gray-500 mt-1 text-sm">
-                        Real-time behavioral intelligence overview
-                    </p>
-                </div>
-                <div className="text-right">
-                    <p className="text-2xl font-mono text-gray-300">
-                        {time ? time.toLocaleTimeString("en-US", { hour12: false }) : "--:--:--"}
-                    </p>
-                    <p className="text-xs text-gray-600">
-                        {time ? time.toLocaleDateString("en-US", {
-                            weekday: "long", year: "numeric", month: "long", day: "numeric",
-                        }) : ""}
+                        Select a module below to view detailed analytics
                     </p>
                 </div>
             </div>
 
-            {isDemo && <ErrorBanner message="Backend API unreachable or no user seeded" onRetry={refetch} />}
+            {/* Bento Grid layout based on user template */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[220px]">
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
-                <MetricCard title="Deep Work Hours" value={`${d.deep_work_hours}h`} icon="🧠" color="cyan" trend="up" trendValue="12% vs yesterday" />
-                <MetricCard title="Identity Alignment" value={`${d.identity_alignment_avg}%`} icon="🧬" color="green" trend="up" trendValue="8.2% this week" />
-                <MetricCard title="Burnout Risk" value={d.burnout_trend.toFixed(2)} icon="🛡" color="amber" trend="down" trendValue="Moderate" subtitle="stable" />
-                <MetricCard title="RL Efficiency" value={`${Math.round(d.rl_strategy_efficiency * 100)}%`} icon="🤖" color="violet" trend="up" trendValue="5% improvement" />
-            </div>
+                {/* Tile 1: Profile (Grey) */}
+                <div className="bg-[#e0e0e0] text-black rounded-3xl p-6 relative col-span-1 row-span-1 flex flex-col justify-end transition-transform hover:scale-[1.02]">
+                    <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/50 flex items-center justify-center text-lg font-bold">✨</div>
+                    <div className="absolute top-6 left-6 w-12 h-12 bg-black/10 rounded-full flex items-center justify-center text-xl">👤</div>
+                    <h3 className="text-xl font-bold leading-tight mt-auto">Aurora<br />Calibrated</h3>
+                    <p className="text-xs text-black/60 mt-2 font-medium">Dashboard Ready</p>
+                </div>
 
-            {/* Energy Forecast */}
-            <div className="glass-card p-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                <div className="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 className="section-title">Energy Forecast vs Actual</h2>
-                        <p className="text-xs text-gray-500 mt-1">LSTM-predicted energy levels · Heuristic fallback active</p>
+                {/* Tile 2: Energy Forecast (Orange) */}
+                <Link href="/energy" className="bg-[#ff5a1f] text-white rounded-3xl p-6 relative col-span-1 md:col-span-2 lg:col-span-1 row-span-1 flex flex-col justify-end transition-transform hover:scale-[1.02] group shadow-xl">
+                    <div className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold group-hover:bg-white group-hover:text-[#ff5a1f] transition-colors">+</div>
+                    <div className="text-4xl font-bold mb-2">⚡ {(current?.actual || current?.predicted || 0).toFixed(1)}<span className="text-xl opacity-60">/10</span></div>
+                    <h3 className="text-xl font-medium leading-tight">Energy<br />Forecast</h3>
+                </Link>
+
+                {/* Tile 3: Scheduler (Light Grey) */}
+                <Link href="/scheduler" className="bg-[#e0e0e0] text-black rounded-3xl p-6 relative col-span-1 row-span-1 flex flex-col justify-end transition-transform hover:scale-[1.02] group">
+                    <div className="absolute top-4 right-4 w-7 h-7 rounded-full bg-black/10 flex items-center justify-center text-lg font-bold group-hover:bg-black group-hover:text-white transition-colors">+</div>
+                    <div className="text-4xl font-bold mb-2">{d.tasks_completed}<span className="text-xl opacity-60">/{d.tasks_total}</span></div>
+                    <h3 className="text-xl font-medium leading-tight">Tasks &<br />Scheduler</h3>
+                </Link>
+
+                {/* Tile 4: Burnout Risk (Red) */}
+                <Link href="/burnout" className="bg-[#f01c49] text-white rounded-3xl p-6 relative col-span-1 row-span-1 flex flex-col justify-end transition-transform hover:scale-[1.02] group shadow-xl">
+                    <div className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold group-hover:bg-white group-hover:text-[#f01c49] transition-colors">+</div>
+                    <div className="text-4xl font-bold mb-2">{d.burnout_trend.toFixed(2)}</div>
+                    <h3 className="text-xl font-medium leading-tight">Burnout<br />Monitor</h3>
+                </Link>
+
+                {/* Tile 5: Knowledge Hub / Analytics (Large Red/Pink) */}
+                <Link href="/analytics" className="bg-[#d90038] text-white rounded-3xl p-8 relative col-span-1 md:col-span-2 row-span-2 flex flex-col justify-end transition-transform hover:scale-[1.02] group shadow-xl overflow-hidden">
+                    <div className="absolute top-6 right-6 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold group-hover:bg-white group-hover:text-[#d90038] z-10 transition-colors">+</div>
+                    <div className="absolute -right-10 -bottom-10 opacity-10 text-[200px] leading-none z-0">🧠</div>
+                    <div className="relative z-10">
+                        <div className="text-6xl font-bold mb-4">{d.deep_work_hours}h</div>
+                        <h3 className="text-3xl font-bold uppercase tracking-wider leading-tight">Cognitive<br />Analytics</h3>
+                        <p className="mt-3 text-white/70 text-sm max-w-[80%]">Comprehensive analysis of your deep work patterns, energy trends, and model metrics.</p>
                     </div>
-                    <span className={`badge ${energyModelType === "lstm" ? "badge-success" : "badge-info"}`}>
-                        {energyModelType === "lstm" ? "LSTM Model" : "Heuristic Model"}
-                    </span>
-                </div>
-                <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={energyData}>
-                        <defs>
-                            <linearGradient id="energyPredicted" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#5c7cfa" stopOpacity={0.3} />
-                                <stop offset="100%" stopColor="#5c7cfa" stopOpacity={0} />
-                            </linearGradient>
-                            <linearGradient id="energyActual" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.3} />
-                                <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="hour" stroke="#475569" fontSize={11} tickLine={false} />
-                        <YAxis domain={[0, 10]} stroke="#475569" fontSize={11} tickLine={false} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Area type="monotone" dataKey="predicted" stroke="#5c7cfa" strokeWidth={2} fill="url(#energyPredicted)" name="Predicted" />
-                        <Area type="monotone" dataKey="actual" stroke="#22d3ee" strokeWidth={2} fill="url(#energyActual)" name="Actual" connectNulls={false} />
-                    </AreaChart>
-                </ResponsiveContainer>
-            </div>
+                </Link>
 
-            {/* Bottom Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="glass-card p-6">
-                    <h2 className="section-title mb-1">Burnout Trend · 30 Days</h2>
-                    <p className="text-xs text-gray-500 mb-4">XGBoost classifier with SHAP explainability</p>
-                    <ResponsiveContainer width="100%" height={220}>
-                        <LineChart data={burnoutData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                            <XAxis dataKey="day" stroke="#475569" fontSize={10} tickLine={false} />
-                            <YAxis domain={[0, 1]} stroke="#475569" fontSize={10} tickLine={false} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Line type="monotone" dataKey="probability" stroke="#fb7185" strokeWidth={2} dot={false} name="Burnout Prob" />
-                            <Line type="monotone" dataKey={() => 0.5} stroke="#475569" strokeWidth={1} strokeDasharray="5 5" dot={false} name="Threshold" />
-                        </LineChart>
-                    </ResponsiveContainer>
+                {/* Tile 6: Identity (Grey) */}
+                <Link href="/identity" className="bg-[#e0e0e0] text-black rounded-3xl p-6 relative col-span-1 row-span-1 flex flex-col justify-end transition-transform hover:scale-[1.02] group">
+                    <div className="absolute top-4 right-4 w-7 h-7 rounded-full bg-black/10 flex items-center justify-center text-lg font-bold group-hover:bg-black group-hover:text-white transition-colors">+</div>
+                    <div className="text-4xl font-bold mb-2">{d.identity_alignment_avg}%</div>
+                    <h3 className="text-xl font-medium leading-tight">Identity<br />Alignment</h3>
+                </Link>
+
+                {/* Tile 7: RL Agent (Purple) */}
+                <div className="bg-[#8c00ff] text-white rounded-3xl p-6 relative col-span-1 md:col-span-2 lg:col-span-1 row-span-1 flex flex-col justify-end transition-transform hover:scale-[1.02] group shadow-xl">
+                    <div className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold group-hover:bg-white group-hover:text-[#8c00ff] transition-colors">+</div>
+                    <div className="text-4xl font-bold mb-2">{Math.round(d.rl_strategy_efficiency * 100)}%</div>
+                    <h3 className="text-xl font-medium leading-tight">RL Strategy<br />Efficiency</h3>
                 </div>
 
-                <div className="glass-card p-6">
-                    <h2 className="section-title mb-1">Burnout Feature Importance</h2>
-                    <p className="text-xs text-gray-500 mb-4">SHAP-based explainability · Latest prediction</p>
-                    <ResponsiveContainer width="100%" height={220}>
-                        <BarChart data={features} layout="vertical">
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={false} />
-                            <XAxis type="number" domain={[0, 0.4]} stroke="#475569" fontSize={10} />
-                            <YAxis type="category" dataKey="name" width={120} stroke="#475569" fontSize={11} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Bar dataKey="value" radius={[0, 4, 4, 0]} name="Importance">
-                                {(features || demoFeatures).map((entry: any, i: number) => (
-                                    <Cell key={i} fill={entry.fill} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
+                {/* Tile 8: Image Background / Quick Actions */}
+                <div className="bg-[#2a2a2a] text-white rounded-3xl p-6 relative col-span-1 md:col-span-2 lg:col-span-2 row-span-1 overflow-hidden transition-transform hover:scale-[1.02] flex flex-col justify-end shadow-xl group">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
+                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Team" className="absolute inset-0 w-full h-full object-cover opacity-60 z-0 grayscale mix-blend-overlay" />
+                    <button
+                        onClick={() => setNeedsCheckin(true)}
+                        className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#ff5a1f] flex items-center justify-center text-lg font-bold z-20 hover:scale-110 transition-transform shadow-lg cursor-pointer"
+                    >
+                        +
+                    </button>
+                    <div className="relative z-20">
+                        <h3 className="text-2xl font-bold leading-tight">Daily <span className="text-[#ff5a1f]">Check-in</span></h3>
+                        <p className="text-sm text-gray-300 mt-1 max-w-[80%]">Re-calibrate your models with new energy data now.</p>
+                    </div>
                 </div>
-            </div>
-
-            {/* Secondary Metrics */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <MetricCard title="Tasks Completed" value={`${d.tasks_completed}/${d.tasks_total}`} icon="✓" color="green" />
-                <MetricCard title="Decision Fatigue" value={d.decision_fatigue_index.toFixed(2)} icon="⚠" color="amber" subtitle="moderate" />
-                <MetricCard title="Energy Forecast MAE" value={d.energy_forecast_mae.toFixed(1)} icon="📈" color="cyan" subtitle="good" />
-                <MetricCard title="Replan Events" value="2" icon="🔄" color="rose" subtitle="today" />
             </div>
         </div>
     );
