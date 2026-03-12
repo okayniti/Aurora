@@ -31,7 +31,7 @@ export default function Dashboard() {
     const { userId } = useUser();
 
     // Check-in state
-    const [needsCheckin, setNeedsCheckin] = useState(false);
+    const [needsCheckin, setNeedsCheckin] = useState(true); // Always true on first load
     const [checkingIn, setCheckingIn] = useState(false);
     const [logData, setLogData] = useState({
         energy_level: 7,
@@ -39,15 +39,6 @@ export default function Dashboard() {
         caffeine_intake: 1,
         exercise_mins: 30,
     });
-
-    useEffect(() => {
-        // Check local storage for daily checkin
-        const lastCheckin = localStorage.getItem("aurora_last_checkin_date");
-        const today = new Date().toDateString();
-        if (lastCheckin !== today) {
-            setNeedsCheckin(true);
-        }
-    }, []);
 
     // Fetch dashboard data from API (falls back to demo)
     const { data: dashboard, refetch } = useApi(
@@ -160,18 +151,18 @@ export default function Dashboard() {
                             />
                         </div>
 
-                        <div className="sm:col-span-2 pt-2 flex flex-col items-center gap-4">
+                        <div className="sm:col-span-2 pt-2 flex flex-col sm:flex-row items-center gap-4 justify-center">
                             <button
                                 type="submit"
                                 disabled={checkingIn}
-                                className="w-full sm:w-2/3 px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-base font-semibold transition-all duration-200 hover:shadow-glow disabled:opacity-50"
+                                className="w-full sm:w-1/2 px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-base font-semibold transition-all duration-200 hover:shadow-glow disabled:opacity-50"
                             >
                                 {checkingIn ? "Calibrating..." : "Start My Day"}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setNeedsCheckin(false)}
-                                className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                                className="w-full sm:w-1/2 px-6 py-3.5 rounded-xl bg-surface-400 hover:bg-surface-300 border border-white/10 hover:border-white/20 text-gray-200 text-base font-semibold transition-all duration-200"
                             >
                                 Skip for now
                             </button>
