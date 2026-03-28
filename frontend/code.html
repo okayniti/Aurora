@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AURORA | Dynamic Intelligence Hub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed-variant": "#1e18b2",
+              "on-secondary-fixed": "#003a43",
+              "on-tertiary": "#080079",
+              "on-tertiary-container": "#000000",
+              "on-error": "#490013",
+              "surface-variant": "#21262e",
+              "secondary-fixed": "#48e4ff",
+              "primary": "#cc97ff",
+              "surface-container-lowest": "#000000",
+              "tertiary-dim": "#6063ee",
+              "on-primary": "#47007c",
+              "surface-dim": "#0a0e13",
+              "error-dim": "#d73357",
+              "outline": "#72767c",
+              "on-primary-fixed-variant": "#430076",
+              "on-surface-variant": "#a8abb2",
+              "on-surface": "#f4f6fe",
+              "surface-container-highest": "#21262e",
+              "primary-fixed-dim": "#b971ff",
+              "inverse-primary": "#842cd3",
+              "tertiary-fixed-dim": "#9699ff",
+              "surface-container-high": "#1b2027",
+              "surface-bright": "#262d35",
+              "primary-container": "#c284ff",
+              "on-secondary": "#004b56",
+              "secondary-fixed-dim": "#29d6f1",
+              "background": "#0a0e13",
+              "on-secondary-container": "#eafbff",
+              "outline-variant": "#44484e",
+              "on-primary-container": "#360061",
+              "on-error-container": "#ffb2b9",
+              "inverse-on-surface": "#51555b",
+              "secondary-container": "#006877",
+              "on-primary-fixed": "#000000",
+              "secondary-dim": "#1ad0eb",
+              "on-tertiary-fixed": "#050061",
+              "tertiary-fixed": "#a6a9ff",
+              "on-background": "#f4f6fe",
+              "error": "#ff6e84",
+              "tertiary": "#9093ff",
+              "on-secondary-fixed-variant": "#005966",
+              "inverse-surface": "#f8f9ff",
+              "primary-dim": "#9c48ea",
+              "surface-container": "#151a20",
+              "surface-tint": "#cc97ff",
+              "tertiary-container": "#7073ff",
+              "error-container": "#a70138",
+              "surface-container-low": "#0f1419",
+              "surface": "#0a0e13",
+              "secondary": "#3adffa",
+              "primary-fixed": "#c284ff"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0a0e13;
+            color: #f4f6fe;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .aurora-blur {
+            filter: blur(120px);
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        .glass-panel {
+            background: rgba(15, 20, 25, 0.4);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        .energy-wave {
+            mask-image: linear-gradient(to right, transparent, black, transparent);
+        }
+    </style>
+</head>
+<body class="min-h-screen selection:bg-primary/30 selection:text-primary">
+<!-- Background Atmospheric Elements -->
+<div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+<div class="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary aurora-blur"></div>
+<div class="absolute top-[40%] -right-[5%] w-[40%] h-[60%] rounded-full bg-secondary aurora-blur"></div>
+<div class="absolute -bottom-[20%] left-[20%] w-[60%] h-[40%] rounded-full bg-tertiary aurora-blur"></div>
+</div>
+<!-- Top Navigation (Shared Component: TopAppBar) -->
+<header class="fixed top-0 w-full h-24 flex justify-between items-center px-16 w-full max-screen-2xl mx-auto z-40 bg-transparent text-[#cc97ff] font-['Inter'] tracking-[0.02em] font-light">
+<div class="text-3xl font-black tracking-tighter text-[#cc97ff] drop-shadow-[0_0_15px_rgba(204,151,255,0.4)]">
+            AURORA
+        </div>
+<div class="flex items-center gap-8">
+<button class="hover:text-[#3adffa] hover:blur-[1px] transition-all duration-500">
+<span class="material-symbols-outlined">notifications_paused</span>
+</button>
+<button class="hover:text-[#3adffa] hover:blur-[1px] transition-all duration-500">
+<span class="material-symbols-outlined">blur_on</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border border-primary/20">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="Close-up portrait of a person with cybernetic light reflections on their face, futuristic aesthetic, soft cool lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2-f2JD1aDXto_vD6HwZ3DFLkThETX0KCuxXBl_4UVOMFG9Na8N9XYk_kbBPhmDXtHB3gpECJC3xk2ni31FXfkSeSZ26wvqwCltfxFIB8mOoIfSI_wPdc8VyXilPDBZ792SknyhOxQui6hKAojI8jROW843f_Q5w9SH7qenJpXzbVL-6mD49dxwT_eiAtA0TQwjJDhfHnGYunsez_bVFHElwVx2qUqyz0xBbrmPjr0YeQXDaBGhphgt0Trbrj_QmrPVnMsGNfiuMOY"/>
+</div>
+</div>
+</header>
+<!-- Side Navigation (Shared Component: SideNavBar) -->
+<nav class="fixed left-6 top-1/2 -translate-y-1/2 h-[716px] w-20 rounded-full bg-[#0a0e13]/60 backdrop-blur-2xl flex flex-col items-center justify-around py-12 z-50 tonal-shift shadow-[0px_20px_40px_rgba(204,151,255,0.08)] border border-[#cc97ff]/10">
+<div class="mb-4">
+<span class="material-symbols-outlined text-[#cc97ff] text-2xl" style="font-variation-settings: 'FILL' 1;">bubble_chart</span>
+</div>
+<div class="flex flex-col gap-10 items-center">
+<a class="text-[#cc97ff] scale-125 transition-all duration-500 group relative" href="#" title="Neural Hub">
+<span class="material-symbols-outlined">bubble_chart</span>
+<span class="absolute left-full ml-4 px-2 py-1 rounded bg-surface-container text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Neural Hub</span>
+</a>
+<a class="text-[#a8abb2] opacity-40 hover:opacity-100 hover:text-[#3adffa] transition-all duration-300 group relative" href="#" title="Energy Flow">
+<span class="material-symbols-outlined">auto_awesome</span>
+</a>
+<a class="text-[#a8abb2] opacity-40 hover:opacity-100 hover:text-[#3adffa] transition-all duration-300 group relative" href="#" title="Task Journey">
+<span class="material-symbols-outlined">timeline</span>
+</a>
+<a class="text-[#a8abb2] opacity-40 hover:opacity-100 hover:text-[#3adffa] transition-all duration-300 group relative" href="#" title="AI Insights">
+<span class="material-symbols-outlined">psychology</span>
+</a>
+</div>
+<div class="mt-auto">
+<a class="text-[#a8abb2] opacity-40 hover:opacity-100 hover:text-[#3adffa] transition-all duration-300" href="#">
+<span class="material-symbols-outlined">settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="relative z-10 pt-32 pl-32 pr-8 md:pr-16 min-h-screen flex flex-col lg:flex-row gap-12">
+<!-- Left Column: Vertical Flowing Journey -->
+<section class="w-full lg:w-1/4 flex flex-col gap-16 relative py-8">
+<div class="absolute left-6 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-primary/20 to-transparent"></div>
+<header class="pl-12">
+<span class="text-on-surface-variant font-label text-[0.6875rem] uppercase tracking-[0.2em]">Current Journey</span>
+<h2 class="text-2xl font-headline mt-2 font-light tracking-tight">System Alignment</h2>
+</header>
+<div class="flex flex-col gap-20">
+<!-- Task Node 01 -->
+<div class="group relative pl-12">
+<div class="absolute left-4 top-2 w-4 h-4 rounded-full bg-primary shadow-[0_0_15px_rgba(204,151,255,0.6)] z-10"></div>
+<div class="flex flex-col gap-1">
+<span class="text-primary font-label text-[0.625rem] tracking-[0.1em]">09:00 AM</span>
+<h3 class="text-on-surface font-headline font-medium group-hover:text-primary transition-colors">Neural Calibration</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mt-1 opacity-70">Synchronizing conscious focus with digital intent.</p>
+</div>
+</div>
+<!-- Task Node 02 (Active) -->
+<div class="group relative pl-12">
+<div class="absolute left-3 -top-1 w-6 h-6 rounded-full border-2 border-secondary flex items-center justify-center animate-pulse z-10 bg-background">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-secondary font-label text-[0.625rem] tracking-[0.1em]">ACTIVE NOW</span>
+<h3 class="text-on-surface text-xl font-headline font-bold">Mission of the Day</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mt-1">Refining the architectural core of the Aurora Neural Net.</p>
+</div>
+</div>
+<!-- Task Node 03 -->
+<div class="group relative pl-12 opacity-40 hover:opacity-100 transition-opacity">
+<div class="absolute left-4 top-2 w-4 h-4 rounded-full bg-outline-variant z-10"></div>
+<div class="flex flex-col gap-1">
+<span class="text-on-surface-variant font-label text-[0.625rem] tracking-[0.1em]">04:30 PM</span>
+<h3 class="text-on-surface font-headline">Atmospheric Integration</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mt-1">Finalizing the visual fluidities for the main hub.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Center: Heart (Dynamic Intelligence Hub) -->
+<section class="flex-1 flex flex-col items-center justify-center relative min-h-[614px]">
+<!-- Energy Wave Visualization -->
+<div class="absolute inset-0 flex items-center justify-center overflow-hidden -z-10 opacity-30">
+<svg class="w-full h-full" viewbox="0 0 800 400">
+<path class="energy-wave" d="M0 200 Q 200 100 400 200 T 800 200" fill="none" stroke="url(#gradient-energy)" stroke-width="4">
+<animate attributename="d" dur="10s" repeatcount="indefinite" values="M0 200 Q 200 100 400 200 T 800 200; M0 200 Q 200 300 400 200 T 800 200; M0 200 Q 200 100 400 200 T 800 200"></animate>
+</path>
+<defs>
+<lineargradient id="gradient-energy" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" style="stop-color:#cc97ff;stop-opacity:0"></stop>
+<stop offset="50%" style="stop-color:#3adffa;stop-opacity:1"></stop>
+<stop offset="100%" style="stop-color:#9093ff;stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+</svg>
+</div>
+<!-- Focus Zone -->
+<div class="relative w-full max-w-2xl text-center space-y-8">
+<div class="inline-block px-6 py-2 rounded-full glass-panel border border-secondary/20 mb-4">
+<span class="text-secondary text-xs font-label uppercase tracking-[0.3em]">Energy Resonance: 94%</span>
+</div>
+<h1 class="text-5xl md:text-7xl font-headline font-black tracking-tight leading-none bg-gradient-to-b from-on-surface to-on-surface-variant bg-clip-text text-transparent">
+                    Focusing on <span class="text-primary italic">Architecture</span>
+</h1>
+<p class="text-on-surface-variant text-lg max-w-lg mx-auto font-light leading-relaxed">
+                    Your cognitive load is optimal. The environment is shifting to <span class="text-secondary">High-Frequency</span> mode to support complex synthesis.
+                </p>
+<!-- Alignment Ring -->
+<div class="relative w-64 h-64 mx-auto mt-12 flex items-center justify-center">
+<div class="absolute inset-0 rounded-full border-2 border-primary/10 scale-110"></div>
+<div class="absolute inset-0 rounded-full border border-secondary/30 rotate-45 shadow-[0_0_50px_rgba(58,223,250,0.1)]"></div>
+<div class="w-48 h-48 rounded-full glass-panel border border-white/5 flex flex-col items-center justify-center p-8 shadow-2xl">
+<span class="text-[0.625rem] text-on-surface-variant uppercase tracking-widest mb-1">Time to Peak</span>
+<span class="text-4xl font-headline font-light tracking-tighter">42:12</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Column: AI Presence & Contextual Insights -->
+<section class="w-full lg:w-1/4 flex flex-col justify-end gap-8 pb-12">
+<!-- Contextual Insights Floating Panel -->
+<div class="glass-panel p-8 rounded-xl border border-primary/10 shadow-xl space-y-4">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined text-lg">psychology</span>
+<span class="text-[0.6875rem] font-label uppercase tracking-widest">Neural Insight</span>
+</div>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+                    "I noticed a slight divergence in your pattern syntax. Shall I initiate a corrective sweep of the core modules?"
+                </p>
+<div class="flex gap-4 pt-4">
+<button class="px-4 py-2 rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-[0.625rem] uppercase tracking-widest transition-all">Proceed</button>
+<button class="px-4 py-2 rounded-full border border-white/5 text-on-surface-variant text-[0.625rem] uppercase tracking-widest hover:text-on-surface transition-all">Dismiss</button>
+</div>
+</div>
+<!-- User State Visualizer -->
+<div class="glass-panel p-8 rounded-xl border border-white/5 space-y-6">
+<div class="flex justify-between items-end">
+<div class="space-y-1">
+<span class="text-on-surface-variant font-label text-[0.625rem] uppercase tracking-widest">Vibe Status</span>
+<div class="text-xl font-headline font-medium">Flow State</div>
+</div>
+<div class="flex gap-1 h-8 items-end">
+<div class="w-1 bg-primary h-1/2 rounded-full"></div>
+<div class="w-1 bg-secondary h-full rounded-full animate-pulse"></div>
+<div class="w-1 bg-tertiary h-2/3 rounded-full"></div>
+<div class="w-1 bg-primary h-3/4 rounded-full"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="p-4 rounded-lg bg-surface-container-low border border-white/5">
+<div class="text-on-surface-variant text-[0.5rem] uppercase mb-1">Cortex</div>
+<div class="text-secondary font-medium">Synced</div>
+</div>
+<div class="p-4 rounded-lg bg-surface-container-low border border-white/5">
+<div class="text-on-surface-variant text-[0.5rem] uppercase mb-1">Burnout</div>
+<div class="text-on-surface font-medium">2% risk</div>
+</div>
+</div>
+</div>
+<!-- Conversational AI (Minimal) -->
+<div class="flex flex-col gap-4">
+<div class="flex items-start gap-4">
+<div class="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center shrink-0 shadow-lg">
+<span class="material-symbols-outlined text-background text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div class="bg-surface-container-high/60 px-5 py-3 rounded-2xl rounded-tl-none text-sm text-on-surface leading-snug">
+                        Ready when you are. The environment has been optimized for deep work.
+                    </div>
+</div>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest/40 border-0 border-b border-white/10 focus:ring-0 focus:border-primary text-sm py-4 px-0 placeholder:text-on-surface-variant/40 transition-all" placeholder="Speak to Aurora..." type="text"/>
+<button class="absolute right-0 top-1/2 -translate-y-1/2 text-primary/60 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button (FAB) - Suppression Logic Applied (Not rendered on Dash) -->
+<!-- Ambient Glow Point (Custom Component) -->
+<div class="fixed bottom-0 right-0 w-[40vw] h-[40vw] bg-tertiary/5 rounded-full blur-[150px] pointer-events-none"></div>
+</body></html>
