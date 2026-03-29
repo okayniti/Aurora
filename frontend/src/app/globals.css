@@ -169,55 +169,72 @@
   }
 }
 
-/* ── Micro-Animations ─────────────────────────────── */
+/* ═══════════════════════════════════════════════════
+   Micro-Animations
+   ═══════════════════════════════════════════════════ */
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeIn {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
 @keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 8px rgba(204, 151, 255, 0.15);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(204, 151, 255, 0.35);
-  }
+  0%, 100% { box-shadow: 0 0 8px rgba(204, 151, 255, 0.15); }
+  50%      { box-shadow: 0 0 20px rgba(204, 151, 255, 0.35); }
 }
 
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50%      { transform: translateY(-8px); }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
+  0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 
-/* ── Animation Utilities ──────────────────────────── */
+/* ── Task 2: Timeline border glow pulse ──────────── */
+@keyframes borderGlowPulse {
+  0%, 100% { border-color: rgba(58, 223, 250, 0.3); box-shadow: -2px 0 12px rgba(58, 223, 250, 0.1); }
+  50%      { border-color: rgba(204, 151, 255, 0.6); box-shadow: -2px 0 20px rgba(204, 151, 255, 0.25); }
+}
+
+/* ── Task 5: Ambient orb drift animations ────────── */
+@keyframes orbDrift1 {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(30px, -20px) scale(1.05); }
+  66%  { transform: translate(-20px, 15px) scale(0.97); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes orbDrift2 {
+  0%   { transform: translate(0, 0) scale(1); }
+  25%  { transform: translate(-25px, 30px) scale(1.03); }
+  50%  { transform: translate(15px, -10px) scale(0.98); }
+  75%  { transform: translate(-10px, -25px) scale(1.04); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes orbDrift3 {
+  0%   { transform: translate(0, 0) scale(1); }
+  40%  { transform: translate(20px, 25px) scale(1.06); }
+  70%  { transform: translate(-30px, -15px) scale(0.95); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+/* ═══════════════════════════════════════════════════
+   Animation Utilities
+   ═══════════════════════════════════════════════════ */
 
 .animate-fade-in {
   animation: fadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -243,6 +260,24 @@
   background: linear-gradient(90deg, transparent 25%, rgba(255, 255, 255, 0.04) 50%, transparent 75%);
   background-size: 200% 100%;
   animation: shimmer 2.5s ease-in-out infinite;
+}
+
+/* ── Orb drift utilities ─────────────────────────── */
+.animate-orb-drift-1 {
+  animation: orbDrift1 16s ease-in-out infinite;
+}
+
+.animate-orb-drift-2 {
+  animation: orbDrift2 20s ease-in-out infinite;
+}
+
+.animate-orb-drift-3 {
+  animation: orbDrift3 13s ease-in-out infinite;
+}
+
+/* ── Timeline active border pulse ────────────────── */
+.animate-border-glow {
+  animation: borderGlowPulse 3s ease-in-out infinite;
 }
 
 /* ── Staggered delays for grid children ───────────── */

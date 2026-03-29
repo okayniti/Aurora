@@ -33,8 +33,8 @@ const demoWeekly = Array.from({ length: 7 }, (_, i) => {
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload?.length) {
         return (
-            <div className="glass-card p-3 text-xs border border-white/10">
-                <p className="text-gray-300 mb-1 font-medium">{label}</p>
+            <div className="glass-panel p-3 text-xs border border-outline rounded-lg">
+                <p className="text-on-surface mb-1 font-medium">{label}</p>
                 {payload.map((p: any, i: number) => (
                     <p key={i} style={{ color: p.color }} className="font-mono">
                         {p.name}: {p.value}
@@ -129,16 +129,16 @@ export default function EnergyPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight">
+                        <h1 className="text-3xl font-bold tracking-tight text-on-surface">
                             Energy <span className="gradient-text">Forecasting</span>
                         </h1>
                         {isDemo && <DemoBadge />}
                     </div>
-                    <p className="text-gray-500 mt-1 text-sm">LSTM-based cognitive energy prediction · Time-series modeling</p>
+                    <p className="text-on-surface-variant mt-1 text-sm">LSTM-based cognitive energy prediction · Time-series modeling</p>
                 </div>
                 <button
                     onClick={() => setShowLog(!showLog)}
-                    className="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium transition-all duration-200 hover:shadow-glow flex items-center gap-2 self-start"
+                    className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dim text-on-primary text-sm font-medium transition-all duration-200 hover:shadow-glow flex items-center gap-2 self-start"
                 >
                     ⚡ Log Energy
                 </button>
@@ -148,11 +148,11 @@ export default function EnergyPage() {
 
             {/* Log Energy Form */}
             {showLog && (
-                <div className="glass-card p-6 animate-fade-in-up border-cyan-700/30">
+                <div className="glass-panel p-6 rounded-xl border border-secondary/20 animate-fade-in-up">
                     <h2 className="section-title mb-4">How&apos;s Your Energy Right Now?</h2>
                     <form onSubmit={handleLogEnergy} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="sm:col-span-2">
-                            <label className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2 block">
+                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-2 block">
                                 Energy Level: {energyEmoji} {logData.energy_level}/10
                             </label>
                             <input
@@ -161,16 +161,16 @@ export default function EnergyPage() {
                                 max={10}
                                 value={logData.energy_level}
                                 onChange={(e) => setLogData({ ...logData, energy_level: +e.target.value })}
-                                className="w-full accent-cyan-500 h-2"
+                                className="w-full accent-secondary h-2"
                             />
-                            <div className="flex justify-between text-[10px] text-gray-600 mt-1">
+                            <div className="flex justify-between text-[10px] text-on-surface-variant mt-1">
                                 <span>😴 Exhausted</span>
                                 <span>😐 Average</span>
                                 <span>🔥 Peak</span>
                             </div>
                         </div>
                         <div>
-                            <label className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1 block">Sleep (hours)</label>
+                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Sleep (hours)</label>
                             <input
                                 type="number"
                                 min={0}
@@ -178,38 +178,38 @@ export default function EnergyPage() {
                                 step={0.5}
                                 value={logData.sleep_hours}
                                 onChange={(e) => setLogData({ ...logData, sleep_hours: +e.target.value })}
-                                className="w-full px-4 py-2.5 rounded-xl bg-surface-400/80 border border-white/10 text-gray-200 text-sm focus:outline-none focus:border-cyan-600 transition-colors"
+                                className="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline text-on-surface text-sm focus:outline-none focus:border-primary focus:shadow-[0_0_8px_rgba(204,151,255,0.2)] transition-all"
                             />
                         </div>
                         <div>
-                            <label className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1 block">Caffeine (cups)</label>
+                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Caffeine (cups)</label>
                             <input
                                 type="number"
                                 min={0}
                                 max={10}
                                 value={logData.caffeine_intake}
                                 onChange={(e) => setLogData({ ...logData, caffeine_intake: +e.target.value })}
-                                className="w-full px-4 py-2.5 rounded-xl bg-surface-400/80 border border-white/10 text-gray-200 text-sm focus:outline-none focus:border-cyan-600 transition-colors"
+                                className="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline text-on-surface text-sm focus:outline-none focus:border-primary focus:shadow-[0_0_8px_rgba(204,151,255,0.2)] transition-all"
                             />
                         </div>
                         <div>
-                            <label className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1 block">Exercise (mins)</label>
+                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Exercise (mins)</label>
                             <input
                                 type="number"
                                 min={0}
                                 max={240}
                                 value={logData.exercise_mins}
                                 onChange={(e) => setLogData({ ...logData, exercise_mins: +e.target.value })}
-                                className="w-full px-4 py-2.5 rounded-xl bg-surface-400/80 border border-white/10 text-gray-200 text-sm focus:outline-none focus:border-cyan-600 transition-colors"
+                                className="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline text-on-surface text-sm focus:outline-none focus:border-primary focus:shadow-[0_0_8px_rgba(204,151,255,0.2)] transition-all"
                             />
                         </div>
                         <div className="flex items-end">
                             <button
                                 type="submit"
                                 disabled={saving}
-                                className={`w-full px-5 py-2.5 rounded-xl text-white text-sm font-medium transition-all duration-200 ${logSuccess
+                                className={`w-full px-5 py-2.5 rounded-xl text-on-primary text-sm font-medium transition-all duration-200 ${logSuccess
                                     ? "bg-emerald-600"
-                                    : "bg-cyan-600 hover:bg-cyan-500"
+                                    : "bg-primary hover:bg-primary-dim"
                                     } disabled:opacity-40`}
                             >
                                 {logSuccess ? "✓ Logged!" : saving ? "Saving..." : "Log Energy"}
@@ -232,43 +232,43 @@ export default function EnergyPage() {
                 <MetricCard title="Forecast MAE" value="0.82" icon="📊" color="amber" subtitle="good accuracy" />
             </div>
 
-            <div className="glass-card p-6 animate-fade-in-up">
+            <div className="glass-panel p-6 rounded-xl border border-white/5 animate-fade-in-up">
                 <h2 className="section-title mb-1">24-Hour Energy Forecast</h2>
-                <p className="text-xs text-gray-500 mb-6">Predicted vs actual · Circadian rhythm + behavioral modifiers</p>
+                <p className="text-xs text-on-surface-variant mb-6">Predicted vs actual · Circadian rhythm + behavioral modifiers</p>
                 <ResponsiveContainer width="100%" height={350}>
                     <AreaChart data={hourlyData}>
                         <defs>
                             <linearGradient id="epred" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#5c7cfa" stopOpacity={0.4} />
-                                <stop offset="100%" stopColor="#5c7cfa" stopOpacity={0} />
+                                <stop offset="0%" stopColor="#9093ff" stopOpacity={0.4} />
+                                <stop offset="100%" stopColor="#9093ff" stopOpacity={0} />
                             </linearGradient>
                             <linearGradient id="eact" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.4} />
-                                <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
+                                <stop offset="0%" stopColor="#3adffa" stopOpacity={0.4} />
+                                <stop offset="100%" stopColor="#3adffa" stopOpacity={0} />
                             </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="hour" stroke="#475569" fontSize={10} tickLine={false} />
-                        <YAxis domain={[0, 10]} stroke="#475569" fontSize={10} tickLine={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" />
+                        <XAxis dataKey="hour" stroke="#44484e" fontSize={10} tickLine={false} />
+                        <YAxis domain={[0, 10]} stroke="#44484e" fontSize={10} tickLine={false} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Area type="monotone" dataKey="predicted" stroke="#5c7cfa" strokeWidth={2} fill="url(#epred)" name="Predicted" />
-                        <Area type="monotone" dataKey="actual" stroke="#22d3ee" strokeWidth={2} fill="url(#eact)" name="Actual" connectNulls={false} />
+                        <Area type="monotone" dataKey="predicted" stroke="#9093ff" strokeWidth={2} fill="url(#epred)" name="Predicted" />
+                        <Area type="monotone" dataKey="actual" stroke="#3adffa" strokeWidth={2} fill="url(#eact)" name="Actual" connectNulls={false} />
                     </AreaChart>
                 </ResponsiveContainer>
             </div>
 
-            <div className="glass-card p-6 animate-fade-in-up">
+            <div className="glass-panel p-6 rounded-xl border border-white/5 animate-fade-in-up">
                 <h2 className="section-title mb-1">Weekly Energy Trends</h2>
-                <p className="text-xs text-gray-500 mb-6">Average, peak, and low energy levels by day</p>
+                <p className="text-xs text-on-surface-variant mb-6">Average, peak, and low energy levels by day</p>
                 <ResponsiveContainer width="100%" height={250}>
                     <LineChart data={weeklyData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="day" stroke="#475569" fontSize={11} />
-                        <YAxis domain={[0, 10]} stroke="#475569" fontSize={10} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" />
+                        <XAxis dataKey="day" stroke="#44484e" fontSize={11} />
+                        <YAxis domain={[0, 10]} stroke="#44484e" fontSize={10} />
                         <Tooltip content={<CustomTooltip />} />
                         <Line type="monotone" dataKey="peakEnergy" stroke="#34d399" strokeWidth={2} dot={{ r: 3 }} name="Peak" />
-                        <Line type="monotone" dataKey="avgEnergy" stroke="#5c7cfa" strokeWidth={2} dot={{ r: 3 }} name="Average" />
-                        <Line type="monotone" dataKey="lowEnergy" stroke="#fb7185" strokeWidth={2} dot={{ r: 3 }} name="Low" />
+                        <Line type="monotone" dataKey="avgEnergy" stroke="#9093ff" strokeWidth={2} dot={{ r: 3 }} name="Average" />
+                        <Line type="monotone" dataKey="lowEnergy" stroke="#ff6e84" strokeWidth={2} dot={{ r: 3 }} name="Low" />
                     </LineChart>
                 </ResponsiveContainer>
             </div>

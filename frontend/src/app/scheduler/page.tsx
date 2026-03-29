@@ -22,7 +22,7 @@ const statusStyles: Record<string, string> = {
     done: "badge-success",
     in_progress: "badge-info",
     pending: "badge-warning",
-    break: "bg-violet-900/50 text-violet-300 border border-violet-700/30",
+    break: "bg-tertiary/15 text-tertiary border border-tertiary/30",
 };
 
 const statusLabels: Record<string, string> = {
@@ -101,16 +101,16 @@ export default function SchedulerPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight">
+                        <h1 className="text-3xl font-bold tracking-tight text-on-surface">
                             RL <span className="gradient-text">Scheduler</span>
                         </h1>
                         {isDemo && <DemoBadge />}
                     </div>
-                    <p className="text-gray-500 mt-1 text-sm">Deep Q-Network agent · Energy-difficulty matching · Identity-aligned ordering</p>
+                    <p className="text-on-surface-variant mt-1 text-sm">Deep Q-Network agent · Energy-difficulty matching · Identity-aligned ordering</p>
                 </div>
                 <button
                     onClick={() => setShowForm(!showForm)}
-                    className="px-5 py-2.5 rounded-xl bg-aurora-600 hover:bg-aurora-500 text-white text-sm font-medium transition-all duration-200 hover:shadow-glow flex items-center gap-2 self-start"
+                    className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dim text-on-primary text-sm font-medium transition-all duration-200 hover:shadow-glow flex items-center gap-2 self-start"
                 >
                     <span className="text-lg">+</span> Add Task
                 </button>
@@ -120,36 +120,36 @@ export default function SchedulerPage() {
 
             {/* Create Task Form */}
             {showForm && (
-                <div className="glass-card p-6 animate-fade-in-up border-aurora-700/30">
+                <div className="glass-panel p-6 rounded-xl border border-primary/20 animate-fade-in-up">
                     <h2 className="section-title mb-4">Create New Task</h2>
                     <form onSubmit={handleCreateTask} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="sm:col-span-2">
-                            <label className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1 block">Title</label>
+                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Title</label>
                             <input
                                 type="text"
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                 placeholder="e.g. Implement login page"
                                 required
-                                className="w-full px-4 py-2.5 rounded-xl bg-surface-400/80 border border-white/10 text-gray-200 text-sm placeholder-gray-600 focus:outline-none focus:border-aurora-600 transition-colors"
+                                className="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline text-on-surface text-sm placeholder-on-surface-variant/40 focus:outline-none focus:border-primary focus:shadow-[0_0_8px_rgba(204,151,255,0.2)] transition-all"
                             />
                         </div>
                         <div className="sm:col-span-2">
-                            <label className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1 block">Description</label>
+                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Description</label>
                             <textarea
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 placeholder="Brief description..."
                                 rows={2}
-                                className="w-full px-4 py-2.5 rounded-xl bg-surface-400/80 border border-white/10 text-gray-200 text-sm placeholder-gray-600 focus:outline-none focus:border-aurora-600 transition-colors resize-none"
+                                className="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline text-on-surface text-sm placeholder-on-surface-variant/40 focus:outline-none focus:border-primary focus:shadow-[0_0_8px_rgba(204,151,255,0.2)] transition-all resize-none"
                             />
                         </div>
                         <div>
-                            <label className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1 block">Category</label>
+                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Category</label>
                             <select
                                 value={formData.category}
                                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                className="w-full px-4 py-2.5 rounded-xl bg-surface-400/80 border border-white/10 text-gray-200 text-sm focus:outline-none focus:border-aurora-600 transition-colors"
+                                className="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline text-on-surface text-sm focus:outline-none focus:border-primary transition-all"
                             >
                                 {categories.map((c) => (
                                     <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
@@ -157,29 +157,29 @@ export default function SchedulerPage() {
                             </select>
                         </div>
                         <div>
-                            <label className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1 block">Est. Minutes</label>
+                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Est. Minutes</label>
                             <input
                                 type="number"
                                 min={5}
                                 max={480}
                                 value={formData.estimated_minutes}
                                 onChange={(e) => setFormData({ ...formData, estimated_minutes: +e.target.value })}
-                                className="w-full px-4 py-2.5 rounded-xl bg-surface-400/80 border border-white/10 text-gray-200 text-sm focus:outline-none focus:border-aurora-600 transition-colors"
+                                className="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline text-on-surface text-sm focus:outline-none focus:border-primary focus:shadow-[0_0_8px_rgba(204,151,255,0.2)] transition-all"
                             />
                         </div>
                         <div>
-                            <label className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1 block">Difficulty: {formData.difficulty}/10</label>
+                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Difficulty: {formData.difficulty}/10</label>
                             <input
                                 type="range"
                                 min={1}
                                 max={10}
                                 value={formData.difficulty}
                                 onChange={(e) => setFormData({ ...formData, difficulty: +e.target.value })}
-                                className="w-full accent-aurora-500"
+                                className="w-full accent-primary"
                             />
                         </div>
                         <div>
-                            <label className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1 block">Priority: {"★".repeat(formData.priority)}{"☆".repeat(5 - formData.priority)}</label>
+                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Priority: {"★".repeat(formData.priority)}{"☆".repeat(5 - formData.priority)}</label>
                             <input
                                 type="range"
                                 min={1}
@@ -193,14 +193,14 @@ export default function SchedulerPage() {
                             <button
                                 type="button"
                                 onClick={() => setShowForm(false)}
-                                className="px-4 py-2 rounded-xl text-gray-400 hover:text-gray-200 text-sm transition-colors"
+                                className="px-4 py-2 rounded-xl text-on-surface-variant hover:text-on-surface text-sm transition-colors"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={saving || !formData.title.trim()}
-                                className="px-5 py-2.5 rounded-xl bg-aurora-600 hover:bg-aurora-500 disabled:opacity-40 text-white text-sm font-medium transition-all duration-200"
+                                className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dim disabled:opacity-40 text-on-primary text-sm font-medium transition-all duration-200"
                             >
                                 {saving ? "Creating..." : "Create Task"}
                             </button>
@@ -211,10 +211,10 @@ export default function SchedulerPage() {
 
             {/* Task List */}
             {(tasks as any[])?.length > 0 && (
-                <div className="glass-card overflow-hidden animate-fade-in-up">
+                <div className="glass-panel rounded-xl border border-white/5 overflow-hidden animate-fade-in-up">
                     <div className="p-6 border-b border-white/5">
                         <h2 className="section-title">Your Tasks</h2>
-                        <p className="text-xs text-gray-500 mt-1">{(tasks as any[]).length} tasks · Click to change status</p>
+                        <p className="text-xs text-on-surface-variant mt-1">{(tasks as any[]).length} tasks · Click to change status</p>
                     </div>
                     <div className="divide-y divide-white/5">
                         {(tasks as any[]).map((task: any) => (
@@ -233,20 +233,20 @@ export default function SchedulerPage() {
                                     className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${task.status === "done"
                                         ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
                                         : task.status === "in_progress"
-                                            ? "bg-aurora-500/20 border-aurora-500"
-                                            : "border-gray-600 hover:border-gray-400"
+                                            ? "bg-primary/20 border-primary"
+                                            : "border-outline hover:border-on-surface-variant"
                                         }`}
                                 >
                                     {task.status === "done" && "✓"}
                                 </button>
                                 <div className="flex-1 min-w-0">
-                                    <p className={`text-sm font-medium ${task.status === "done" ? "text-gray-500 line-through" : "text-gray-200"}`}>
+                                    <p className={`text-sm font-medium ${task.status === "done" ? "text-on-surface-variant line-through" : "text-on-surface"}`}>
                                         {task.title}
                                     </p>
                                     <div className="flex items-center gap-3 mt-0.5">
-                                        {task.category && <span className="text-[10px] text-gray-600">{task.category}</span>}
-                                        {task.estimated_minutes && <span className="text-[10px] text-gray-600">{task.estimated_minutes}min</span>}
-                                        <span className="text-[10px] text-gray-600">{"★".repeat(task.priority)}{"☆".repeat(5 - task.priority)}</span>
+                                        {task.category && <span className="text-[10px] text-on-surface-variant">{task.category}</span>}
+                                        {task.estimated_minutes && <span className="text-[10px] text-on-surface-variant">{task.estimated_minutes}min</span>}
+                                        <span className="text-[10px] text-on-surface-variant">{"★".repeat(task.priority)}{"☆".repeat(5 - task.priority)}</span>
                                     </div>
                                 </div>
                                 <span className={`badge ${statusStyles[task.status] || "badge-warning"}`}>
@@ -267,12 +267,12 @@ export default function SchedulerPage() {
             </div>
 
             {/* Schedule Table */}
-            <div className="glass-card overflow-hidden animate-fade-in-up">
+            <div className="glass-panel rounded-xl border border-white/5 overflow-hidden animate-fade-in-up">
                 <div className="p-6 border-b border-white/5">
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="section-title">Today&apos;s Optimized Schedule</h2>
-                            <p className="text-xs text-gray-500 mt-1">Tasks ordered by RL agent · Energy-matched time slots</p>
+                            <p className="text-xs text-on-surface-variant mt-1">Tasks ordered by RL agent · Energy-matched time slots</p>
                         </div>
                         <button
                             onClick={async () => {
@@ -283,7 +283,7 @@ export default function SchedulerPage() {
                                     } catch { }
                                 }
                             }}
-                            className="px-4 py-2 rounded-xl bg-aurora-700/20 border border-aurora-700/30 text-aurora-400 text-sm font-medium hover:bg-aurora-700/30 transition-colors"
+                            className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
                         >
                             Re-optimize
                         </button>
@@ -292,32 +292,32 @@ export default function SchedulerPage() {
 
                 <div className="divide-y divide-white/5">
                     {(scheduleData || demoSchedule).map((item: any, i: number) => (
-                        <div key={i} className={`flex items-center gap-6 px-6 py-4 transition-colors hover:bg-white/[0.02] ${item.status === "break" ? "bg-violet-950/10" : ""}`}>
+                        <div key={i} className={`flex items-center gap-6 px-6 py-4 transition-colors hover:bg-white/[0.02] ${item.status === "break" ? "bg-tertiary/5" : ""}`}>
                             <div className="w-32 shrink-0">
-                                <span className="font-mono text-sm text-gray-400">{item.time}</span>
+                                <span className="font-mono text-sm text-on-surface-variant">{item.time}</span>
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-200 truncate">{item.task}</p>
+                                <p className="text-sm font-medium text-on-surface truncate">{item.task}</p>
                                 {item.status !== "break" && (
                                     <div className="flex items-center gap-3 mt-1">
-                                        <span className="text-[10px] text-gray-500">Difficulty: {item.difficulty}/10</span>
-                                        <span className="text-[10px] text-gray-500">Priority: {"★".repeat(item.priority)}{"☆".repeat(5 - item.priority)}</span>
+                                        <span className="text-[10px] text-on-surface-variant">Difficulty: {item.difficulty}/10</span>
+                                        <span className="text-[10px] text-on-surface-variant">Priority: {"★".repeat(item.priority)}{"☆".repeat(5 - item.priority)}</span>
                                     </div>
                                 )}
                             </div>
                             {item.status !== "break" && (
                                 <div className="w-20 text-center">
-                                    <span className={`font-mono text-sm ${item.energy >= 7 ? "text-emerald-400" : item.energy >= 4 ? "text-amber-400" : "text-rose-400"}`}>
+                                    <span className={`font-mono text-sm ${item.energy >= 7 ? "text-emerald-400" : item.energy >= 4 ? "text-amber-400" : "text-error"}`}>
                                         ⚡ {item.energy}
                                     </span>
                                 </div>
                             )}
                             <div className="w-20 text-center">
                                 <div className="inline-flex items-center gap-1">
-                                    <div className="w-12 h-1.5 bg-surface-400 rounded-full overflow-hidden">
-                                        <div className="h-full rounded-full bg-aurora-500" style={{ width: `${item.confidence * 100}%` }} />
+                                    <div className="w-12 h-1.5 bg-surface-container rounded-full overflow-hidden">
+                                        <div className="h-full rounded-full bg-primary" style={{ width: `${item.confidence * 100}%` }} />
                                     </div>
-                                    <span className="text-[10px] text-gray-500 font-mono">{(item.confidence * 100).toFixed(0)}%</span>
+                                    <span className="text-[10px] text-on-surface-variant font-mono">{(item.confidence * 100).toFixed(0)}%</span>
                                 </div>
                             </div>
                             <div className="w-24 text-right">
@@ -329,20 +329,20 @@ export default function SchedulerPage() {
             </div>
 
             {/* Reward Function */}
-            <div className="glass-card p-6 animate-fade-in-up">
+            <div className="glass-panel p-6 rounded-xl border border-white/5 animate-fade-in-up">
                 <h2 className="section-title mb-4">Reward Function Components</h2>
                 <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                     {[
                         { label: "Completion", weight: "+1.0", desc: "Task finished", color: "text-emerald-400" },
-                        { label: "Alignment", weight: "+0.5", desc: "Identity match", color: "text-aurora-400" },
-                        { label: "Priority", weight: "+0.3", desc: "High-priority done", color: "text-cyan-400" },
-                        { label: "Burnout", weight: "−1.5", desc: "Risk penalty", color: "text-rose-400" },
+                        { label: "Alignment", weight: "+0.5", desc: "Identity match", color: "text-primary" },
+                        { label: "Priority", weight: "+0.3", desc: "High-priority done", color: "text-secondary" },
+                        { label: "Burnout", weight: "−1.5", desc: "Risk penalty", color: "text-error" },
                         { label: "Overload", weight: "−1.0", desc: "Energy mismatch", color: "text-amber-400" },
                     ].map((r, i) => (
-                        <div key={i} className="text-center p-3 rounded-xl bg-surface-400/30">
+                        <div key={i} className="text-center p-3 rounded-xl bg-surface-container-low border border-white/5">
                             <span className={`font-mono text-xl font-bold ${r.color}`}>{r.weight}</span>
-                            <p className="text-xs text-gray-300 mt-1 font-medium">{r.label}</p>
-                            <p className="text-[10px] text-gray-600 mt-0.5">{r.desc}</p>
+                            <p className="text-xs text-on-surface mt-1 font-medium">{r.label}</p>
+                            <p className="text-[10px] text-on-surface-variant mt-0.5">{r.desc}</p>
                         </div>
                     ))}
                 </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useUser } from "@/lib/UserContext";
 import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
@@ -38,12 +38,15 @@ const demoTasks = [
     },
 ];
 
+// ── Timer constants ─────────────────────────────────────────
+const TOTAL_SECONDS = 42 * 60 + 12; // 42:12
+
 export default function Dashboard() {
     const { userId } = useUser();
     const [aiMessage] = useState(
         "Ready when you are. The environment has been optimized for deep work."
     );
-    const [peakTimer, setPeakTimer] = useState({ minutes: 42, seconds: 12 });
+    const [elapsed, setElapsed] = useState(0);
 
     // Fetch dashboard data from API (falls back to demo)
     const { data: dashboard } = useApi(
@@ -52,20 +55,29 @@ export default function Dashboard() {
         [userId]
     );
 
-    // Countdown timer animation
+    // Countdown timer
     useEffect(() => {
         const interval = setInterval(() => {
-            setPeakTimer((prev) => {
-                if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-                if (prev.minutes > 0) return { minutes: prev.minutes - 1, seconds: 59 };
-                return { minutes: 42, seconds: 12 }; // Reset
-            });
+            setElapsed((prev) => (prev + 1) % TOTAL_SECONDS);
         }, 1000);
         return () => clearInterval(interval);
     }, []);
 
+    const remaining = TOTAL_SECONDS - elapsed;
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    const progress = remaining / TOTAL_SECONDS; // 1 → 0
+
     const d = dashboard || demoDashboard;
     const energyResonance = Math.round((1 - d.burnout_trend) * 100);
+
+    // SVG ring values
+    const RING_RADIUS = 110;
+    const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+    const strokeDashoffset = useMemo(
+        () => RING_CIRCUMFERENCE * (1 - progress),
+        [progress, RING_CIRCUMFERENCE]
+    );
 
     return (
         <div className="flex flex-col lg:flex-row gap-12 min-h-[calc(100vh-8rem)] animate-fade-in">
@@ -89,21 +101,34 @@ export default function Dashboard() {
                     {demoTasks.map((task, i) => (
                         <div
                             key={i}
-                            className={`group relative pl-12 ${
+                            className={`group relative pl-12 transition-all duration-500 ${
                                 task.status === "upcoming"
-                                    ? "opacity-40 hover:opacity-100 transition-opacity"
+                                    ? "opacity-40 hover:opacity-80"
                                     : ""
                             }`}
                         >
+                            {/* Left border indicator */}
+                            {task.status === "active" ? (
+                                <div className="absolute left-0 top-0 bottom-0 w-[2px] rounded-full animate-border-glow border-l-2 border-secondary" />
+                            ) : task.status === "done" ? (
+                                <div className="absolute left-0 top-0 bottom-0 w-[2px] rounded-full bg-primary/30" />
+                            ) : (
+                                <div className="absolute left-0 top-0 bottom-0 w-[2px] rounded-full bg-outline-variant/20" />
+                            )}
+
                             {/* Node dot */}
                             {task.status === "active" ? (
                                 <div className="absolute left-3 -top-1 w-6 h-6 rounded-full border-2 border-secondary flex items-center justify-center animate-pulse z-10 bg-background">
                                     <div className="w-2 h-2 rounded-full bg-secondary" />
                                 </div>
                             ) : task.status === "done" ? (
-                                <div className="absolute left-4 top-2 w-4 h-4 rounded-full bg-primary shadow-glow-primary z-10" />
+                                <div className="absolute left-3.5 top-1 w-5 h-5 rounded-full bg-primary/20 border border-primary flex items-center justify-center z-10">
+                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                                        <path d="M2 5L4.5 7.5L8 3" stroke="#cc97ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </div>
                             ) : (
-                                <div className="absolute left-4 top-2 w-4 h-4 rounded-full bg-outline-variant z-10" />
+                                <div className="absolute left-4 top-2 w-4 h-4 rounded-full bg-outline-variant/40 z-10" />
                             )}
 
                             {/* Content */}
@@ -117,12 +142,15 @@ export default function Dashboard() {
                                             : "text-on-surface-variant"
                                     }`}
                                 >
+                                    {task.status === "done" && "✓ "}
                                     {task.time}
                                 </span>
                                 <h3
                                     className={`text-on-surface group-hover:text-primary transition-colors ${
                                         task.status === "active"
                                             ? "text-xl font-bold"
+                                            : task.status === "done"
+                                            ? "font-medium opacity-70"
                                             : "font-medium"
                                     }`}
                                 >
@@ -196,20 +224,58 @@ export default function Dashboard() {
                         support complex synthesis.
                     </p>
 
-                    {/* Alignment Ring */}
+                    {/* ── Task 1: Alignment Ring with SVG Progress ── */}
                     <div className="relative w-64 h-64 mx-auto mt-12 flex items-center justify-center">
-                        {/* Outer ring */}
+                        {/* Outer decorative ring */}
                         <div className="absolute inset-0 rounded-full border-2 border-primary/10 scale-110" />
-                        {/* Inner ring */}
-                        <div className="absolute inset-0 rounded-full border border-secondary/30 rotate-45 shadow-glow-secondary" />
-                        {/* Center glass */}
-                        <div className="w-48 h-48 rounded-full glass-panel border border-white/5 flex flex-col items-center justify-center p-8 shadow-2xl">
+
+                        {/* SVG Progress Ring */}
+                        <svg
+                            className="absolute inset-0 w-full h-full -rotate-90"
+                            viewBox="0 0 256 256"
+                            style={{ filter: "drop-shadow(0 0 8px rgba(204, 151, 255, 0.3))" }}
+                        >
+                            <defs>
+                                <linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#cc97ff" />
+                                    <stop offset="100%" stopColor="#8a5cbf" />
+                                </linearGradient>
+                            </defs>
+                            {/* Background track */}
+                            <circle
+                                cx="128"
+                                cy="128"
+                                r={RING_RADIUS}
+                                fill="none"
+                                stroke="rgba(204, 151, 255, 0.08)"
+                                strokeWidth="3"
+                            />
+                            {/* Progress arc */}
+                            <circle
+                                cx="128"
+                                cy="128"
+                                r={RING_RADIUS}
+                                fill="none"
+                                stroke="url(#ring-gradient)"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeDasharray={RING_CIRCUMFERENCE}
+                                strokeDashoffset={strokeDashoffset}
+                                style={{ transition: "stroke-dashoffset 1s linear" }}
+                            />
+                        </svg>
+
+                        {/* Inner decorative ring */}
+                        <div className="absolute inset-4 rounded-full border border-secondary/20 rotate-45" />
+
+                        {/* Center glass circle */}
+                        <div className="w-48 h-48 rounded-full glass-panel border border-white/5 flex flex-col items-center justify-center p-8 shadow-2xl z-10">
                             <span className="text-[0.625rem] text-on-surface-variant uppercase tracking-widest mb-1">
                                 Time to Peak
                             </span>
-                            <span className="text-4xl font-light tracking-tighter text-on-surface">
-                                {String(peakTimer.minutes).padStart(2, "0")}:
-                                {String(peakTimer.seconds).padStart(2, "0")}
+                            <span className="text-4xl font-light tracking-tighter text-on-surface tabular-nums">
+                                {String(minutes).padStart(2, "0")}:
+                                {String(seconds).padStart(2, "0")}
                             </span>
                         </div>
                     </div>
@@ -218,8 +284,9 @@ export default function Dashboard() {
 
             {/* ══════════════════════════════════════════════
                 RIGHT COLUMN: AI Presence & Insights
+                Task 4: Consistent gap-3 spacing
                ══════════════════════════════════════════════ */}
-            <section className="w-full lg:w-1/4 flex flex-col justify-end gap-8 pb-12">
+            <section className="w-full lg:w-1/4 flex flex-col justify-end gap-3 pb-12">
                 {/* Neural Insight Panel */}
                 <div className="glass-panel p-8 rounded-xl border border-primary/10 shadow-xl space-y-4">
                     <div className="flex items-center gap-3 text-primary">
@@ -295,7 +362,7 @@ export default function Dashboard() {
                     </div>
                     <div className="relative">
                         <input
-                            className="w-full bg-surface-container-lowest/40 border-0 border-b border-white/10 focus:ring-0 focus:border-primary text-sm py-4 px-0 placeholder:text-on-surface-variant/40 transition-all text-on-surface outline-none"
+                            className="w-full bg-surface-container-lowest/40 border-0 border-b-2 border-white/10 focus:border-primary focus:shadow-[0_2px_12px_rgba(204,151,255,0.25)] text-sm py-4 px-0 placeholder:text-on-surface-variant/40 transition-all duration-300 text-on-surface outline-none"
                             placeholder="Speak to Aurora..."
                             type="text"
                         />

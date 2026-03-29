@@ -34,19 +34,19 @@ const demoRiskTimeline = Array.from({ length: 14 }, (_, i) => ({
 }));
 
 const demoCompletion = [
-    { category: "Coding", completed: 12, total: 15, color: "#5c7cfa" },
+    { category: "Coding", completed: 12, total: 15, color: "#9093ff" },
     { category: "Research", completed: 5, total: 6, color: "#34d399" },
     { category: "Writing", completed: 3, total: 5, color: "#fbbf24" },
-    { category: "Meetings", completed: 8, total: 8, color: "#a78bfa" },
-    { category: "DevOps", completed: 2, total: 4, color: "#fb7185" },
-    { category: "Review", completed: 4, total: 5, color: "#22d3ee" },
+    { category: "Meetings", completed: 8, total: 8, color: "#cc97ff" },
+    { category: "DevOps", completed: 2, total: 4, color: "#ff6e84" },
+    { category: "Review", completed: 4, total: 5, color: "#3adffa" },
 ];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload?.length) {
         return (
-            <div className="glass-card p-3 text-xs border border-white/10">
-                <p className="text-gray-300 mb-1 font-medium">{label}</p>
+            <div className="glass-panel p-3 text-xs border border-outline rounded-lg">
+                <p className="text-on-surface mb-1 font-medium">{label}</p>
                 {payload.map((p: any, i: number) => (
                     <p key={i} style={{ color: p.color || p.fill }} className="font-mono">
                         {p.name}: {p.value}
@@ -76,12 +76,12 @@ export default function AnalyticsPage() {
     return (
         <div className="space-y-8 animate-fade-in">
             <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold tracking-tight">
+                <h1 className="text-3xl font-bold tracking-tight text-on-surface">
                     Cognitive <span className="gradient-text">Analytics</span>
                 </h1>
                 {isDemo && <DemoBadge />}
             </div>
-            <p className="text-gray-500 -mt-6 text-sm">System-wide metrics · Performance trends · Adaptive insights</p>
+            <p className="text-on-surface-variant -mt-6 text-sm">System-wide metrics · Performance trends · Adaptive insights</p>
 
             {isDemo && <ErrorBanner message="Using simulated analytics" />}
 
@@ -95,55 +95,55 @@ export default function AnalyticsPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="glass-card p-6">
+                <div className="glass-panel p-6 rounded-xl border border-white/5">
                     <h2 className="section-title mb-1">Weekly Deep Work & Alignment</h2>
-                    <p className="text-xs text-gray-500 mb-4">Hours of focused work vs identity alignment trend</p>
+                    <p className="text-xs text-on-surface-variant mb-4">Hours of focused work vs identity alignment trend</p>
                     <ResponsiveContainer width="100%" height={260}>
                         <AreaChart data={demoWeeklyDeepWork}>
                             <defs>
                                 <linearGradient id="dwGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.3} />
-                                    <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
+                                    <stop offset="0%" stopColor="#3adffa" stopOpacity={0.3} />
+                                    <stop offset="100%" stopColor="#3adffa" stopOpacity={0} />
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                            <XAxis dataKey="day" stroke="#475569" fontSize={11} />
-                            <YAxis yAxisId="left" domain={[0, 8]} stroke="#22d3ee" fontSize={10} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" />
+                            <XAxis dataKey="day" stroke="#44484e" fontSize={11} />
+                            <YAxis yAxisId="left" domain={[0, 8]} stroke="#3adffa" fontSize={10} />
                             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} stroke="#34d399" fontSize={10} />
                             <Tooltip content={<CustomTooltip />} />
-                            <Area yAxisId="left" type="monotone" dataKey="deepWork" stroke="#22d3ee" strokeWidth={2} fill="url(#dwGrad)" name="Deep Work (h)" />
+                            <Area yAxisId="left" type="monotone" dataKey="deepWork" stroke="#3adffa" strokeWidth={2} fill="url(#dwGrad)" name="Deep Work (h)" />
                             <Line yAxisId="right" type="monotone" dataKey="alignment" stroke="#34d399" strokeWidth={2} dot={{ r: 3 }} name="Alignment %" />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
 
-                <div className="glass-card p-6">
+                <div className="glass-panel p-6 rounded-xl border border-white/5">
                     <h2 className="section-title mb-1">Risk Indicators (14 Days)</h2>
-                    <p className="text-xs text-gray-500 mb-4">Burnout probability and decision fatigue trends</p>
+                    <p className="text-xs text-on-surface-variant mb-4">Burnout probability and decision fatigue trends</p>
                     <ResponsiveContainer width="100%" height={260}>
                         <LineChart data={demoRiskTimeline}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                            <XAxis dataKey="day" stroke="#475569" fontSize={10} />
-                            <YAxis domain={[0, 1]} stroke="#475569" fontSize={10} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" />
+                            <XAxis dataKey="day" stroke="#44484e" fontSize={10} />
+                            <YAxis domain={[0, 1]} stroke="#44484e" fontSize={10} />
                             <Tooltip content={<CustomTooltip />} />
-                            <Line type="monotone" dataKey="burnout" stroke="#fb7185" strokeWidth={2} dot={false} name="Burnout Risk" />
+                            <Line type="monotone" dataKey="burnout" stroke="#ff6e84" strokeWidth={2} dot={false} name="Burnout Risk" />
                             <Line type="monotone" dataKey="fatigue" stroke="#fbbf24" strokeWidth={2} dot={false} name="Decision Fatigue" />
-                            <Line type="monotone" dataKey={() => 0.5} stroke="#475569" strokeDasharray="5 5" strokeWidth={1} dot={false} />
+                            <Line type="monotone" dataKey={() => 0.5} stroke="#44484e" strokeDasharray="5 5" strokeWidth={1} dot={false} />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
             </div>
 
-            <div className="glass-card p-6">
+            <div className="glass-panel p-6 rounded-xl border border-white/5">
                 <h2 className="section-title mb-1">Task Completion by Category</h2>
-                <p className="text-xs text-gray-500 mb-6">Completed tasks vs total by work category</p>
+                <p className="text-xs text-on-surface-variant mb-6">Completed tasks vs total by work category</p>
                 <ResponsiveContainer width="100%" height={250}>
                     <BarChart data={demoCompletion}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={false} />
-                        <XAxis dataKey="category" stroke="#475569" fontSize={11} />
-                        <YAxis stroke="#475569" fontSize={10} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" horizontal={false} />
+                        <XAxis dataKey="category" stroke="#44484e" fontSize={11} />
+                        <YAxis stroke="#44484e" fontSize={10} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="total" fill="#1e293b" radius={[4, 4, 0, 0]} name="Total" />
+                        <Bar dataKey="total" fill="#1a1f26" radius={[4, 4, 0, 0]} name="Total" />
                         <Bar dataKey="completed" radius={[4, 4, 0, 0]} name="Completed">
                             {demoCompletion.map((entry, i) => (
                                 <Cell key={i} fill={entry.color} />

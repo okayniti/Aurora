@@ -16,25 +16,18 @@ const demoTrend = Array.from({ length: 30 }, (_, i) => ({
 }));
 
 const demoFeatures = [
-    { name: "Stress Trend", value: 0.32, color: "#fb7185" },
-    { name: "Sleep Quality", value: 0.25, color: "#5c7cfa" },
+    { name: "Stress Trend", value: 0.32, color: "#ff6e84" },
+    { name: "Sleep Quality", value: 0.25, color: "#9093ff" },
     { name: "Cognitive Load", value: 0.20, color: "#fbbf24" },
     { name: "Deep Work Streak", value: 0.13, color: "#34d399" },
-    { name: "Energy Variance", value: 0.10, color: "#a78bfa" },
-];
-
-const demoRiskDist = [
-    { name: "Low", value: 12, fill: "#34d399" },
-    { name: "Moderate", value: 10, fill: "#fbbf24" },
-    { name: "High", value: 6, fill: "#fb7185" },
-    { name: "Critical", value: 2, fill: "#ef4444" },
+    { name: "Energy Variance", value: 0.10, color: "#cc97ff" },
 ];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload?.length) {
         return (
-            <div className="glass-card p-3 text-xs border border-white/10">
-                <p className="text-gray-300 mb-1 font-medium">{label ? `Day ${label}` : payload[0]?.name}</p>
+            <div className="glass-panel p-3 text-xs border border-outline rounded-lg">
+                <p className="text-on-surface mb-1 font-medium">{label ? `Day ${label}` : payload[0]?.name}</p>
                 {payload.map((p: any, i: number) => (
                     <p key={i} style={{ color: p.fill || p.color }} className="font-mono">
                         {p.name}: {typeof p.value === "number" ? p.value.toFixed(3) : p.value}
@@ -72,7 +65,7 @@ export default function BurnoutPage() {
             return Object.entries(risk.feature_importance).map(([name, value], i) => ({
                 name: name.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()),
                 value: +(value as number).toFixed(3),
-                color: ["#fb7185", "#5c7cfa", "#fbbf24", "#34d399", "#a78bfa"][i % 5],
+                color: ["#ff6e84", "#9093ff", "#fbbf24", "#34d399", "#cc97ff"][i % 5],
             }));
         },
         demoFeatures,
@@ -94,7 +87,7 @@ export default function BurnoutPage() {
         [
             { name: "Low", value: 0, fill: "#34d399" },
             { name: "Moderate", value: 0, fill: "#fbbf24" },
-            { name: "High", value: 0, fill: "#fb7185" },
+            { name: "High", value: 0, fill: "#ff6e84" },
             { name: "Critical", value: 0, fill: "#ef4444" },
         ]
     );
@@ -102,12 +95,12 @@ export default function BurnoutPage() {
     return (
         <div className="space-y-8 animate-fade-in">
             <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold tracking-tight">
+                <h1 className="text-3xl font-bold tracking-tight text-on-surface">
                     Burnout <span className="gradient-text">Monitor</span>
                 </h1>
                 {isDemo && <DemoBadge />}
             </div>
-            <p className="text-gray-500 -mt-6 text-sm">XGBoost classifier · SHAP explainability · Real-time risk monitoring</p>
+            <p className="text-on-surface-variant -mt-6 text-sm">XGBoost classifier · SHAP explainability · Real-time risk monitoring</p>
 
             {isDemo && <ErrorBanner message="Using simulated burnout data" />}
 
@@ -119,29 +112,29 @@ export default function BurnoutPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="glass-card p-6">
+                <div className="glass-panel p-6 rounded-xl border border-white/5">
                     <h2 className="section-title mb-1">30-Day Burnout Trend</h2>
-                    <p className="text-xs text-gray-500 mb-4">Burnout probability over time · Threshold at 0.5</p>
+                    <p className="text-xs text-on-surface-variant mb-4">Burnout probability over time · Threshold at 0.5</p>
                     <ResponsiveContainer width="100%" height={280}>
                         <LineChart data={trendData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                            <XAxis dataKey="day" stroke="#475569" fontSize={10} />
-                            <YAxis domain={[0, 1]} stroke="#475569" fontSize={10} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" />
+                            <XAxis dataKey="day" stroke="#44484e" fontSize={10} />
+                            <YAxis domain={[0, 1]} stroke="#44484e" fontSize={10} />
                             <Tooltip content={<CustomTooltip />} />
-                            <Line type="monotone" dataKey="probability" stroke="#fb7185" strokeWidth={2} dot={false} />
-                            <Line type="monotone" dataKey={() => 0.5} stroke="#475569" strokeDasharray="5 5" dot={false} strokeWidth={1} />
+                            <Line type="monotone" dataKey="probability" stroke="#ff6e84" strokeWidth={2} dot={false} />
+                            <Line type="monotone" dataKey={() => 0.5} stroke="#44484e" strokeDasharray="5 5" dot={false} strokeWidth={1} />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
 
-                <div className="glass-card p-6">
+                <div className="glass-panel p-6 rounded-xl border border-white/5">
                     <h2 className="section-title mb-1">Feature Importance (SHAP)</h2>
-                    <p className="text-xs text-gray-500 mb-4">Explainable contribution to burnout prediction</p>
+                    <p className="text-xs text-on-surface-variant mb-4">Explainable contribution to burnout prediction</p>
                     <ResponsiveContainer width="100%" height={280}>
                         <BarChart data={featureData} layout="vertical">
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={false} />
-                            <XAxis type="number" domain={[0, 0.4]} stroke="#475569" fontSize={10} />
-                            <YAxis type="category" dataKey="name" width={120} stroke="#475569" fontSize={11} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" horizontal={false} />
+                            <XAxis type="number" domain={[0, 0.4]} stroke="#44484e" fontSize={10} />
+                            <YAxis type="category" dataKey="name" width={120} stroke="#44484e" fontSize={11} />
                             <Tooltip content={<CustomTooltip />} />
                             <Bar dataKey="value" radius={[0, 6, 6, 0]} name="SHAP Value">
                                 {(featureData || demoFeatures).map((entry: any, i: number) => (
@@ -153,9 +146,9 @@ export default function BurnoutPage() {
                 </div>
             </div>
 
-            <div className="glass-card p-6">
+            <div className="glass-panel p-6 rounded-xl border border-white/5">
                 <h2 className="section-title mb-1">Risk Level Distribution (Past 30 Days)</h2>
-                <p className="text-xs text-gray-500 mb-4">Count of days at each risk level</p>
+                <p className="text-xs text-on-surface-variant mb-4">Count of days at each risk level</p>
                 <div className="flex items-center gap-8">
                     <ResponsiveContainer width="40%" height={200}>
                         <PieChart>
@@ -172,9 +165,9 @@ export default function BurnoutPage() {
                             <div key={item.name} className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.fill }} />
-                                    <span className="text-sm text-gray-300">{item.name}</span>
+                                    <span className="text-sm text-on-surface">{item.name}</span>
                                 </div>
-                                <span className="font-mono text-sm text-gray-400">{item.value} days</span>
+                                <span className="font-mono text-sm text-on-surface-variant">{item.value} days</span>
                             </div>
                         ))}
                     </div>
