@@ -80,11 +80,11 @@ export default function Dashboard() {
     );
 
     return (
-        <div className="flex flex-col lg:flex-row gap-12 min-h-[calc(100vh-8rem)] animate-fade-in">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 min-h-[calc(100vh-8rem)] animate-fade-in">
             {/* ══════════════════════════════════════════════
                 LEFT COLUMN: Task Timeline Journey
                ══════════════════════════════════════════════ */}
-            <section className="w-full lg:w-1/4 flex flex-col gap-16 relative py-8">
+            <section className="w-full lg:w-1/4 flex flex-col gap-10 lg:gap-16 relative py-8 order-2 lg:order-1">
                 {/* Vertical line */}
                 <div className="absolute left-6 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-primary/20 to-transparent" />
 
@@ -168,7 +168,7 @@ export default function Dashboard() {
             {/* ══════════════════════════════════════════════
                 CENTER: Dynamic Intelligence Hub
                ══════════════════════════════════════════════ */}
-            <section className="flex-1 flex flex-col items-center justify-center relative min-h-[614px]">
+            <section className="flex-1 flex flex-col items-center justify-center relative min-h-[400px] lg:min-h-[614px] order-1 lg:order-2">
                 {/* Animated Energy Wave SVG */}
                 <div className="absolute inset-0 flex items-center justify-center overflow-hidden -z-10 opacity-30">
                     <svg className="w-full h-full" viewBox="0 0 800 400">
@@ -212,20 +212,20 @@ export default function Dashboard() {
                     </div>
 
                     {/* Hero Heading */}
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none bg-gradient-to-b from-on-surface to-on-surface-variant bg-clip-text text-transparent">
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-none bg-gradient-to-b from-on-surface to-on-surface-variant bg-clip-text text-transparent">
                         Focusing on{" "}
                         <span className="text-primary italic">Architecture</span>
                     </h1>
 
                     {/* Description */}
-                    <p className="text-on-surface-variant text-lg max-w-lg mx-auto font-light leading-relaxed">
+                    <p className="text-on-surface-variant text-base md:text-lg max-w-lg mx-auto font-light leading-relaxed">
                         Your cognitive load is optimal. The environment is shifting to{" "}
                         <span className="text-secondary">High-Frequency</span> mode to
                         support complex synthesis.
                     </p>
 
                     {/* ── Task 1: Alignment Ring with SVG Progress ── */}
-                    <div className="relative w-64 h-64 mx-auto mt-12 flex items-center justify-center">
+                    <div className="relative w-48 h-48 md:w-64 md:h-64 mx-auto mt-8 md:mt-12 flex items-center justify-center">
                         {/* Outer decorative ring */}
                         <div className="absolute inset-0 rounded-full border-2 border-primary/10 scale-110" />
 
@@ -269,11 +269,11 @@ export default function Dashboard() {
                         <div className="absolute inset-4 rounded-full border border-secondary/20 rotate-45" />
 
                         {/* Center glass circle */}
-                        <div className="w-48 h-48 rounded-full glass-panel border border-white/5 flex flex-col items-center justify-center p-8 shadow-2xl z-10">
+                        <div className="w-36 h-36 md:w-48 md:h-48 rounded-full glass-panel border border-white/5 flex flex-col items-center justify-center p-6 md:p-8 shadow-2xl z-10">
                             <span className="text-[0.625rem] text-on-surface-variant uppercase tracking-widest mb-1">
                                 Time to Peak
                             </span>
-                            <span className="text-4xl font-light tracking-tighter text-on-surface tabular-nums">
+                            <span className="text-3xl md:text-4xl font-light tracking-tighter text-on-surface tabular-nums">
                                 {String(minutes).padStart(2, "0")}:
                                 {String(seconds).padStart(2, "0")}
                             </span>
@@ -286,9 +286,9 @@ export default function Dashboard() {
                 RIGHT COLUMN: AI Presence & Insights
                 Task 4: Consistent gap-3 spacing
                ══════════════════════════════════════════════ */}
-            <section className="w-full lg:w-1/4 flex flex-col justify-end gap-3 pb-12">
+            <section className="w-full lg:w-1/4 flex flex-col justify-end gap-3 pb-12 order-3 lg:order-3">
                 {/* Neural Insight Panel */}
-                <div className="glass-panel p-8 rounded-xl border border-primary/10 shadow-xl space-y-4">
+                <div className="glass-panel p-5 md:p-8 rounded-xl border border-primary/10 shadow-xl space-y-4">
                     <div className="flex items-center gap-3 text-primary">
                         <span className="material-symbols-outlined text-lg">psychology</span>
                         <span className="label-sm !text-primary !tracking-widest">
@@ -300,17 +300,17 @@ export default function Dashboard() {
                         initiate a corrective sweep of the core modules?&quot;
                     </p>
                     <div className="flex gap-4 pt-4">
-                        <button className="px-4 py-2 rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-[0.625rem] uppercase tracking-widest transition-all">
+                        <button className="px-4 py-2 min-h-[44px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-[0.625rem] uppercase tracking-widest transition-all">
                             Proceed
                         </button>
-                        <button className="px-4 py-2 rounded-full border border-white/5 text-on-surface-variant text-[0.625rem] uppercase tracking-widest hover:text-on-surface transition-all">
+                        <button className="px-4 py-2 min-h-[44px] rounded-full border border-white/5 text-on-surface-variant text-[0.625rem] uppercase tracking-widest hover:text-on-surface transition-all">
                             Dismiss
                         </button>
                     </div>
                 </div>
 
                 {/* Vibe Status Panel */}
-                <div className="glass-panel p-8 rounded-xl border border-white/5 space-y-6">
+                <div className="glass-panel p-5 md:p-8 rounded-xl border border-white/5 space-y-6">
                     <div className="flex justify-between items-end">
                         <div className="space-y-1">
                             <span className="text-on-surface-variant text-[0.625rem] uppercase tracking-widest">
