@@ -29,7 +29,7 @@ export default function TopBar({ onMenuToggle }: TopBarProps) {
     }, []);
 
     return (
-        <header className="fixed top-0 w-full h-20 md:h-24 flex justify-between items-center px-4 md:px-8 lg:px-16 z-40 bg-transparent font-sans tracking-[0.02em] font-light">
+        <header className="fixed top-0 w-full h-20 md:h-24 flex justify-between items-center px-4 md:pl-32 md:pr-8 lg:pr-16 z-40 bg-transparent font-sans tracking-[0.02em] font-light">
             {/* Left: Hamburger (mobile) + Logo */}
             <div className="flex items-center gap-3">
                 {/* Hamburger — mobile only */}
