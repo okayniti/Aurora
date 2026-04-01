@@ -4,7 +4,11 @@ import { useState, useEffect, useMemo } from "react";
 import { useUser } from "@/lib/UserContext";
 import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
-import { Skeleton, MetricSkeleton } from "@/components/ui/Skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { Spotlight } from "@/components/ui/Spotlight";
+import { ShimmerButton } from "@/components/ui/ShimmerButton";
+import { CardTilt } from "@/components/ui/CardTilt";
+import { TypingPlaceholder } from "@/components/ui/TypingPlaceholder";
 
 // ── Fallback demo data (used when API is unavailable) ────────
 const demoDashboard = {
@@ -85,10 +89,11 @@ function mapTasksToTimeline(tasks: any[]): typeof demoTasks {
 function getActiveTaskName(tasks: any[]): string {
     if (!tasks || tasks.length === 0) return "Architecture";
     const active = tasks.find((t: any) => t.status === "in_progress");
-    if (active) return active.title || "Architecture";
-    const pending = tasks.find((t: any) => t.status === "pending");
-    if (pending) return pending.title || "Architecture";
-    return "Architecture";
+    const name = active?.title || tasks.find((t: any) => t.status === "pending")?.title || "Architecture";
+    // Truncate to max 3 words
+    const words = name.split(" ");
+    if (words.length <= 3) return name;
+    return words.slice(0, 3).join(" ") + "…";
 }
 
 function getCortexStatus(burnoutProb: number): { label: string; color: string } {
@@ -323,6 +328,8 @@ export default function Dashboard() {
                 CENTER: Dynamic Intelligence Hub
                ══════════════════════════════════════════════ */}
             <section className="flex-1 flex flex-col items-center justify-center relative min-h-[400px] lg:min-h-[614px] order-1 lg:order-2">
+                {/* Ambient spotlight follows mouse */}
+                <Spotlight color="rgba(204, 151, 255, 0.06)" size={700} />
                 {/* Animated Energy Wave SVG */}
                 <div className="absolute inset-0 flex items-center justify-center overflow-hidden -z-10 opacity-30">
                     <svg className="w-full h-full" viewBox="0 0 800 400">
@@ -433,6 +440,7 @@ export default function Dashboard() {
                         </div>
                     </div>
                 ) : (
+                    <CardTilt>
                     <div className="glass-panel p-5 md:p-8 rounded-xl border border-primary/10 shadow-xl space-y-4">
                         <div className="flex items-center gap-3 text-primary">
                             <span className="material-symbols-outlined text-lg">psychology</span>
@@ -449,14 +457,11 @@ export default function Dashboard() {
                             {neuralMessage}
                         </p>
                         <div className="flex gap-4 pt-4">
-                            <button className="px-4 py-2 min-h-[44px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-[0.625rem] uppercase tracking-widest transition-all">
-                                Proceed
-                            </button>
-                            <button className="px-4 py-2 min-h-[44px] rounded-full border border-white/5 text-on-surface-variant text-[0.625rem] uppercase tracking-widest hover:text-on-surface transition-all">
-                                Dismiss
-                            </button>
+                            <ShimmerButton variant="primary">Proceed</ShimmerButton>
+                            <ShimmerButton variant="ghost">Dismiss</ShimmerButton>
                         </div>
                     </div>
+                    </CardTilt>
                 )}
 
                 {/* Vibe Status Panel — real burnout data */}
@@ -469,6 +474,7 @@ export default function Dashboard() {
                         </div>
                     </div>
                 ) : (
+                    <CardTilt>
                     <div className="glass-panel p-5 md:p-8 rounded-xl border border-white/5 space-y-6">
                         <div className="flex justify-between items-end">
                             <div className="space-y-1">
@@ -506,6 +512,7 @@ export default function Dashboard() {
                             </div>
                         </div>
                     </div>
+                    </CardTilt>
                 )}
 
                 {/* Conversational AI Input */}
@@ -523,16 +530,14 @@ export default function Dashboard() {
                             Ready when you are. The environment has been optimized for deep work.
                         </div>
                     </div>
-                    <div className="relative">
-                        <input
-                            className="w-full bg-surface-container-lowest/40 border-0 border-b-2 border-white/10 focus:border-primary focus:shadow-[0_2px_12px_rgba(204,151,255,0.25)] text-sm py-4 px-0 placeholder:text-on-surface-variant/40 transition-all duration-300 text-on-surface outline-none"
-                            placeholder="Speak to Aurora..."
-                            type="text"
-                        />
-                        <button className="absolute right-0 top-1/2 -translate-y-1/2 text-primary/60 hover:text-primary transition-colors">
-                            <span className="material-symbols-outlined">send</span>
-                        </button>
-                    </div>
+                    <TypingPlaceholder
+                        phrases={[
+                            "Speak to Aurora...",
+                            "How is my energy today?",
+                            "Schedule my deep work...",
+                            "What is my burnout risk?",
+                        ]}
+                    />
                 </div>
             </section>
         </div>

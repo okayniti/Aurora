@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { AnimatedGradientText } from "@/components/ui/AnimatedGradientText";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -42,8 +43,8 @@ export default function TopBar({ onMenuToggle }: TopBarProps) {
                 </button>
 
                 {/* Logo */}
-                <div className="text-2xl md:text-3xl font-black tracking-tighter text-primary drop-shadow-[0_0_15px_rgba(204,151,255,0.4)]">
-                    AURORA
+                <div className="text-2xl md:text-3xl font-black tracking-tighter drop-shadow-[0_0_15px_rgba(204,151,255,0.4)]">
+                    <AnimatedGradientText>AURORA</AnimatedGradientText>
                 </div>
             </div>
 

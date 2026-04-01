@@ -86,12 +86,12 @@ export default function AnalyticsPage() {
             {isDemo && <ErrorBanner message="Using simulated analytics" />}
 
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                <MetricCard title="Deep Work" value={`${d.deep_work_hours}h`} icon="🧠" color="cyan" subtitle="today" />
-                <MetricCard title="Identity Align" value={`${d.identity_alignment_avg}%`} icon="🧬" color="green" />
-                <MetricCard title="Burnout Score" value={d.burnout_trend.toFixed(2)} icon="🛡" color="rose" />
-                <MetricCard title="RL Efficiency" value={`${Math.round(d.rl_strategy_efficiency * 100)}%`} icon="🤖" color="violet" />
+                <MetricCard title="Deep Work" value={`${d.deep_work_hours}h`} animateValue={d.deep_work_hours} animateDecimals={1} icon="🧠" color="cyan" subtitle="today" />
+                <MetricCard title="Identity Align" value={`${d.identity_alignment_avg}%`} animateValue={d.identity_alignment_avg} animateDecimals={1} icon="🧬" color="green" />
+                <MetricCard title="Burnout Score" value={d.burnout_trend.toFixed(2)} animateValue={d.burnout_trend} animateDecimals={2} icon="🛡" color="rose" />
+                <MetricCard title="RL Efficiency" value={`${Math.round(d.rl_strategy_efficiency * 100)}%`} animateValue={Math.round(d.rl_strategy_efficiency * 100)} icon="🤖" color="violet" />
                 <MetricCard title="Task Rate" value={`${d.tasks_completed}/${d.tasks_total}`} icon="📊" color="green" subtitle={`${Math.round((d.tasks_completed / Math.max(d.tasks_total, 1)) * 100)}%`} />
-                <MetricCard title="Decision Fatigue" value={d.decision_fatigue_index.toFixed(2)} icon="⚡" color="amber" subtitle={d.decision_fatigue_index > 0.6 ? "high" : "moderate"} />
+                <MetricCard title="Decision Fatigue" value={d.decision_fatigue_index.toFixed(2)} animateValue={d.decision_fatigue_index} animateDecimals={2} icon="⚡" color="amber" subtitle={d.decision_fatigue_index > 0.6 ? "high" : "moderate"} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import MetricCard from "@/components/layout/MetricCard";
 import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { BackgroundBeams } from "@/components/ui/BackgroundBeams";
 
 const demoAlignments = [
     { task: "Implement LSTM Energy Model", score: 92, color: "#34d399" },
@@ -78,7 +79,8 @@ export default function IdentityPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 glass-panel p-6 rounded-xl border border-white/5">
+                <div className="lg:col-span-2 glass-panel p-6 rounded-xl border border-white/5 relative overflow-hidden">
+                    <BackgroundBeams />
                     <h2 className="section-title mb-1">Task-Identity Alignment Scores</h2>
                     <p className="text-xs text-on-surface-variant mb-6">Cosine similarity between task embeddings and identity embedding</p>
                     <ResponsiveContainer width="100%" height={380}>

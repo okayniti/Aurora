@@ -203,6 +203,17 @@
   100% { background-position: 200% 0; }
 }
 
+@keyframes shimmerSweep {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 /* ── Task 2: Timeline border glow pulse ──────────── */
 @keyframes borderGlowPulse {
   0%, 100% { border-color: rgba(58, 223, 250, 0.3); box-shadow: -2px 0 12px rgba(58, 223, 250, 0.1); }

@@ -105,10 +105,10 @@ export default function BurnoutPage() {
             {isDemo && <ErrorBanner message="Using simulated burnout data" />}
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <MetricCard title="Burnout Risk" value={latest.toFixed(3)} icon="🛡" color={riskColor as any} subtitle={riskLevel} />
-                <MetricCard title="Sleep Trend" value="6.8h" icon="😴" color="cyan" subtitle="below optimal" />
-                <MetricCard title="Deep Work Streak" value="3.5h" icon="🧠" color="violet" trend="up" trendValue="today" />
-                <MetricCard title="Cognitive Load" value="14.2" icon="⚡" color="amber" subtitle="elevated" />
+                <MetricCard title="Burnout Risk" value={latest.toFixed(3)} animateValue={latest} animateDecimals={3} icon="🛡" color={riskColor as any} subtitle={riskLevel} />
+                <MetricCard title="Sleep Trend" value="6.8h" animateValue={6.8} animateDecimals={1} icon="😴" color="cyan" subtitle="below optimal" />
+                <MetricCard title="Deep Work Streak" value="3.5h" animateValue={3.5} animateDecimals={1} icon="🧠" color="violet" trend="up" trendValue="today" />
+                <MetricCard title="Cognitive Load" value="14.2" animateValue={14.2} animateDecimals={1} icon="⚡" color="amber" subtitle="elevated" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
