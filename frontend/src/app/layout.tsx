@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ClientShell from "@/components/layout/ClientShell";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
     title: "AURORA — Dynamic Intelligence Hub",
@@ -27,7 +28,9 @@ export default function RootLayout({
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
             </head>
             <body className="min-h-screen selection:bg-primary/30 selection:text-primary">
-                <ClientShell>{children}</ClientShell>
+                <Providers>
+                    <ClientShell>{children}</ClientShell>
+                </Providers>
             </body>
         </html>
     );

@@ -1,5 +1,6 @@
 "use client";
 
+import React, { memo } from "react";
 import { NumberTicker } from "@/components/ui/NumberTicker";
 
 interface MetricCardProps {
@@ -10,9 +11,7 @@ interface MetricCardProps {
     subtitle?: string;
     trend?: "up" | "down" | "flat";
     trendValue?: string;
-    /** If provided, the numeric part of 'value' animates from 0 to this number */
     animateValue?: number;
-    /** Decimal places for animated value */
     animateDecimals?: number;
 }
 
@@ -28,7 +27,7 @@ const colorMap: Record<string, string> = {
     error: "text-error",
 };
 
-export default function MetricCard({
+export default memo(function MetricCard({
     title,
     value,
     icon,
@@ -41,10 +40,8 @@ export default function MetricCard({
 }: MetricCardProps) {
     const valueColor = colorMap[color] || "text-primary";
 
-    // Parse prefix/suffix from value string for animated mode
     let displayValue: React.ReactNode = value;
     if (animateValue !== undefined) {
-        // Extract non-numeric prefix/suffix: e.g. "73.5%" → prefix="" suffix="%"
         const match = value.match(/^([^\d]*)([\d.]+)(.*)$/);
         const prefix = match?.[1] || "";
         const suffix = match?.[3] || "";
@@ -83,4 +80,4 @@ export default function MetricCard({
             )}
         </div>
     );
-}
+});

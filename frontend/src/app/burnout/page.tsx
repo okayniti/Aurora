@@ -5,10 +5,23 @@ import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
 import MetricCard from "@/components/layout/MetricCard";
 import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
-import {
-    LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-    Tooltip, ResponsiveContainer, Cell, PieChart, Pie,
-} from "recharts";
+import dynamic from "next/dynamic";
+import { ChartSkeleton } from "@/components/ui/Skeleton";
+
+const BurnoutTrendChart = dynamic(() => import("@/components/charts/BurnoutTrendChart"), {
+    ssr: false,
+    loading: () => <ChartSkeleton height="h-[280px]" />
+});
+
+const BurnoutFeatureChart = dynamic(() => import("@/components/charts/BurnoutFeatureChart"), {
+    ssr: false,
+    loading: () => <ChartSkeleton height="h-[280px]" />
+});
+
+const BurnoutDistributionChart = dynamic(() => import("@/components/charts/BurnoutDistributionChart"), {
+    ssr: false,
+    loading: () => <div className="h-[200px] w-[160px] animate-pulse bg-surface-container rounded-full" />
+});
 
 const demoTrend = Array.from({ length: 30 }, (_, i) => ({
     day: i + 1,
@@ -23,21 +36,7 @@ const demoFeatures = [
     { name: "Energy Variance", value: 0.10, color: "#cc97ff" },
 ];
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload?.length) {
-        return (
-            <div className="glass-panel p-3 text-xs border border-outline rounded-lg">
-                <p className="text-on-surface mb-1 font-medium">{label ? `Day ${label}` : payload[0]?.name}</p>
-                {payload.map((p: any, i: number) => (
-                    <p key={i} style={{ color: p.fill || p.color }} className="font-mono">
-                        {p.name}: {typeof p.value === "number" ? p.value.toFixed(3) : p.value}
-                    </p>
-                ))}
-            </div>
-        );
-    }
-    return null;
-};
+// CustomTooltip moved out
 
 export default function BurnoutPage() {
     const { userId } = useUser();
@@ -54,7 +53,8 @@ export default function BurnoutPage() {
             }));
         },
         demoTrend,
-        [userId]
+        [userId],
+        { staleTime: 30000 }
     );
 
     const { data: featureData } = useApi(
@@ -69,7 +69,8 @@ export default function BurnoutPage() {
             }));
         },
         demoFeatures,
-        [userId]
+        [userId],
+        { staleTime: 30000 }
     );
 
     const isDemo = !!error;
@@ -115,34 +116,13 @@ export default function BurnoutPage() {
                 <div className="glass-panel p-6 rounded-xl border border-white/5">
                     <h2 className="section-title mb-1">30-Day Burnout Trend</h2>
                     <p className="text-xs text-on-surface-variant mb-4">Burnout probability over time · Threshold at 0.5</p>
-                    <ResponsiveContainer width="100%" height={280}>
-                        <LineChart data={trendData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" />
-                            <XAxis dataKey="day" stroke="#44484e" fontSize={10} />
-                            <YAxis domain={[0, 1]} stroke="#44484e" fontSize={10} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Line type="monotone" dataKey="probability" stroke="#ff6e84" strokeWidth={2} dot={false} />
-                            <Line type="monotone" dataKey={() => 0.5} stroke="#44484e" strokeDasharray="5 5" dot={false} strokeWidth={1} />
-                        </LineChart>
-                    </ResponsiveContainer>
+                    <BurnoutTrendChart data={trendData} />
                 </div>
 
                 <div className="glass-panel p-6 rounded-xl border border-white/5">
                     <h2 className="section-title mb-1">Feature Importance (SHAP)</h2>
                     <p className="text-xs text-on-surface-variant mb-4">Explainable contribution to burnout prediction</p>
-                    <ResponsiveContainer width="100%" height={280}>
-                        <BarChart data={featureData} layout="vertical">
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" horizontal={false} />
-                            <XAxis type="number" domain={[0, 0.4]} stroke="#44484e" fontSize={10} />
-                            <YAxis type="category" dataKey="name" width={120} stroke="#44484e" fontSize={11} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Bar dataKey="value" radius={[0, 6, 6, 0]} name="SHAP Value">
-                                {(featureData || demoFeatures).map((entry: any, i: number) => (
-                                    <Cell key={i} fill={entry.color} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
+                    <BurnoutFeatureChart data={featureData} demoFeatures={demoFeatures} />
                 </div>
             </div>
 
@@ -150,16 +130,7 @@ export default function BurnoutPage() {
                 <h2 className="section-title mb-1">Risk Level Distribution (Past 30 Days)</h2>
                 <p className="text-xs text-on-surface-variant mb-4">Count of days at each risk level</p>
                 <div className="flex items-center gap-8">
-                    <ResponsiveContainer width="40%" height={200}>
-                        <PieChart>
-                            <Pie data={riskDist} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3}>
-                                {riskDist.map((entry: any, i: number) => (
-                                    <Cell key={i} fill={entry.fill} />
-                                ))}
-                            </Pie>
-                            <Tooltip content={<CustomTooltip />} />
-                        </PieChart>
-                    </ResponsiveContainer>
+                    <BurnoutDistributionChart data={riskDist} />
                     <div className="flex-1 space-y-3">
                         {riskDist.map((item: any) => (
                             <div key={item.name} className="flex items-center justify-between">

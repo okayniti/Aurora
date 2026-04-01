@@ -6,8 +6,14 @@ import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
 import MetricCard from "@/components/layout/MetricCard";
 import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { BackgroundBeams } from "@/components/ui/BackgroundBeams";
+import dynamic from "next/dynamic";
+import { ChartSkeleton } from "@/components/ui/Skeleton";
+
+const IdentityAlignmentChart = dynamic(() => import("@/components/charts/IdentityAlignmentChart"), {
+    ssr: false,
+    loading: () => <ChartSkeleton height="h-[380px]" />
+});
 
 const demoAlignments = [
     { task: "Implement LSTM Energy Model", score: 92, color: "#34d399" },
@@ -24,18 +30,7 @@ const demoAlignments = [
 
 const demoIdentity = `I am a disciplined machine learning engineer who values deep work, continuous learning, and building impactful AI systems. I prioritize research, code quality, and long-term career growth over short-term gains.`;
 
-const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload?.length) {
-        return (
-            <div className="glass-panel p-3 text-xs border border-outline rounded-lg">
-                <p className="text-on-surface font-medium">{payload[0]?.payload?.task}</p>
-                <p className="text-primary font-mono mt-1">Alignment: {payload[0]?.value}%</p>
-            </div>
-        );
-    }
-    return null;
-};
-
+// CustomTooltip moved
 export default function IdentityPage() {
     const { userId } = useUser();
     const [identityText, setIdentityText] = useState(demoIdentity);
@@ -83,19 +78,7 @@ export default function IdentityPage() {
                     <BackgroundBeams />
                     <h2 className="section-title mb-1">Task-Identity Alignment Scores</h2>
                     <p className="text-xs text-on-surface-variant mb-6">Cosine similarity between task embeddings and identity embedding</p>
-                    <ResponsiveContainer width="100%" height={380}>
-                        <BarChart data={(alignments || demoAlignments).sort((a: any, b: any) => b.score - a.score)}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" horizontal={false} />
-                            <XAxis dataKey="task" stroke="#44484e" fontSize={9} angle={-20} textAnchor="end" height={70} interval={0} />
-                            <YAxis domain={[0, 100]} stroke="#44484e" fontSize={10} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Bar dataKey="score" radius={[4, 4, 0, 0]} name="Alignment %">
-                                {(alignments || demoAlignments).sort((a: any, b: any) => b.score - a.score).map((entry: any, i: number) => (
-                                    <Cell key={i} fill={entry.color} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
+                    <IdentityAlignmentChart data={(alignments || demoAlignments).sort((a: any, b: any) => b.score - a.score)} />
                 </div>
 
                 <div className="glass-panel p-6 rounded-xl border border-white/5">

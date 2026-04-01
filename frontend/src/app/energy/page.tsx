@@ -6,10 +6,18 @@ import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
 import MetricCard from "@/components/layout/MetricCard";
 import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
-import {
-    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-    ResponsiveContainer, LineChart, Line,
-} from "recharts";
+import dynamic from "next/dynamic";
+import { ChartSkeleton } from "@/components/ui/Skeleton";
+
+const EnergyForecastChart = dynamic(() => import("@/components/charts/EnergyForecastChart"), {
+    ssr: false,
+    loading: () => <ChartSkeleton height="h-[350px]" />
+});
+
+const EnergyWeeklyChart = dynamic(() => import("@/components/charts/EnergyWeeklyChart"), {
+    ssr: false,
+    loading: () => <ChartSkeleton height="h-[250px]" />
+});
 
 const demoHourly = Array.from({ length: 24 }, (_, i) => {
     const base = [3, 2.5, 2, 1.5, 1, 1.5, 3, 5, 7, 8, 8.5, 8, 7, 6, 5.5, 6.5, 7, 7.5, 7, 6.5, 6, 5, 4, 3.5];
@@ -30,22 +38,7 @@ const demoWeekly = Array.from({ length: 7 }, (_, i) => {
     };
 });
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload?.length) {
-        return (
-            <div className="glass-panel p-3 text-xs border border-outline rounded-lg">
-                <p className="text-on-surface mb-1 font-medium">{label}</p>
-                {payload.map((p: any, i: number) => (
-                    <p key={i} style={{ color: p.color }} className="font-mono">
-                        {p.name}: {p.value}
-                    </p>
-                ))}
-            </div>
-        );
-    }
-    return null;
-};
-
+// (CustomTooltip moved to individual charts)
 export default function EnergyPage() {
     const { userId } = useUser();
     const [showLog, setShowLog] = useState(false);
@@ -71,7 +64,8 @@ export default function EnergyPage() {
             })) || demoHourly;
         },
         demoHourly,
-        [userId]
+        [userId],
+        { staleTime: 30000 }
     );
 
     const { data: weeklyData } = useApi(
@@ -88,7 +82,8 @@ export default function EnergyPage() {
             }));
         },
         demoWeekly,
-        [userId]
+        [userId],
+        { staleTime: 30000 }
     );
 
     const isDemo = !!error;
@@ -235,42 +230,13 @@ export default function EnergyPage() {
             <div className="glass-panel p-6 rounded-xl border border-white/5 animate-fade-in-up">
                 <h2 className="section-title mb-1">24-Hour Energy Forecast</h2>
                 <p className="text-xs text-on-surface-variant mb-6">Predicted vs actual · Circadian rhythm + behavioral modifiers</p>
-                <ResponsiveContainer width="100%" height={350}>
-                    <AreaChart data={hourlyData}>
-                        <defs>
-                            <linearGradient id="epred" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#9093ff" stopOpacity={0.4} />
-                                <stop offset="100%" stopColor="#9093ff" stopOpacity={0} />
-                            </linearGradient>
-                            <linearGradient id="eact" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#3adffa" stopOpacity={0.4} />
-                                <stop offset="100%" stopColor="#3adffa" stopOpacity={0} />
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" />
-                        <XAxis dataKey="hour" stroke="#44484e" fontSize={10} tickLine={false} />
-                        <YAxis domain={[0, 10]} stroke="#44484e" fontSize={10} tickLine={false} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Area type="monotone" dataKey="predicted" stroke="#9093ff" strokeWidth={2} fill="url(#epred)" name="Predicted" />
-                        <Area type="monotone" dataKey="actual" stroke="#3adffa" strokeWidth={2} fill="url(#eact)" name="Actual" connectNulls={false} />
-                    </AreaChart>
-                </ResponsiveContainer>
+                <EnergyForecastChart data={hourlyData} />
             </div>
 
             <div className="glass-panel p-6 rounded-xl border border-white/5 animate-fade-in-up">
                 <h2 className="section-title mb-1">Weekly Energy Trends</h2>
                 <p className="text-xs text-on-surface-variant mb-6">Average, peak, and low energy levels by day</p>
-                <ResponsiveContainer width="100%" height={250}>
-                    <LineChart data={weeklyData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" />
-                        <XAxis dataKey="day" stroke="#44484e" fontSize={11} />
-                        <YAxis domain={[0, 10]} stroke="#44484e" fontSize={10} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Line type="monotone" dataKey="peakEnergy" stroke="#34d399" strokeWidth={2} dot={{ r: 3 }} name="Peak" />
-                        <Line type="monotone" dataKey="avgEnergy" stroke="#9093ff" strokeWidth={2} dot={{ r: 3 }} name="Average" />
-                        <Line type="monotone" dataKey="lowEnergy" stroke="#ff6e84" strokeWidth={2} dot={{ r: 3 }} name="Low" />
-                    </LineChart>
-                </ResponsiveContainer>
+                <EnergyWeeklyChart data={weeklyData} />
             </div>
         </div>
     );

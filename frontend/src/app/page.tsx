@@ -5,10 +5,15 @@ import { useUser } from "@/lib/UserContext";
 import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { Spotlight } from "@/components/ui/Spotlight";
 import { ShimmerButton } from "@/components/ui/ShimmerButton";
-import { CardTilt } from "@/components/ui/CardTilt";
 import { TypingPlaceholder } from "@/components/ui/TypingPlaceholder";
+import { TaskTimelineItem } from "@/components/layout/TaskTimelineItem";
+import { InsightCard } from "@/components/layout/InsightCard";
+import dynamic from "next/dynamic";
+
+const Spotlight = dynamic(() => import("@/components/ui/Spotlight").then(m => m.Spotlight), { ssr: false });
+const CardTilt = dynamic(() => import("@/components/ui/CardTilt").then(m => m.CardTilt), { ssr: false });
+const FocusWave = dynamic(() => import("@/components/ui/FocusWave"), { ssr: false });
 
 // ── Fallback demo data (used when API is unavailable) ────────
 const demoDashboard = {
@@ -257,68 +262,7 @@ export default function Dashboard() {
                         </div>
                     ) : (
                         timelineTasks.map((task, i) => (
-                            <div
-                                key={i}
-                                className={`group relative pl-12 transition-all duration-500 ${
-                                    task.status === "upcoming"
-                                        ? "opacity-40 hover:opacity-80"
-                                        : ""
-                                }`}
-                            >
-                                {/* Left border indicator */}
-                                {task.status === "active" ? (
-                                    <div className="absolute left-0 top-0 bottom-0 w-[2px] rounded-full animate-border-glow border-l-2 border-secondary" />
-                                ) : task.status === "done" ? (
-                                    <div className="absolute left-0 top-0 bottom-0 w-[2px] rounded-full bg-primary/30" />
-                                ) : (
-                                    <div className="absolute left-0 top-0 bottom-0 w-[2px] rounded-full bg-outline-variant/20" />
-                                )}
-
-                                {/* Node dot */}
-                                {task.status === "active" ? (
-                                    <div className="absolute left-3 -top-1 w-6 h-6 rounded-full border-2 border-secondary flex items-center justify-center animate-pulse z-10 bg-background">
-                                        <div className="w-2 h-2 rounded-full bg-secondary" />
-                                    </div>
-                                ) : task.status === "done" ? (
-                                    <div className="absolute left-3.5 top-1 w-5 h-5 rounded-full bg-primary/20 border border-primary flex items-center justify-center z-10">
-                                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                                            <path d="M2 5L4.5 7.5L8 3" stroke="#cc97ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                    </div>
-                                ) : (
-                                    <div className="absolute left-4 top-2 w-4 h-4 rounded-full bg-outline-variant/40 z-10" />
-                                )}
-
-                                {/* Content */}
-                                <div className="flex flex-col gap-1">
-                                    <span
-                                        className={`label-xs ${
-                                            task.status === "active"
-                                                ? "text-secondary"
-                                                : task.status === "done"
-                                                ? "text-primary"
-                                                : "text-on-surface-variant"
-                                        }`}
-                                    >
-                                        {task.status === "done" && "✓ "}
-                                        {task.time}
-                                    </span>
-                                    <h3
-                                        className={`text-on-surface group-hover:text-primary transition-colors ${
-                                            task.status === "active"
-                                                ? "text-xl font-bold"
-                                                : task.status === "done"
-                                                ? "font-medium opacity-70"
-                                                : "font-medium"
-                                        }`}
-                                    >
-                                        {task.title}
-                                    </h3>
-                                    <p className="text-on-surface-variant text-sm leading-relaxed mt-1 opacity-70">
-                                        {task.desc}
-                                    </p>
-                                </div>
-                            </div>
+                            <TaskTimelineItem key={i} task={task} />
                         ))
                     )}
                 </div>
@@ -331,31 +275,7 @@ export default function Dashboard() {
                 {/* Ambient spotlight follows mouse */}
                 <Spotlight color="rgba(204, 151, 255, 0.06)" size={700} />
                 {/* Animated Energy Wave SVG */}
-                <div className="absolute inset-0 flex items-center justify-center overflow-hidden -z-10 opacity-30">
-                    <svg className="w-full h-full" viewBox="0 0 800 400">
-                        <path
-                            className="energy-wave"
-                            d="M0 200 Q 200 100 400 200 T 800 200"
-                            fill="none"
-                            stroke="url(#gradient-energy)"
-                            strokeWidth="4"
-                        >
-                            <animate
-                                attributeName="d"
-                                dur="10s"
-                                repeatCount="indefinite"
-                                values="M0 200 Q 200 100 400 200 T 800 200; M0 200 Q 200 300 400 200 T 800 200; M0 200 Q 200 100 400 200 T 800 200"
-                            />
-                        </path>
-                        <defs>
-                            <linearGradient id="gradient-energy" x1="0%" x2="100%" y1="0%" y2="0%">
-                                <stop offset="0%" style={{ stopColor: "#cc97ff", stopOpacity: 0 }} />
-                                <stop offset="50%" style={{ stopColor: "#3adffa", stopOpacity: 1 }} />
-                                <stop offset="100%" style={{ stopColor: "#9093ff", stopOpacity: 0 }} />
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                </div>
+                <FocusWave />
 
                 {/* Focus Zone */}
                 <div className="relative w-full max-w-2xl text-center space-y-8">
@@ -440,28 +360,7 @@ export default function Dashboard() {
                         </div>
                     </div>
                 ) : (
-                    <CardTilt>
-                    <div className="glass-panel p-5 md:p-8 rounded-xl border border-primary/10 shadow-xl space-y-4">
-                        <div className="flex items-center gap-3 text-primary">
-                            <span className="material-symbols-outlined text-lg">psychology</span>
-                            <span className="label-sm !text-primary !tracking-widest">
-                                Neural Insight
-                            </span>
-                            {burnoutError && (
-                                <button onClick={refetchBurnout} className="ml-auto text-amber-400 text-[10px] px-2 py-1 rounded-full bg-amber-500/10">
-                                    ↻ retry
-                                </button>
-                            )}
-                        </div>
-                        <p className="text-on-surface-variant text-sm leading-relaxed">
-                            {neuralMessage}
-                        </p>
-                        <div className="flex gap-4 pt-4">
-                            <ShimmerButton variant="primary">Proceed</ShimmerButton>
-                            <ShimmerButton variant="ghost">Dismiss</ShimmerButton>
-                        </div>
-                    </div>
-                    </CardTilt>
+                    <InsightCard neuralMessage={neuralMessage} onRetry={refetchBurnout} hasError={!!burnoutError} />
                 )}
 
                 {/* Vibe Status Panel — real burnout data */}

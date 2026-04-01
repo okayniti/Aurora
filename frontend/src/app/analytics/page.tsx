@@ -5,10 +5,23 @@ import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
 import MetricCard from "@/components/layout/MetricCard";
 import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
-import {
-    AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis,
-    CartesianGrid, Tooltip, ResponsiveContainer, Cell,
-} from "recharts";
+import dynamic from "next/dynamic";
+import { ChartSkeleton } from "@/components/ui/Skeleton";
+
+const AnalyticsDeepWorkChart = dynamic(() => import("@/components/charts/AnalyticsDeepWorkChart"), {
+    ssr: false,
+    loading: () => <ChartSkeleton height="h-[260px]" />
+});
+
+const AnalyticsRiskChart = dynamic(() => import("@/components/charts/AnalyticsRiskChart"), {
+    ssr: false,
+    loading: () => <ChartSkeleton height="h-[260px]" />
+});
+
+const AnalyticsCompletionChart = dynamic(() => import("@/components/charts/AnalyticsCompletionChart"), {
+    ssr: false,
+    loading: () => <ChartSkeleton height="h-[250px]" />
+});
 
 const demoDashboard = {
     deep_work_hours: 4.2,
@@ -42,21 +55,7 @@ const demoCompletion = [
     { category: "Review", completed: 4, total: 5, color: "#3adffa" },
 ];
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload?.length) {
-        return (
-            <div className="glass-panel p-3 text-xs border border-outline rounded-lg">
-                <p className="text-on-surface mb-1 font-medium">{label}</p>
-                {payload.map((p: any, i: number) => (
-                    <p key={i} style={{ color: p.color || p.fill }} className="font-mono">
-                        {p.name}: {p.value}
-                    </p>
-                ))}
-            </div>
-        );
-    }
-    return null;
-};
+// CustomTooltip moved
 
 export default function AnalyticsPage() {
     const { userId } = useUser();
@@ -98,59 +97,20 @@ export default function AnalyticsPage() {
                 <div className="glass-panel p-6 rounded-xl border border-white/5">
                     <h2 className="section-title mb-1">Weekly Deep Work & Alignment</h2>
                     <p className="text-xs text-on-surface-variant mb-4">Hours of focused work vs identity alignment trend</p>
-                    <ResponsiveContainer width="100%" height={260}>
-                        <AreaChart data={demoWeeklyDeepWork}>
-                            <defs>
-                                <linearGradient id="dwGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#3adffa" stopOpacity={0.3} />
-                                    <stop offset="100%" stopColor="#3adffa" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" />
-                            <XAxis dataKey="day" stroke="#44484e" fontSize={11} />
-                            <YAxis yAxisId="left" domain={[0, 8]} stroke="#3adffa" fontSize={10} />
-                            <YAxis yAxisId="right" orientation="right" domain={[0, 100]} stroke="#34d399" fontSize={10} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Area yAxisId="left" type="monotone" dataKey="deepWork" stroke="#3adffa" strokeWidth={2} fill="url(#dwGrad)" name="Deep Work (h)" />
-                            <Line yAxisId="right" type="monotone" dataKey="alignment" stroke="#34d399" strokeWidth={2} dot={{ r: 3 }} name="Alignment %" />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                    <AnalyticsDeepWorkChart data={demoWeeklyDeepWork} />
                 </div>
 
                 <div className="glass-panel p-6 rounded-xl border border-white/5">
                     <h2 className="section-title mb-1">Risk Indicators (14 Days)</h2>
                     <p className="text-xs text-on-surface-variant mb-4">Burnout probability and decision fatigue trends</p>
-                    <ResponsiveContainer width="100%" height={260}>
-                        <LineChart data={demoRiskTimeline}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" />
-                            <XAxis dataKey="day" stroke="#44484e" fontSize={10} />
-                            <YAxis domain={[0, 1]} stroke="#44484e" fontSize={10} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Line type="monotone" dataKey="burnout" stroke="#ff6e84" strokeWidth={2} dot={false} name="Burnout Risk" />
-                            <Line type="monotone" dataKey="fatigue" stroke="#fbbf24" strokeWidth={2} dot={false} name="Decision Fatigue" />
-                            <Line type="monotone" dataKey={() => 0.5} stroke="#44484e" strokeDasharray="5 5" strokeWidth={1} dot={false} />
-                        </LineChart>
-                    </ResponsiveContainer>
+                    <AnalyticsRiskChart data={demoRiskTimeline} />
                 </div>
             </div>
 
             <div className="glass-panel p-6 rounded-xl border border-white/5">
                 <h2 className="section-title mb-1">Task Completion by Category</h2>
                 <p className="text-xs text-on-surface-variant mb-6">Completed tasks vs total by work category</p>
-                <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={demoCompletion}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1a1f26" horizontal={false} />
-                        <XAxis dataKey="category" stroke="#44484e" fontSize={11} />
-                        <YAxis stroke="#44484e" fontSize={10} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="total" fill="#1a1f26" radius={[4, 4, 0, 0]} name="Total" />
-                        <Bar dataKey="completed" radius={[4, 4, 0, 0]} name="Completed">
-                            {demoCompletion.map((entry, i) => (
-                                <Cell key={i} fill={entry.color} />
-                            ))}
-                        </Bar>
-                    </BarChart>
-                </ResponsiveContainer>
+                    <AnalyticsCompletionChart data={demoCompletion} />
             </div>
         </div>
     );
