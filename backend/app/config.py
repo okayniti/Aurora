@@ -21,7 +21,14 @@ class Settings(BaseSettings):
     DATABASE_ECHO: bool = False
 
     # CORS
+    FRONTEND_URL: Optional[str] = None
     CORS_ORIGINS: str = "http://localhost:3000"
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        if self.FRONTEND_URL:
+            return [self.FRONTEND_URL]
+        return self.CORS_ORIGINS.split(",")
 
     # ML Models
     ENERGY_MODEL_PATH: str = "models/energy_model.pt"

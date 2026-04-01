@@ -2,7 +2,7 @@
 AURORA API — Task Endpoints
 """
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
@@ -10,12 +10,15 @@ from app.dependencies import get_db
 from app.database.schemas import TaskCreate, TaskUpdate, TaskStatusUpdate
 from app.services.task_service import TaskService
 
+from app.utils.limiter import limiter
+
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 service = TaskService()
 
 
 @router.post("/")
-async def create_task(data: TaskCreate, db: AsyncSession = Depends(get_db)):
+@limiter.limit("20/minute")
+async def create_task(request: Request, data: TaskCreate, db: AsyncSession = Depends(get_db)):
     """Create a new task."""
     return await service.create_task(
         db, data.user_id, data.title, data.description,

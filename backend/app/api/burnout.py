@@ -2,13 +2,15 @@
 AURORA API — Burnout Endpoints
 """
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
 from app.dependencies import get_db
 from app.database.schemas import BurnoutSnapshotCreate
 from app.services.burnout_service import BurnoutService
+
+from app.utils.limiter import limiter
 
 router = APIRouter(prefix="/burnout", tags=["Burnout Risk"])
 service = BurnoutService()
@@ -40,8 +42,9 @@ async def get_burnout_trend(
 
 
 @router.post("/snapshot")
+@limiter.limit("20/minute")
 async def record_burnout_snapshot(
-    data: BurnoutSnapshotCreate, db: AsyncSession = Depends(get_db)
+    request: Request, data: BurnoutSnapshotCreate, db: AsyncSession = Depends(get_db)
 ):
     """Record burnout indicator values."""
     return await service.get_risk(

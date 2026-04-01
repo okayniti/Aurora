@@ -2,7 +2,7 @@
 AURORA API — Energy Endpoints
 """
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from datetime import date
@@ -10,6 +10,8 @@ from datetime import date
 from app.dependencies import get_db
 from app.database.schemas import EnergyLogCreate, EnergyForecastResponse
 from app.services.energy_service import EnergyService
+
+from app.utils.limiter import limiter
 
 router = APIRouter(prefix="/energy", tags=["Energy Forecasting"])
 service = EnergyService()
@@ -22,7 +24,8 @@ async def get_energy_forecast(user_id: UUID, db: AsyncSession = Depends(get_db))
 
 
 @router.post("/log")
-async def log_energy(data: EnergyLogCreate, db: AsyncSession = Depends(get_db)):
+@limiter.limit("20/minute")
+async def log_energy(request: Request, data: EnergyLogCreate, db: AsyncSession = Depends(get_db)):
     """Log an actual energy level reading."""
     return await service.log_energy(
         db, data.user_id, data.energy_level,

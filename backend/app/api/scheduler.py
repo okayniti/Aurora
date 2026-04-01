@@ -2,7 +2,7 @@
 AURORA API — Scheduler Endpoints
 """
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from datetime import date
@@ -11,18 +11,21 @@ from app.dependencies import get_db
 from app.database.schemas import ScheduleOptimizeRequest, SchedulerFeedback
 from app.services.scheduler_service import SchedulerService
 
+from app.utils.limiter import limiter
+
 router = APIRouter(prefix="/scheduler", tags=["RL Scheduler"])
 service = SchedulerService()
 
 
 @router.post("/optimize/{user_id}")
+@limiter.limit("20/minute")
 async def optimize_schedule(
-    user_id: UUID,
-    request: ScheduleOptimizeRequest = ScheduleOptimizeRequest(),
+    request: Request, user_id: UUID,
+    data: ScheduleOptimizeRequest = ScheduleOptimizeRequest(),
     db: AsyncSession = Depends(get_db),
 ):
     """Run RL agent to generate optimized daily schedule."""
-    return await service.optimize_schedule(db, user_id, request.date)
+    return await service.optimize_schedule(db, user_id, data.date)
 
 
 @router.get("/schedule/{user_id}")
@@ -34,7 +37,8 @@ async def get_schedule(
 
 
 @router.post("/feedback")
-async def submit_feedback(data: SchedulerFeedback, db: AsyncSession = Depends(get_db)):
+@limiter.limit("20/minute")
+async def submit_feedback(request: Request, data: SchedulerFeedback, db: AsyncSession = Depends(get_db)):
     """Submit reward signal (task completed or missed)."""
     from app.database.models import ScheduleEntry
     entry = await db.get(ScheduleEntry, data.schedule_entry_id)

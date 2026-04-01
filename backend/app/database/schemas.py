@@ -31,7 +31,7 @@ class UserResponse(BaseModel):
 
 class EnergyLogCreate(BaseModel):
     user_id: UUID
-    energy_level: float = Field(..., ge=0, le=10)
+    energy_level: float = Field(..., ge=0, le=100)
     sleep_hours: Optional[float] = None
     caffeine_intake: Optional[int] = None
     exercise_mins: Optional[int] = None
@@ -70,7 +70,7 @@ class TaskCreate(BaseModel):
     title: str
     description: Optional[str] = None
     difficulty: Optional[float] = Field(None, ge=0, le=10)
-    estimated_minutes: Optional[int] = None
+    estimated_minutes: Optional[int] = Field(None, gt=0)
     priority: int = Field(3, ge=1, le=5)
     category: Optional[str] = None
     scheduled_start: Optional[datetime] = None
@@ -80,7 +80,7 @@ class TaskUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     difficulty: Optional[float] = Field(None, ge=0, le=10)
-    estimated_minutes: Optional[int] = None
+    estimated_minutes: Optional[int] = Field(None, gt=0)
     priority: Optional[int] = Field(None, ge=1, le=5)
     category: Optional[str] = None
     scheduled_start: Optional[datetime] = None
@@ -88,7 +88,7 @@ class TaskUpdate(BaseModel):
 
 class TaskStatusUpdate(BaseModel):
     status: str = Field(..., pattern="^(pending|in_progress|done|missed)$")
-    actual_minutes: Optional[int] = None
+    actual_minutes: Optional[int] = Field(None, gt=0)
 
 class TaskResponse(BaseModel):
     id: UUID
@@ -115,11 +115,11 @@ class TaskResponse(BaseModel):
 
 class BurnoutSnapshotCreate(BaseModel):
     user_id: UUID
-    sleep_trend: Optional[float] = None
-    deep_work_streak: Optional[int] = None
-    stress_trend: Optional[float] = None
-    energy_variance: Optional[float] = None
-    cognitive_load: Optional[float] = None
+    sleep_trend: Optional[float] = Field(None, ge=0, le=1)
+    deep_work_streak: Optional[int] = Field(None, ge=0)
+    stress_trend: Optional[float] = Field(None, ge=0, le=1)
+    energy_variance: Optional[float] = Field(None, ge=0, le=1)
+    cognitive_load: Optional[float] = Field(None, ge=0, le=1)
 
 class BurnoutRiskResponse(BaseModel):
     user_id: UUID

@@ -2,7 +2,7 @@
 AURORA API — Replanning Endpoints
 """
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
@@ -10,11 +10,14 @@ from app.dependencies import get_db
 from app.database.schemas import ReplanTriggerRequest
 from app.database.models import ReplanEvent
 
+from app.utils.limiter import limiter
+
 router = APIRouter(prefix="/replan", tags=["Dynamic Replanning"])
 
 
 @router.post("/trigger")
-async def trigger_replan(data: ReplanTriggerRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("20/minute")
+async def trigger_replan(request: Request, data: ReplanTriggerRequest, db: AsyncSession = Depends(get_db)):
     """Manually trigger a schedule replan."""
     from app.ml.replanning.engine import ReplanEngine
     from app.ml.energy_model.inference import EnergyPredictor
