@@ -44,10 +44,10 @@ export default function SideNav({ mobileOpen, onClose }: SideNavProps) {
                                 href={item.href}
                                 title={item.label}
                                 className={`
-                                    group relative transition-all duration-500
+                                    group relative outline-none transition-all duration-300 transform
                                     ${isActive
                                         ? "text-primary scale-125"
-                                        : "text-on-surface-variant opacity-40 hover:opacity-100 hover:text-secondary"
+                                        : "text-on-surface-variant opacity-40 hover:opacity-100 hover:text-primary hover:scale-110"
                                     }
                                 `}
                             >
@@ -70,7 +70,7 @@ export default function SideNav({ mobileOpen, onClose }: SideNavProps) {
                 <div className="mt-auto">
                     <Link
                         href="/analytics"
-                        className="text-on-surface-variant opacity-40 hover:opacity-100 hover:text-secondary transition-all duration-300"
+                        className="text-on-surface-variant opacity-40 hover:opacity-100 hover:text-primary hover:scale-110 outline-none transition-all duration-300 inline-block transform"
                     >
                         <span className="material-symbols-outlined">settings</span>
                     </Link>
