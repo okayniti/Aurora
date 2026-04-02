@@ -9,6 +9,7 @@ import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
 import { BackgroundBeams } from "@/components/ui/BackgroundBeams";
 import dynamic from "next/dynamic";
 import { ChartSkeleton } from "@/components/ui/Skeleton";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const IdentityAlignmentChart = dynamic(() => import("@/components/charts/IdentityAlignmentChart"), {
     ssr: false,
@@ -66,7 +67,15 @@ export default function IdentityPage() {
 
             {isDemo && <ErrorBanner message="Using simulated alignment data" />}
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {!isDemo && (!alignments || alignments.length === 0) && (
+                <ScrollReveal className="glass-panel p-12 text-center rounded-xl border border-white/5 flex flex-col items-center gap-4">
+                    <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 animate-pulse">fingerprint</span>
+                    <h3 className="text-lg font-medium text-on-surface">No profile</h3>
+                    <p className="text-sm text-on-surface-variant">Write your identity profile to begin alignment scoring.</p>
+                </ScrollReveal>
+            )}
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
                 <MetricCard title="Avg Alignment" value={`${avgAlignment.toFixed(1)}%`} icon="🧬" color="green" />
                 <MetricCard title="Highly Aligned" value={`${highlyAligned}/${(alignments || demoAlignments).length}`} icon="✓" color="cyan" subtitle="≥70% match" />
                 <MetricCard title="Embedding Model" value="MiniLM" icon="🧠" color="violet" subtitle="384 dims" />
@@ -74,14 +83,14 @@ export default function IdentityPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 glass-panel p-6 rounded-xl border border-white/5 relative overflow-hidden">
+                <ScrollReveal index={0} className="lg:col-span-2 glass-panel p-6 rounded-xl border border-white/5 relative overflow-hidden">
                     <BackgroundBeams />
                     <h2 className="section-title mb-1">Task-Identity Alignment Scores</h2>
                     <p className="text-xs text-on-surface-variant mb-6">Cosine similarity between task embeddings and identity embedding</p>
                     <IdentityAlignmentChart data={(alignments || demoAlignments).sort((a: any, b: any) => b.score - a.score)} />
-                </div>
+                </ScrollReveal>
 
-                <div className="glass-panel p-6 rounded-xl border border-white/5">
+                <ScrollReveal index={1} className="glass-panel p-6 rounded-xl border border-white/5">
                     <h2 className="section-title mb-4">Identity Profile</h2>
                     <div className="space-y-4">
                         <div className="p-4 rounded-xl bg-surface-container-low border border-white/5">
@@ -101,7 +110,7 @@ export default function IdentityPage() {
                                     } catch { }
                                 }
                             }}
-                            className="w-full px-4 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+                            className="w-full px-4 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-medium hover:bg-primary/20 transition-colors outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
                         >
                             Update Identity & Re-align
                         </button>
@@ -118,7 +127,7 @@ export default function IdentityPage() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </ScrollReveal>
             </div>
         </div>
     );

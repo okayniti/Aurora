@@ -7,6 +7,7 @@ import MetricCard from "@/components/layout/MetricCard";
 import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
 import dynamic from "next/dynamic";
 import { ChartSkeleton } from "@/components/ui/Skeleton";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const AnalyticsDeepWorkChart = dynamic(() => import("@/components/charts/AnalyticsDeepWorkChart"), {
     ssr: false,
@@ -84,7 +85,15 @@ export default function AnalyticsPage() {
 
             {isDemo && <ErrorBanner message="Using simulated analytics" />}
 
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            {!isDemo && (!dashboard) && (
+                <ScrollReveal className="glass-panel p-12 text-center rounded-xl border border-white/5 flex flex-col items-center gap-4">
+                    <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 animate-pulse">analytics</span>
+                    <h3 className="text-lg font-medium text-on-surface">No data</h3>
+                    <p className="text-sm text-on-surface-variant">Cognitive analytics will appear after 3 days of tracking.</p>
+                </ScrollReveal>
+            )}
+
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 stagger-children">
                 <MetricCard title="Deep Work" value={`${d.deep_work_hours}h`} animateValue={d.deep_work_hours} animateDecimals={1} icon="🧠" color="cyan" subtitle="today" />
                 <MetricCard title="Identity Align" value={`${d.identity_alignment_avg}%`} animateValue={d.identity_alignment_avg} animateDecimals={1} icon="🧬" color="green" />
                 <MetricCard title="Burnout Score" value={d.burnout_trend.toFixed(2)} animateValue={d.burnout_trend} animateDecimals={2} icon="🛡" color="rose" />
@@ -94,24 +103,24 @@ export default function AnalyticsPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="glass-panel p-6 rounded-xl border border-white/5">
+                <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-white/5">
                     <h2 className="section-title mb-1">Weekly Deep Work & Alignment</h2>
                     <p className="text-xs text-on-surface-variant mb-4">Hours of focused work vs identity alignment trend</p>
                     <AnalyticsDeepWorkChart data={demoWeeklyDeepWork} />
-                </div>
+                </ScrollReveal>
 
-                <div className="glass-panel p-6 rounded-xl border border-white/5">
+                <ScrollReveal index={1} className="glass-panel p-6 rounded-xl border border-white/5">
                     <h2 className="section-title mb-1">Risk Indicators (14 Days)</h2>
                     <p className="text-xs text-on-surface-variant mb-4">Burnout probability and decision fatigue trends</p>
                     <AnalyticsRiskChart data={demoRiskTimeline} />
-                </div>
+                </ScrollReveal>
             </div>
 
-            <div className="glass-panel p-6 rounded-xl border border-white/5">
+            <ScrollReveal index={2} className="glass-panel p-6 rounded-xl border border-white/5">
                 <h2 className="section-title mb-1">Task Completion by Category</h2>
                 <p className="text-xs text-on-surface-variant mb-6">Completed tasks vs total by work category</p>
-                    <AnalyticsCompletionChart data={demoCompletion} />
-            </div>
+                <AnalyticsCompletionChart data={demoCompletion} />
+            </ScrollReveal>
         </div>
     );
 }

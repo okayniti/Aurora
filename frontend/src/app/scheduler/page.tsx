@@ -6,6 +6,7 @@ import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
 import MetricCard from "@/components/layout/MetricCard";
 import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const demoSchedule = [
     { time: "08:00 – 09:30", task: "Implement LSTM Energy Model", difficulty: 8, priority: 5, confidence: 0.87, energy: 7.8, status: "done" },
@@ -110,7 +111,7 @@ export default function SchedulerPage() {
                 </div>
                 <button
                     onClick={() => setShowForm(!showForm)}
-                    className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dim text-on-primary text-sm font-medium transition-all duration-200 hover:shadow-glow flex items-center gap-2 self-start"
+                    className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dim text-on-primary text-sm font-medium transition-all duration-200 hover:shadow-glow flex items-center gap-2 self-start outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
                 >
                     <span className="text-lg">+</span> Add Task
                 </button>
@@ -120,7 +121,7 @@ export default function SchedulerPage() {
 
             {/* Create Task Form */}
             {showForm && (
-                <div className="glass-panel p-6 rounded-xl border border-primary/20 animate-fade-in-up">
+                <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-primary/20">
                     <h2 className="section-title mb-4">Create New Task</h2>
                     <form onSubmit={handleCreateTask} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="sm:col-span-2">
@@ -193,25 +194,31 @@ export default function SchedulerPage() {
                             <button
                                 type="button"
                                 onClick={() => setShowForm(false)}
-                                className="px-4 py-2 rounded-xl text-on-surface-variant hover:text-on-surface text-sm transition-colors"
+                                className="px-4 py-2 rounded-xl text-on-surface-variant hover:text-on-surface text-sm transition-colors outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={saving || !formData.title.trim()}
-                                className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dim disabled:opacity-40 text-on-primary text-sm font-medium transition-all duration-200"
+                                className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dim disabled:opacity-40 text-on-primary text-sm font-medium transition-all duration-200 outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
                             >
                                 {saving ? "Creating..." : "Create Task"}
                             </button>
                         </div>
                     </form>
-                </div>
+                </ScrollReveal>
             )}
 
             {/* Task List */}
-            {(tasks as any[])?.length > 0 && (
-                <div className="glass-panel rounded-xl border border-white/5 overflow-hidden animate-fade-in-up">
+            {(!isDemo && (!tasks || (tasks as any[]).length === 0)) ? (
+                <ScrollReveal index={1} className="glass-panel p-12 rounded-xl border border-white/5 flex flex-col items-center text-center gap-4">
+                    <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 animate-pulse">check_circle</span>
+                    <h3 className="text-lg font-medium text-on-surface">No tasks</h3>
+                    <p className="text-sm text-on-surface-variant">No missions loaded yet. Add your first task above.</p>
+                </ScrollReveal>
+            ) : (tasks as any[])?.length > 0 && (
+                <ScrollReveal index={1} className="glass-panel rounded-xl border border-white/5 overflow-hidden">
                     <div className="p-6 border-b border-white/5">
                         <h2 className="section-title">Your Tasks</h2>
                         <p className="text-xs text-on-surface-variant mt-1">{(tasks as any[]).length} tasks · Click to change status</p>
@@ -255,7 +262,7 @@ export default function SchedulerPage() {
                             </div>
                         ))}
                     </div>
-                </div>
+                </ScrollReveal>
             )}
 
             {/* Metrics */}
@@ -267,7 +274,7 @@ export default function SchedulerPage() {
             </div>
 
             {/* Schedule Table */}
-            <div className="glass-panel rounded-xl border border-white/5 overflow-hidden animate-fade-in-up">
+            <ScrollReveal index={2} className="glass-panel rounded-xl border border-white/5 overflow-hidden">
                 <div className="p-6 border-b border-white/5">
                     <div className="flex items-center justify-between">
                         <div>
@@ -283,7 +290,7 @@ export default function SchedulerPage() {
                                     } catch { }
                                 }
                             }}
-                            className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+                            className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-medium hover:bg-primary/20 transition-colors outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
                         >
                             Re-optimize
                         </button>
@@ -326,10 +333,10 @@ export default function SchedulerPage() {
                         </div>
                     ))}
                 </div>
-            </div>
+            </ScrollReveal>
 
             {/* Reward Function */}
-            <div className="glass-panel p-6 rounded-xl border border-white/5 animate-fade-in-up">
+            <ScrollReveal index={3} className="glass-panel p-6 rounded-xl border border-white/5">
                 <h2 className="section-title mb-4">Reward Function Components</h2>
                 <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                     {[
@@ -346,7 +353,7 @@ export default function SchedulerPage() {
                         </div>
                     ))}
                 </div>
-            </div>
+            </ScrollReveal>
         </div>
     );
 }

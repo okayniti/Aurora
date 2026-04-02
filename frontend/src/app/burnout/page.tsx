@@ -7,6 +7,7 @@ import MetricCard from "@/components/layout/MetricCard";
 import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
 import dynamic from "next/dynamic";
 import { ChartSkeleton } from "@/components/ui/Skeleton";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const BurnoutTrendChart = dynamic(() => import("@/components/charts/BurnoutTrendChart"), {
     ssr: false,
@@ -105,7 +106,15 @@ export default function BurnoutPage() {
 
             {isDemo && <ErrorBanner message="Using simulated burnout data" />}
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {!isDemo && (!trendData || trendData.length === 0) && (
+                <ScrollReveal className="glass-panel p-12 text-center rounded-xl border border-white/5 flex flex-col items-center gap-4">
+                    <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 animate-pulse">monitor_heart</span>
+                    <h3 className="text-lg font-medium text-on-surface">Warming Up</h3>
+                    <p className="text-sm text-on-surface-variant">30-day monitor is warming up. Check back after logging energy data.</p>
+                </ScrollReveal>
+            )}
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
                 <MetricCard title="Burnout Risk" value={latest.toFixed(3)} animateValue={latest} animateDecimals={3} icon="🛡" color={riskColor as any} subtitle={riskLevel} />
                 <MetricCard title="Sleep Trend" value="6.8h" animateValue={6.8} animateDecimals={1} icon="😴" color="cyan" subtitle="below optimal" />
                 <MetricCard title="Deep Work Streak" value="3.5h" animateValue={3.5} animateDecimals={1} icon="🧠" color="violet" trend="up" trendValue="today" />
@@ -113,20 +122,20 @@ export default function BurnoutPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="glass-panel p-6 rounded-xl border border-white/5">
+                <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-white/5">
                     <h2 className="section-title mb-1">30-Day Burnout Trend</h2>
                     <p className="text-xs text-on-surface-variant mb-4">Burnout probability over time · Threshold at 0.5</p>
                     <BurnoutTrendChart data={trendData} />
-                </div>
+                </ScrollReveal>
 
-                <div className="glass-panel p-6 rounded-xl border border-white/5">
+                <ScrollReveal index={1} className="glass-panel p-6 rounded-xl border border-white/5">
                     <h2 className="section-title mb-1">Feature Importance (SHAP)</h2>
                     <p className="text-xs text-on-surface-variant mb-4">Explainable contribution to burnout prediction</p>
                     <BurnoutFeatureChart data={featureData} demoFeatures={demoFeatures} />
-                </div>
+                </ScrollReveal>
             </div>
 
-            <div className="glass-panel p-6 rounded-xl border border-white/5">
+            <ScrollReveal index={2} className="glass-panel p-6 rounded-xl border border-white/5">
                 <h2 className="section-title mb-1">Risk Level Distribution (Past 30 Days)</h2>
                 <p className="text-xs text-on-surface-variant mb-4">Count of days at each risk level</p>
                 <div className="flex items-center gap-8">
@@ -143,7 +152,7 @@ export default function BurnoutPage() {
                         ))}
                     </div>
                 </div>
-            </div>
+            </ScrollReveal>
         </div>
     );
 }

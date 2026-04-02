@@ -8,6 +8,7 @@ import MetricCard from "@/components/layout/MetricCard";
 import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
 import dynamic from "next/dynamic";
 import { ChartSkeleton } from "@/components/ui/Skeleton";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const EnergyForecastChart = dynamic(() => import("@/components/charts/EnergyForecastChart"), {
     ssr: false,
@@ -133,7 +134,7 @@ export default function EnergyPage() {
                 </div>
                 <button
                     onClick={() => setShowLog(!showLog)}
-                    className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dim text-on-primary text-sm font-medium transition-all duration-200 hover:shadow-glow flex items-center gap-2 self-start"
+                    className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dim text-on-primary text-sm font-medium transition-all duration-200 hover:shadow-glow flex items-center gap-2 self-start outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
                 >
                     ⚡ Log Energy
                 </button>
@@ -141,9 +142,18 @@ export default function EnergyPage() {
 
             {isDemo && <ErrorBanner message="Using simulated energy data" />}
 
+            {/* Empty State Overlay */}
+            {!isDemo && (!hourlyData || hourlyData.length === 0) && (
+                <ScrollReveal className="glass-panel p-12 text-center rounded-xl border border-white/5 flex flex-col items-center gap-4">
+                    <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 animate-pulse">battery_0_bar</span>
+                    <h3 className="text-lg font-medium text-on-surface">No logs</h3>
+                    <p className="text-sm text-on-surface-variant">No energy data yet. Log your first reading.</p>
+                </ScrollReveal>
+            )}
+
             {/* Log Energy Form */}
             {showLog && (
-                <div className="glass-panel p-6 rounded-xl border border-secondary/20 animate-fade-in-up">
+                <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-secondary/20">
                     <h2 className="section-title mb-4">How&apos;s Your Energy Right Now?</h2>
                     <form onSubmit={handleLogEnergy} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="sm:col-span-2">
@@ -202,7 +212,7 @@ export default function EnergyPage() {
                             <button
                                 type="submit"
                                 disabled={saving}
-                                className={`w-full px-5 py-2.5 rounded-xl text-on-primary text-sm font-medium transition-all duration-200 ${logSuccess
+                                className={`w-full px-5 py-2.5 rounded-xl text-on-primary text-sm font-medium outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95 transition-all duration-200 ${logSuccess
                                     ? "bg-emerald-600"
                                     : "bg-primary hover:bg-primary-dim"
                                     } disabled:opacity-40`}
@@ -211,7 +221,7 @@ export default function EnergyPage() {
                             </button>
                         </div>
                     </form>
-                </div>
+                </ScrollReveal>
             )}
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
@@ -227,17 +237,17 @@ export default function EnergyPage() {
                 <MetricCard title="Forecast MAE" value="0.82" icon="📊" color="amber" subtitle="good accuracy" />
             </div>
 
-            <div className="glass-panel p-6 rounded-xl border border-white/5 animate-fade-in-up">
+            <ScrollReveal index={1} className="glass-panel p-6 rounded-xl border border-white/5">
                 <h2 className="section-title mb-1">24-Hour Energy Forecast</h2>
                 <p className="text-xs text-on-surface-variant mb-6">Predicted vs actual · Circadian rhythm + behavioral modifiers</p>
                 <EnergyForecastChart data={hourlyData} />
-            </div>
+            </ScrollReveal>
 
-            <div className="glass-panel p-6 rounded-xl border border-white/5 animate-fade-in-up">
+            <ScrollReveal index={2} className="glass-panel p-6 rounded-xl border border-white/5">
                 <h2 className="section-title mb-1">Weekly Energy Trends</h2>
                 <p className="text-xs text-on-surface-variant mb-6">Average, peak, and low energy levels by day</p>
                 <EnergyWeeklyChart data={weeklyData} />
-            </div>
+            </ScrollReveal>
         </div>
     );
 }
