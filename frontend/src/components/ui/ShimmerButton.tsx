@@ -25,7 +25,7 @@ export function ShimmerButton({
     return (
         <button
             onClick={onClick}
-            className={`relative overflow-hidden px-5 py-2.5 min-h-[44px] rounded-full text-[0.625rem] uppercase tracking-widest transition-all duration-300 ${base} ${className}`}
+            className={`relative overflow-hidden px-5 py-2.5 min-h-[44px] rounded-full text-[0.625rem] uppercase tracking-widest transition-all duration-300 outline-none active:scale-95 ${base} ${className}`}
         >
             {/* Shimmer sweep */}
             <span

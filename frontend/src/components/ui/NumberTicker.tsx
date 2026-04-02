@@ -24,26 +24,29 @@ export function NumberTicker({
 }: NumberTickerProps) {
     const [display, setDisplay] = useState(0);
     const ref = useRef<HTMLSpanElement>(null);
-    const hasAnimated = useRef(false);
-
     useEffect(() => {
-        if (hasAnimated.current) {
-            setDisplay(value);
-            return;
-        }
-
+        let isAnimating = false;
+        
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if (entry.isIntersecting && !hasAnimated.current) {
-                    hasAnimated.current = true;
+                if (entry.isIntersecting && !isAnimating) {
+                    isAnimating = true;
+                    // Animate from current display to the new requested value
                     const startTime = performance.now();
+                    const startValue = display;
+                    const diff = value - startValue;
+
                     const animate = (now: number) => {
                         const elapsed = now - startTime;
                         const progress = Math.min(elapsed / duration, 1);
-                        // Ease out cubic
                         const eased = 1 - Math.pow(1 - progress, 3);
-                        setDisplay(eased * value);
-                        if (progress < 1) requestAnimationFrame(animate);
+                        setDisplay(startValue + eased * diff);
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animate);
+                        } else {
+                            isAnimating = false;
+                        }
                     };
                     requestAnimationFrame(animate);
                 }
