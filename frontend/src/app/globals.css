@@ -25,6 +25,11 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  *:focus-visible {
+    outline: 2px solid #cc97ff;
+    outline-offset: 2px;
+  }
+
   ::selection {
     background: rgba(204, 151, 255, 0.3);
     color: #cc97ff;
@@ -55,6 +60,12 @@
     background: rgba(15, 20, 25, 0.4);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .glass-panel:hover {
+    transform: scale(1.01);
+    box-shadow: 0 4px 20px rgba(204, 151, 255, 0.2);
   }
 
   /* ── Aurora Blur Orbs ─────────────────────────── */
