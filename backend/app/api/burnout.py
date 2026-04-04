@@ -18,6 +18,7 @@ service = BurnoutService()
 
 @router.get("/risk/{user_id}")
 async def get_burnout_risk(
+    request: Request,
     user_id: UUID,
     sleep_trend: float = 7.0,
     deep_work_streak: int = 0,
@@ -28,7 +29,7 @@ async def get_burnout_risk(
 ):
     """Get current burnout risk prediction with explainability."""
     return await service.get_risk(
-        db, user_id, sleep_trend, deep_work_streak,
+        db, user_id, request.app.state.burnout_predictor, sleep_trend, deep_work_streak,
         stress_trend, energy_variance, cognitive_load,
     )
 
@@ -48,6 +49,6 @@ async def record_burnout_snapshot(
 ):
     """Record burnout indicator values."""
     return await service.get_risk(
-        db, data.user_id, data.sleep_trend, data.deep_work_streak,
+        db, data.user_id, request.app.state.burnout_predictor, data.sleep_trend, data.deep_work_streak,
         data.stress_trend, data.energy_variance, data.cognitive_load,
     )

@@ -19,6 +19,11 @@ from app.api.router import api_router
 from app.database.connection import init_db
 from app.utils.logger import setup_logger
 
+from app.ml.energy_model.inference import EnergyPredictor
+from app.ml.burnout_model.inference import BurnoutPredictor
+from app.ml.identity_engine.embeddings import EmbeddingService
+from app.ml.rl_scheduler.inference import ScheduleOptimizer
+
 logger = setup_logger("aurora.main")
 
 
@@ -28,6 +33,18 @@ async def lifespan(app: FastAPI):
     logger.info("🌅 AURORA starting up...")
     await init_db()
     logger.info("✅ Database initialized")
+
+    logger.info("🧠 Loading ML Models globally...")
+    app.state.energy_predictor = EnergyPredictor()
+    app.state.burnout_predictor = BurnoutPredictor()
+    
+    embedding_service = EmbeddingService()
+    embedding_service.load_model()
+    app.state.embedding_service = embedding_service
+    
+    app.state.schedule_optimizer = ScheduleOptimizer()
+    logger.info("✅ ML Models loaded into memory")
+
     logger.info(f"🚀 AURORA v{settings.APP_VERSION} is ready")
     yield
     logger.info("🌙 AURORA shutting down...")

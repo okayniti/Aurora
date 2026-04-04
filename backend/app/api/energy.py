@@ -18,9 +18,9 @@ service = EnergyService()
 
 
 @router.get("/forecast/{user_id}")
-async def get_energy_forecast(user_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_energy_forecast(request: Request, user_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get 24-hour energy level predictions."""
-    return await service.get_forecast(db, user_id)
+    return await service.get_forecast(db, user_id, predictor=request.app.state.energy_predictor)
 
 
 @router.post("/log")

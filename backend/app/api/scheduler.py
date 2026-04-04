@@ -25,7 +25,12 @@ async def optimize_schedule(
     db: AsyncSession = Depends(get_db),
 ):
     """Run RL agent to generate optimized daily schedule."""
-    return await service.optimize_schedule(db, user_id, data.date)
+    return await service.optimize_schedule(
+        db, user_id, 
+        request.app.state.schedule_optimizer, 
+        request.app.state.energy_predictor, 
+        data.date
+    )
 
 
 @router.get("/schedule/{user_id}")

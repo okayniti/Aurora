@@ -22,7 +22,7 @@ async def update_identity_profile(
     request: Request, data: IdentityProfileUpdate, db: AsyncSession = Depends(get_db)
 ):
     """Set or update user identity description."""
-    return await service.update_identity(db, data.user_id, data.identity_desc)
+    return await service.update_identity(db, data.user_id, data.identity_desc, request.app.state.embedding_service)
 
 
 @router.post("/align")
@@ -32,11 +32,11 @@ async def compute_alignment(
 ):
     """Compute task-identity alignment score."""
     return await service.compute_alignment(
-        db, data.user_id, data.task_id, data.task_description
+        db, data.user_id, data.task_id, data.task_description, request.app.state.embedding_service
     )
 
 
 @router.get("/scores/{user_id}")
-async def get_all_scores(user_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_all_scores(request: Request, user_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get alignment scores for all user tasks."""
-    return await service.get_all_scores(db, user_id)
+    return await service.get_all_scores(db, user_id, request.app.state.embedding_service)
