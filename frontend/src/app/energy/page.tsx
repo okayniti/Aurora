@@ -118,7 +118,9 @@ export default function EnergyPage() {
         }
     }
 
-    const energyEmoji = logData.energy_level >= 8 ? "🔥" : logData.energy_level >= 6 ? "⚡" : logData.energy_level >= 4 ? "😐" : "😴";
+    const currentEnergyValue = (current?.actual || current?.predicted || 0).toFixed(1);
+    const energyPercentage = Math.round((Number(currentEnergyValue) / 10) * 100);
+    const energyColor = energyPercentage > 60 ? "text-emerald-400" : energyPercentage >= 30 ? "text-amber-400" : "text-rose-400";
 
     return (
         <div className="space-y-8 animate-fade-in">
@@ -126,23 +128,15 @@ export default function EnergyPage() {
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight text-on-surface">
-                            Energy <span className="gradient-text">Forecasting</span>
+                            Energy
                         </h1>
                         {isDemo && <DemoBadge />}
                     </div>
-                    <p className="text-on-surface-variant mt-1 text-sm">LSTM-based cognitive energy prediction · Time-series modeling</p>
                 </div>
-                <button
-                    onClick={() => setShowLog(!showLog)}
-                    className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dim text-on-primary text-sm font-medium transition-all duration-200 hover:shadow-glow flex items-center gap-2 self-start outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
-                >
-                    ⚡ Log Energy
-                </button>
             </div>
 
             {isDemo && <ErrorBanner message="Using simulated energy data" />}
 
-            {/* Empty State Overlay */}
             {!isDemo && (!hourlyData || hourlyData.length === 0) && (
                 <ScrollReveal className="glass-panel p-12 text-center rounded-xl border border-white/5 flex flex-col items-center gap-4">
                     <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 animate-pulse">battery_0_bar</span>
@@ -151,102 +145,80 @@ export default function EnergyPage() {
                 </ScrollReveal>
             )}
 
-            {/* Log Energy Form */}
-            {showLog && (
-                <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-secondary/20">
-                    <h2 className="section-title mb-4">How&apos;s Your Energy Right Now?</h2>
-                    <form onSubmit={handleLogEnergy} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="sm:col-span-2">
-                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-2 block">
-                                Energy Level: {energyEmoji} {logData.energy_level}/10
-                            </label>
-                            <input
-                                type="range"
-                                min={1}
-                                max={10}
-                                value={logData.energy_level}
-                                onChange={(e) => setLogData({ ...logData, energy_level: +e.target.value })}
-                                className="w-full accent-secondary h-2"
-                            />
-                            <div className="flex justify-between text-[10px] text-on-surface-variant mt-1">
-                                <span>😴 Exhausted</span>
-                                <span>😐 Average</span>
-                                <span>🔥 Peak</span>
-                            </div>
-                        </div>
-                        <div>
-                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Sleep (hours)</label>
-                            <input
-                                type="number"
-                                min={0}
-                                max={14}
-                                step={0.5}
-                                value={logData.sleep_hours}
-                                onChange={(e) => setLogData({ ...logData, sleep_hours: +e.target.value })}
-                                className="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline text-on-surface text-sm focus:outline-none focus:border-primary focus:shadow-[0_0_8px_rgba(204,151,255,0.2)] transition-all"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Caffeine (cups)</label>
-                            <input
-                                type="number"
-                                min={0}
-                                max={10}
-                                value={logData.caffeine_intake}
-                                onChange={(e) => setLogData({ ...logData, caffeine_intake: +e.target.value })}
-                                className="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline text-on-surface text-sm focus:outline-none focus:border-primary focus:shadow-[0_0_8px_rgba(204,151,255,0.2)] transition-all"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Exercise (mins)</label>
-                            <input
-                                type="number"
-                                min={0}
-                                max={240}
-                                value={logData.exercise_mins}
-                                onChange={(e) => setLogData({ ...logData, exercise_mins: +e.target.value })}
-                                className="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline text-on-surface text-sm focus:outline-none focus:border-primary focus:shadow-[0_0_8px_rgba(204,151,255,0.2)] transition-all"
-                            />
-                        </div>
-                        <div className="flex items-end">
-                            <button
-                                type="submit"
-                                disabled={saving}
-                                className={`w-full px-5 py-2.5 rounded-xl text-on-primary text-sm font-medium outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95 transition-all duration-200 ${logSuccess
-                                    ? "bg-emerald-600"
-                                    : "bg-primary hover:bg-primary-dim"
-                                    } disabled:opacity-40`}
-                            >
-                                {logSuccess ? "✓ Logged!" : saving ? "Saving..." : "Log Energy"}
-                            </button>
-                        </div>
-                    </form>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Your Energy Right Now */}
+                <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col items-center justify-center text-center">
+                    <span className="text-2xl mb-2">🔋</span>
+                    <div className={`text-5xl font-bold tracking-tighter ${energyColor}`}>
+                        {energyPercentage}%
+                    </div>
+                    <span className="text-sm font-medium text-on-surface-variant mt-2">Your Energy Right Now</span>
                 </ScrollReveal>
-            )}
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
-                <MetricCard title="Current Energy" value={(current?.actual || current?.predicted || 0).toFixed(1)} icon="⚡" color="cyan" subtitle="/10" />
-                <MetricCard title="Peak Hour" value={peakHour?.hour || "09:00"} icon="📈" color="green" subtitle={`${peakHour?.predicted}/10`} />
-                <MetricCard
-                    title="Model Type"
-                    value={energyModelType === "lstm" ? "LSTM" : "Heuristic"}
-                    icon="🧪"
-                    color="violet"
-                    subtitle={energyModelType === "lstm" ? "trained" : "fallback"}
-                />
-                <MetricCard title="Forecast MAE" value="0.82" icon="📊" color="amber" subtitle="good accuracy" />
+                {/* Sleep */}
+                <ScrollReveal index={1} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col items-center justify-center text-center">
+                    <span className="text-2xl mb-2">😴</span>
+                    <input
+                        type="number"
+                        min={0}
+                        max={12}
+                        step={0.5}
+                        value={logData.sleep_hours}
+                        onChange={(e) => setLogData({ ...logData, sleep_hours: +e.target.value })}
+                        className="w-24 text-center text-4xl font-bold bg-transparent border-b border-primary/30 focus:outline-none focus:border-primary transition-colors text-on-surface mb-2 px-1"
+                    />
+                    <span className="text-sm font-medium text-on-surface-variant">Last Night's Sleep (hrs)</span>
+                </ScrollReveal>
+
+                {/* Caffeine */}
+                <ScrollReveal index={2} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col items-center justify-center text-center">
+                    <span className="text-2xl mb-2">☕</span>
+                    <input
+                        type="number"
+                        min={0}
+                        max={10}
+                        value={logData.caffeine_intake}
+                        onChange={(e) => setLogData({ ...logData, caffeine_intake: +e.target.value })}
+                        className="w-24 text-center text-4xl font-bold bg-transparent border-b border-primary/30 focus:outline-none focus:border-primary transition-colors text-on-surface mb-2 px-1"
+                    />
+                    <span className="text-sm font-medium text-on-surface-variant">Caffeine Today (cups)</span>
+                </ScrollReveal>
+
+                {/* Exercise */}
+                <ScrollReveal index={3} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col items-center justify-center text-center">
+                    <span className="text-2xl mb-2">🏃</span>
+                    <button 
+                        onClick={() => setLogData({ ...logData, exercise_mins: logData.exercise_mins > 0 ? 0 : 30 })}
+                        className={`text-3xl font-bold px-6 py-2 rounded-xl transition-all ${logData.exercise_mins > 0 ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-surface-container text-on-surface border border-outline'}`}
+                    >
+                        {logData.exercise_mins > 0 ? "Yes" : "No"}
+                    </button>
+                    <span className="text-sm font-medium text-on-surface-variant mt-2">Exercise Today</span>
+                </ScrollReveal>
+
+                {/* Energy Forecast */}
+                <ScrollReveal index={4} className="glass-panel p-6 rounded-xl border border-white/5 col-span-2 lg:col-span-2 flex flex-col">
+                    <div className="flex items-center gap-2 mb-4">
+                        <span className="text-xl">📈</span>
+                        <span className="text-sm font-medium text-on-surface-variant">Energy Forecast</span>
+                    </div>
+                    <div className="flex-1 min-h-[220px]">
+                        <EnergyForecastChart data={hourlyData} />
+                    </div>
+                </ScrollReveal>
             </div>
 
-            <ScrollReveal index={1} className="glass-panel p-6 rounded-xl border border-white/5">
-                <h2 className="section-title mb-1">24-Hour Energy Forecast</h2>
-                <p className="text-xs text-on-surface-variant mb-6">Predicted vs actual · Circadian rhythm + behavioral modifiers</p>
-                <EnergyForecastChart data={hourlyData} />
-            </ScrollReveal>
-
-            <ScrollReveal index={2} className="glass-panel p-6 rounded-xl border border-white/5">
-                <h2 className="section-title mb-1">Weekly Energy Trends</h2>
-                <p className="text-xs text-on-surface-variant mb-6">Average, peak, and low energy levels by day</p>
-                <EnergyWeeklyChart data={weeklyData} />
+            <ScrollReveal index={5}>
+                <button
+                    onClick={handleLogEnergy}
+                    disabled={saving}
+                    className={`w-full py-4 rounded-xl text-on-primary text-lg font-bold tracking-wide outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95 transition-all duration-200 ${logSuccess
+                        ? "bg-emerald-600"
+                        : "bg-primary hover:bg-primary-dim shadow-glow"
+                        } disabled:opacity-40`}
+                >
+                    {logSuccess ? "✓ Logged Successfully" : saving ? "Saving..." : "Log My Energy"}
+                </button>
             </ScrollReveal>
         </div>
     );

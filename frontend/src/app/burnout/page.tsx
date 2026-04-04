@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useUser } from "@/lib/UserContext";
 import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
@@ -41,6 +42,9 @@ const demoFeatures = [
 
 export default function BurnoutPage() {
     const { userId } = useUser();
+    const [stressLevel, setStressLevel] = useState(5);
+    const [cogLoad, setCogLoad] = useState(5);
+    const [analyzing, setAnalyzing] = useState(false);
 
     const { data: trendData, error } = useApi(
         async () => {
@@ -94,15 +98,17 @@ export default function BurnoutPage() {
         ]
     );
 
+    const stressEmoji = stressLevel >= 8 ? "😤" : stressLevel >= 5 ? "😬" : "😌";
+    const plainEnglishRisk = latest < 0.25 ? "You're doing great!" : latest < 0.5 ? "Take it easy" : "Rest now";
+
     return (
         <div className="space-y-8 animate-fade-in">
             <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-bold tracking-tight text-on-surface">
-                    Burnout <span className="gradient-text">Monitor</span>
+                    Burnout Monitor
                 </h1>
                 {isDemo && <DemoBadge />}
             </div>
-            <p className="text-on-surface-variant -mt-6 text-sm">XGBoost classifier · SHAP explainability · Real-time risk monitoring</p>
 
             {isDemo && <ErrorBanner message="Using simulated burnout data" />}
 
@@ -114,44 +120,88 @@ export default function BurnoutPage() {
                 </ScrollReveal>
             )}
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
-                <MetricCard title="Burnout Risk" value={latest.toFixed(3)} animateValue={latest} animateDecimals={3} icon="🛡" color={riskColor as any} subtitle={riskLevel} />
-                <MetricCard title="Sleep Trend" value="6.8h" animateValue={6.8} animateDecimals={1} icon="😴" color="cyan" subtitle="below optimal" />
-                <MetricCard title="Deep Work Streak" value="3.5h" animateValue={3.5} animateDecimals={1} icon="🧠" color="violet" trend="up" trendValue="today" />
-                <MetricCard title="Cognitive Load" value="14.2" animateValue={14.2} animateDecimals={1} icon="⚡" color="amber" subtitle="elevated" />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-white/5">
-                    <h2 className="section-title mb-1">30-Day Burnout Trend</h2>
-                    <p className="text-xs text-on-surface-variant mb-4">Burnout probability over time · Threshold at 0.5</p>
-                    <BurnoutTrendChart data={trendData} />
-                </ScrollReveal>
-
-                <ScrollReveal index={1} className="glass-panel p-6 rounded-xl border border-white/5">
-                    <h2 className="section-title mb-1">Feature Importance (SHAP)</h2>
-                    <p className="text-xs text-on-surface-variant mb-4">Explainable contribution to burnout prediction</p>
-                    <BurnoutFeatureChart data={featureData} demoFeatures={demoFeatures} />
-                </ScrollReveal>
-            </div>
-
-            <ScrollReveal index={2} className="glass-panel p-6 rounded-xl border border-white/5">
-                <h2 className="section-title mb-1">Risk Level Distribution (Past 30 Days)</h2>
-                <p className="text-xs text-on-surface-variant mb-4">Count of days at each risk level</p>
-                <div className="flex items-center gap-8">
-                    <BurnoutDistributionChart data={riskDist} />
-                    <div className="flex-1 space-y-3">
-                        {riskDist.map((item: any) => (
-                            <div key={item.name} className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.fill }} />
-                                    <span className="text-sm text-on-surface">{item.name}</span>
-                                </div>
-                                <span className="font-mono text-sm text-on-surface-variant">{item.value} days</span>
-                            </div>
-                        ))}
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Burnout Risk */}
+                <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col items-center justify-center text-center">
+                    <span className="text-2xl mb-2">🧨</span>
+                    <div className={`text-5xl font-bold tracking-tighter ${riskColor === 'green' ? 'text-emerald-400' : riskColor === 'amber' ? 'text-amber-400' : 'text-rose-400'}`}>
+                        {Math.round(latest * 100)}%
                     </div>
-                </div>
+                    <span className="text-sm font-medium text-on-surface-variant mt-2">{plainEnglishRisk}</span>
+                </ScrollReveal>
+
+                {/* Stress Level */}
+                <ScrollReveal index={1} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col items-center justify-center text-center">
+                    <span className="text-2xl mb-2">{stressEmoji}</span>
+                    <input
+                        type="range"
+                        min={1}
+                        max={10}
+                        value={stressLevel}
+                        onChange={(e) => setStressLevel(+e.target.value)}
+                        className="w-full h-2 rounded-lg appearance-none bg-surface-container accent-primary mt-2 mb-4"
+                    />
+                    <span className="text-sm font-medium text-on-surface-variant">Stress Level: {stressLevel}/10</span>
+                </ScrollReveal>
+
+                {/* Cognitive Load */}
+                <ScrollReveal index={2} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col items-center justify-center text-center">
+                    <span className="text-2xl mb-2">🧠</span>
+                    <input
+                        type="range"
+                        min={1}
+                        max={10}
+                        value={cogLoad}
+                        onChange={(e) => setCogLoad(+e.target.value)}
+                        className="w-full h-2 rounded-lg appearance-none bg-surface-container accent-secondary mt-2 mb-4"
+                    />
+                    <span className="text-sm font-medium text-on-surface-variant">Cognitive Load: {cogLoad}/10</span>
+                </ScrollReveal>
+
+                {/* Top Factors */}
+                <ScrollReveal index={3} className="glass-panel p-6 rounded-xl border border-white/5 row-span-1 flex flex-col text-left">
+                    <div className="flex items-center gap-2 mb-4">
+                        <span className="text-xl">🔍</span>
+                        <span className="text-sm font-medium text-on-surface-variant">What's Affecting You Most</span>
+                    </div>
+                    <ul className="space-y-4 flex-1">
+                        {featureData?.slice(0, 3).map((f: any, idx: number) => (
+                            <li key={idx} className="flex flex-col gap-1">
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-on-surface font-medium">{f.name}</span>
+                                    <span className="text-on-surface-variant">{(f.value * 100).toFixed(0)}%</span>
+                                </div>
+                                <div className="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+                                    <div 
+                                        className="h-full rounded-full" 
+                                        style={{ width: `${Math.min(f.value * 200, 100)}%`, backgroundColor: f.color }} 
+                                    />
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </ScrollReveal>
+
+                {/* 30-Day Trend */}
+                <ScrollReveal index={4} className="glass-panel p-6 rounded-xl border border-white/5 col-span-2 flex flex-col">
+                    <div className="flex items-center gap-2 mb-4">
+                        <span className="text-xl">📊</span>
+                        <span className="text-sm font-medium text-on-surface-variant">30-Day Trend</span>
+                    </div>
+                    <div className="flex-1 min-h-[220px]">
+                        <BurnoutTrendChart data={trendData} />
+                    </div>
+                </ScrollReveal>
+            </div>
+
+            <ScrollReveal index={5}>
+                <button
+                    onClick={() => { setAnalyzing(true); setTimeout(() => setAnalyzing(false), 1000); }}
+                    disabled={analyzing}
+                    className={`w-full py-4 rounded-xl text-on-primary text-lg font-bold tracking-wide outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95 transition-all duration-200 bg-primary hover:bg-primary-dim shadow-glow disabled:opacity-40`}
+                >
+                    {analyzing ? "Analyzing Factors..." : "Check My Burnout"}
+                </button>
             </ScrollReveal>
         </div>
     );

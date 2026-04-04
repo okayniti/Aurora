@@ -59,11 +59,10 @@ export default function IdentityPage() {
         <div className="space-y-8 animate-fade-in">
             <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-bold tracking-tight text-on-surface">
-                    Identity <span className="gradient-text">Alignment</span>
+                    Identity
                 </h1>
                 {isDemo && <DemoBadge />}
             </div>
-            <p className="text-on-surface-variant -mt-6 text-sm">Sentence-Transformer embeddings · Cosine similarity · Semantic task matching</p>
 
             {isDemo && <ErrorBanner message="Using simulated alignment data" />}
 
@@ -75,59 +74,62 @@ export default function IdentityPage() {
                 </ScrollReveal>
             )}
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
-                <MetricCard title="Avg Alignment" value={`${avgAlignment.toFixed(1)}%`} icon="🧬" color="green" />
-                <MetricCard title="Highly Aligned" value={`${highlyAligned}/${(alignments || demoAlignments).length}`} icon="✓" color="cyan" subtitle="≥70% match" />
-                <MetricCard title="Embedding Model" value="MiniLM" icon="🧠" color="violet" subtitle="384 dims" />
-                <MetricCard title="Method" value="Cosine" icon="📐" color="amber" subtitle="similarity" />
-            </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <ScrollReveal index={0} className="lg:col-span-2 glass-panel p-6 rounded-xl border border-white/5 relative overflow-hidden">
-                    <BackgroundBeams />
-                    <h2 className="section-title mb-1">Task-Identity Alignment Scores</h2>
-                    <p className="text-xs text-on-surface-variant mb-6">Cosine similarity between task embeddings and identity embedding</p>
-                    <IdentityAlignmentChart data={(alignments || demoAlignments).sort((a: any, b: any) => b.score - a.score)} />
+                
+                {/* Who am I */}
+                <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col lg:row-span-2">
+                    <div className="flex items-center gap-2 mb-4">
+                        <span className="text-xl">👤</span>
+                        <span className="text-sm font-medium text-on-surface-variant">Who am I</span>
+                    </div>
+                    <textarea
+                        value={identityText}
+                        onChange={(e) => setIdentityText(e.target.value)}
+                        className="w-full flex-1 bg-surface-container rounded-xl p-4 text-sm text-on-surface leading-relaxed resize-none outline-none focus:border-primary border border-outline min-h-[200px] mb-4"
+                    />
+                    <button
+                        onClick={async () => {
+                            if (userId) {
+                                try {
+                                    await api.updateIdentity(userId, identityText);
+                                    refetch();
+                                } catch { }
+                            }
+                        }}
+                        className="w-full py-3 rounded-xl bg-primary hover:bg-primary-dim text-on-primary text-sm font-bold transition-all outline-none active:scale-95 shadow-glow"
+                    >
+                        Update Identity
+                    </button>
                 </ScrollReveal>
 
-                <ScrollReveal index={1} className="glass-panel p-6 rounded-xl border border-white/5">
-                    <h2 className="section-title mb-4">Identity Profile</h2>
-                    <div className="space-y-4">
-                        <div className="p-4 rounded-xl bg-surface-container-low border border-white/5">
-                            <p className="text-xs text-on-surface-variant mb-2">Your Identity Description</p>
-                            <textarea
-                                value={identityText}
-                                onChange={(e) => setIdentityText(e.target.value)}
-                                className="w-full bg-transparent text-sm text-on-surface leading-relaxed resize-none outline-none min-h-[120px]"
-                            />
-                        </div>
-                        <button
-                            onClick={async () => {
-                                if (userId) {
-                                    try {
-                                        await api.updateIdentity(userId, identityText);
-                                        refetch();
-                                    } catch { }
-                                }
-                            }}
-                            className="w-full px-4 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-medium hover:bg-primary/20 transition-colors outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
-                        >
-                            Update Identity & Re-align
-                        </button>
-                        <div className="space-y-2 mt-4">
-                            <p className="text-xs text-on-surface-variant font-medium uppercase tracking-wider">Alignment Guide</p>
-                            <div className="flex items-center gap-2 text-xs">
-                                <div className="w-3 h-3 rounded-full bg-emerald-500" /><span className="text-on-surface-variant">≥70% — Highly aligned</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs">
-                                <div className="w-3 h-3 rounded-full bg-amber-500" /><span className="text-on-surface-variant">40–70% — Moderate</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs">
-                                <div className="w-3 h-3 rounded-full bg-error" /><span className="text-on-surface-variant">&lt;40% — Low alignment</span>
-                            </div>
-                        </div>
+                {/* Mission Map Chart */}
+                <ScrollReveal index={1} className="glass-panel p-6 rounded-xl border border-white/5 lg:col-span-2 flex flex-col relative overflow-hidden text-left min-h-[350px]">
+                    <BackgroundBeams />
+                    <div className="flex items-center gap-2 mb-4 relative z-10">
+                        <span className="text-xl">🗺️</span>
+                        <span className="text-sm font-medium text-on-surface-variant">My Mission Map</span>
+                    </div>
+                    <div className="flex-1 min-h-[200px] relative z-10">
+                        <IdentityAlignmentChart data={(alignments || demoAlignments).sort((a: any, b: any) => b.score - a.score)} />
                     </div>
                 </ScrollReveal>
+
+                {/* Alignment Stats */}
+                <ScrollReveal index={2} className="glass-panel p-6 rounded-xl border border-white/5 lg:col-span-2 flex justify-around items-center text-center">
+                    <div>
+                        <span className="text-3xl mb-1 block">🧬</span>
+                        <h3 className="text-sm font-bold text-on-surface-variant">Model Match</h3>
+                    </div>
+                    <div>
+                        <div className="text-4xl font-bold tracking-tighter text-emerald-400">{avgAlignment.toFixed(0)}%</div>
+                        <span className="text-[10px] uppercase tracking-wider text-on-surface-variant">Average</span>
+                    </div>
+                    <div>
+                        <div className="text-4xl font-bold tracking-tighter text-cyan-400">{highlyAligned}</div>
+                        <span className="text-[10px] uppercase tracking-wider text-on-surface-variant">Aligned Tasks</span>
+                    </div>
+                </ScrollReveal>
+
             </div>
         </div>
     );

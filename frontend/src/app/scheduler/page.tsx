@@ -97,138 +97,114 @@ export default function SchedulerPage() {
         }
     }
 
+    const bestFocusWindow = (scheduleData || demoSchedule).reduce((max: any, cur: any) => cur.energy > max.energy && cur.status !== "break" ? cur : max, (scheduleData || demoSchedule)[0]);
+    const nextTask = (scheduleData || demoSchedule).find((s: any) => s.status !== "done" && s.status !== "break") || (scheduleData || demoSchedule)[0];
+
     return (
         <div className="space-y-8 animate-fade-in">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight text-on-surface">
-                            RL <span className="gradient-text">Scheduler</span>
-                        </h1>
-                        {isDemo && <DemoBadge />}
-                    </div>
-                    <p className="text-on-surface-variant mt-1 text-sm">Deep Q-Network agent · Energy-difficulty matching · Identity-aligned ordering</p>
-                </div>
-                <button
-                    onClick={() => setShowForm(!showForm)}
-                    className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dim text-on-primary text-sm font-medium transition-all duration-200 hover:shadow-glow flex items-center gap-2 self-start outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
-                >
-                    <span className="text-lg">+</span> Add Task
-                </button>
+            <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold tracking-tight text-on-surface">
+                    Task Journey
+                </h1>
+                {isDemo && <DemoBadge />}
             </div>
 
-            {isDemo && <ErrorBanner message="Using simulated schedule" />}
+            {isDemo && <ErrorBanner message="Using simulated schedule data" />}
 
-            {/* Create Task Form */}
-            {showForm && (
-                <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-primary/20">
-                    <h2 className="section-title mb-4">Create New Task</h2>
-                    <form onSubmit={handleCreateTask} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="sm:col-span-2">
-                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Title</label>
-                            <input
-                                type="text"
-                                value={formData.title}
-                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                placeholder="e.g. Implement login page"
-                                required
-                                className="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline text-on-surface text-sm placeholder-on-surface-variant/40 focus:outline-none focus:border-primary focus:shadow-[0_0_8px_rgba(204,151,255,0.2)] transition-all"
-                            />
-                        </div>
-                        <div className="sm:col-span-2">
-                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Description</label>
-                            <textarea
-                                value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                placeholder="Brief description..."
-                                rows={2}
-                                className="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline text-on-surface text-sm placeholder-on-surface-variant/40 focus:outline-none focus:border-primary focus:shadow-[0_0_8px_rgba(204,151,255,0.2)] transition-all resize-none"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Category</label>
-                            <select
-                                value={formData.category}
-                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                className="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline text-on-surface text-sm focus:outline-none focus:border-primary transition-all"
-                            >
-                                {categories.map((c) => (
-                                    <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Est. Minutes</label>
-                            <input
-                                type="number"
-                                min={5}
-                                max={480}
-                                value={formData.estimated_minutes}
-                                onChange={(e) => setFormData({ ...formData, estimated_minutes: +e.target.value })}
-                                className="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline text-on-surface text-sm focus:outline-none focus:border-primary focus:shadow-[0_0_8px_rgba(204,151,255,0.2)] transition-all"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Difficulty: {formData.difficulty}/10</label>
-                            <input
-                                type="range"
-                                min={1}
-                                max={10}
-                                value={formData.difficulty}
-                                onChange={(e) => setFormData({ ...formData, difficulty: +e.target.value })}
-                                className="w-full accent-primary"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-1 block">Priority: {"★".repeat(formData.priority)}{"☆".repeat(5 - formData.priority)}</label>
-                            <input
-                                type="range"
-                                min={1}
-                                max={5}
-                                value={formData.priority}
-                                onChange={(e) => setFormData({ ...formData, priority: +e.target.value })}
-                                className="w-full accent-amber-500"
-                            />
-                        </div>
-                        <div className="sm:col-span-2 flex items-center gap-3 justify-end pt-2">
-                            <button
-                                type="button"
-                                onClick={() => setShowForm(false)}
-                                className="px-4 py-2 rounded-xl text-on-surface-variant hover:text-on-surface text-sm transition-colors outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={saving || !formData.title.trim()}
-                                className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dim disabled:opacity-40 text-on-primary text-sm font-medium transition-all duration-200 outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
-                            >
-                                {saving ? "Creating..." : "Create Task"}
-                            </button>
-                        </div>
-                    </form>
+            {/* Task List Fallback */}
+            {(!isDemo && (!tasks || (tasks as any[]).length === 0)) && (
+                <ScrollReveal className="glass-panel p-12 text-center rounded-xl border border-white/5 flex flex-col items-center gap-4">
+                    <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 animate-pulse">check_circle</span>
+                    <h3 className="text-lg font-medium text-on-surface">No tasks</h3>
+                    <p className="text-sm text-on-surface-variant">No missions loaded yet. Add your first task below.</p>
                 </ScrollReveal>
             )}
 
-            {/* Task List */}
-            {(!isDemo && (!tasks || (tasks as any[]).length === 0)) ? (
-                <ScrollReveal index={1} className="glass-panel p-12 rounded-xl border border-white/5 flex flex-col items-center text-center gap-4">
-                    <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 animate-pulse">check_circle</span>
-                    <h3 className="text-lg font-medium text-on-surface">No tasks</h3>
-                    <p className="text-sm text-on-surface-variant">No missions loaded yet. Add your first task above.</p>
-                </ScrollReveal>
-            ) : (tasks as any[])?.length > 0 && (
-                <ScrollReveal index={1} className="glass-panel rounded-xl border border-white/5 overflow-hidden">
-                    <div className="p-6 border-b border-white/5">
-                        <h2 className="section-title">Your Tasks</h2>
-                        <p className="text-xs text-on-surface-variant mt-1">{(tasks as any[]).length} tasks · Click to change status</p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* Add a Task */}
+                <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col justify-between">
+                    <div className="flex items-center gap-2 mb-4">
+                        <span className="text-xl">➕</span>
+                        <span className="text-sm font-medium text-on-surface-variant">Add a Task</span>
                     </div>
-                    <div className="divide-y divide-white/5">
-                        {(tasks as any[]).map((task: any) => (
-                            <div
-                                key={task.id}
-                                className="flex items-center gap-4 px-6 py-3 hover:bg-white/[0.02] transition-colors group"
-                            >
+                    <form onSubmit={handleCreateTask} className="flex flex-col gap-4">
+                        <input
+                            type="text"
+                            value={formData.title}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                            placeholder="What do you need to do?"
+                            required
+                            className="w-full px-4 py-3 rounded-xl bg-surface-container border border-outline text-on-surface text-sm placeholder-on-surface-variant/40 focus:outline-none focus:border-primary transition-all"
+                        />
+                        <div className="flex items-center justify-between bg-surface-container rounded-xl p-1 border border-outline">
+                            {["Easy", "Medium", "Hard"].map((diff, i) => {
+                                const vals = [3, 5, 8];
+                                const isSelected = formData.difficulty === vals[i];
+                                return (
+                                    <button
+                                        key={diff}
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, difficulty: vals[i] })}
+                                        className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${isSelected ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:text-on-surface'}`}
+                                    >
+                                        {diff}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <div>
+                            <div className="flex justify-between items-center text-xs text-on-surface-variant mb-2">
+                                <span>Duration</span>
+                                <span>{formData.estimated_minutes} mins</span>
+                            </div>
+                            <input
+                                type="range"
+                                min={15}
+                                max={240}
+                                step={15}
+                                value={formData.estimated_minutes}
+                                onChange={(e) => setFormData({ ...formData, estimated_minutes: +e.target.value })}
+                                className="w-full h-2 rounded-lg appearance-none bg-surface-container accent-primary"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={saving || !formData.title.trim()}
+                            className="w-full py-2.5 mt-2 rounded-xl bg-primary/20 text-primary hover:bg-primary/30 disabled:opacity-40 text-sm font-semibold transition-all outline-none"
+                        >
+                            {saving ? "Adding..." : "Add to List"}
+                        </button>
+                    </form>
+                </ScrollReveal>
+
+                {/* Best Focus Time */}
+                <ScrollReveal index={1} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col justify-center items-center text-center">
+                    <span className="text-3xl mb-3">🔋</span>
+                    <h3 className="text-lg font-bold text-on-surface mb-1">Your best focus window</h3>
+                    <p className="text-primary font-mono text-xl tracking-wide">{bestFocusWindow ? bestFocusWindow.time : "10:00 – 12:00"}</p>
+                    <span className="text-xs text-on-surface-variant mt-2">Based on your highest energy forecasts</span>
+                </ScrollReveal>
+
+                {/* Aurora's Suggestion */}
+                <ScrollReveal index={2} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col justify-center items-center text-center">
+                    <span className="text-3xl mb-3">🤖</span>
+                    <h3 className="text-lg font-bold text-on-surface mb-1">Aurora's Suggestion</h3>
+                    <p className="text-sm text-on-surface-variant px-4">Start with <strong className="text-secondary">{nextTask?.task || "your hardest task"}</strong> at {nextTask?.time.split(" ")[0] || "10:00"} when your energy peaks.</p>
+                </ScrollReveal>
+
+                {/* Tasks List */}
+                <ScrollReveal index={3} className="glass-panel rounded-xl border border-white/5 lg:col-span-3">
+                    <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xl">✅</span>
+                            <span className="text-sm font-medium text-on-surface-variant">My Tasks Today</span>
+                        </div>
+                        <span className="text-xs text-on-surface-variant bg-surface-container px-2 py-1 rounded-md">{(tasks as any[])?.length || 0} Total</span>
+                    </div>
+                    <div className="divide-y divide-white/5 max-h-[300px] overflow-y-auto">
+                        {((tasks as any[])?.length > 0 ? (tasks as any[]) : []).map((task: any) => (
+                            <div key={task.id} className="flex items-center gap-4 px-6 py-4 hover:bg-white/[0.02] transition-colors">
                                 <button
                                     onClick={async () => {
                                         const next: Record<string, string> = { pending: "in_progress", in_progress: "done", done: "pending" };
@@ -237,122 +213,38 @@ export default function SchedulerPage() {
                                             refetchTasks();
                                         } catch { }
                                     }}
-                                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${task.status === "done"
-                                        ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
-                                        : task.status === "in_progress"
-                                            ? "bg-primary/20 border-primary"
-                                            : "border-outline hover:border-on-surface-variant"
-                                        }`}
+                                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors shrink-0 ${task.status === "done" ? "bg-emerald-500/20 border-emerald-500 text-emerald-400" : task.status === "in_progress" ? "bg-primary/20 border-primary" : "border-outline hover:border-on-surface-variant"}`}
                                 >
                                     {task.status === "done" && "✓"}
                                 </button>
-                                <div className="flex-1 min-w-0">
-                                    <p className={`text-sm font-medium ${task.status === "done" ? "text-on-surface-variant line-through" : "text-on-surface"}`}>
-                                        {task.title}
-                                    </p>
-                                    <div className="flex items-center gap-3 mt-0.5">
-                                        {task.category && <span className="text-[10px] text-on-surface-variant">{task.category}</span>}
-                                        {task.estimated_minutes && <span className="text-[10px] text-on-surface-variant">{task.estimated_minutes}min</span>}
-                                        <span className="text-[10px] text-on-surface-variant">{"★".repeat(task.priority)}{"☆".repeat(5 - task.priority)}</span>
-                                    </div>
-                                </div>
-                                <span className={`badge ${statusStyles[task.status] || "badge-warning"}`}>
-                                    {statusLabels[task.status] || task.status}
+                                <p className={`flex-1 text-sm ${task.status === "done" ? "text-on-surface-variant line-through" : "text-on-surface"}`}>{task.title}</p>
+                                <span className={`text-xs px-2 py-1 rounded-md ${task.difficulty >= 8 ? 'bg-rose-500/10 text-rose-400' : task.difficulty >= 5 ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                                    {task.estimated_minutes} min
                                 </span>
                             </div>
                         ))}
+                        {(!isDemo && (!tasks || (tasks as any[]).length === 0)) && (
+                            <div className="px-6 py-12 text-center text-sm text-on-surface-variant">No tasks scheduled for today.</div>
+                        )}
                     </div>
                 </ScrollReveal>
-            )}
-
-            {/* Metrics */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
-                <MetricCard title="Strategy" value="Greedy" icon="🤖" color="violet" subtitle="DQN pending training" />
-                <MetricCard title="Schedule Score" value="0.82" icon="📋" color="green" subtitle="good" />
-                <MetricCard title="Tasks Scheduled" value={String((scheduleData || []).filter((s: any) => s.status !== "break").length)} icon="✓" color="cyan" />
-                <MetricCard title="Breaks Inserted" value={String((scheduleData || []).filter((s: any) => s.status === "break").length)} icon="🧘" color="amber" subtitle="burnout prevention" />
             </div>
 
-            {/* Schedule Table */}
-            <ScrollReveal index={2} className="glass-panel rounded-xl border border-white/5 overflow-hidden">
-                <div className="p-6 border-b border-white/5">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h2 className="section-title">Today&apos;s Optimized Schedule</h2>
-                            <p className="text-xs text-on-surface-variant mt-1">Tasks ordered by RL agent · Energy-matched time slots</p>
-                        </div>
-                        <button
-                            onClick={async () => {
-                                if (userId) {
-                                    try {
-                                        await api.optimizeSchedule(userId);
-                                        refetch();
-                                    } catch { }
-                                }
-                            }}
-                            className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-medium hover:bg-primary/20 transition-colors outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
-                        >
-                            Re-optimize
-                        </button>
-                    </div>
-                </div>
-
-                <div className="divide-y divide-white/5">
-                    {(scheduleData || demoSchedule).map((item: any, i: number) => (
-                        <div key={i} className={`flex items-center gap-6 px-6 py-4 transition-colors hover:bg-white/[0.02] ${item.status === "break" ? "bg-tertiary/5" : ""}`}>
-                            <div className="w-32 shrink-0">
-                                <span className="font-mono text-sm text-on-surface-variant">{item.time}</span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-on-surface truncate">{item.task}</p>
-                                {item.status !== "break" && (
-                                    <div className="flex items-center gap-3 mt-1">
-                                        <span className="text-[10px] text-on-surface-variant">Difficulty: {item.difficulty}/10</span>
-                                        <span className="text-[10px] text-on-surface-variant">Priority: {"★".repeat(item.priority)}{"☆".repeat(5 - item.priority)}</span>
-                                    </div>
-                                )}
-                            </div>
-                            {item.status !== "break" && (
-                                <div className="w-20 text-center">
-                                    <span className={`font-mono text-sm ${item.energy >= 7 ? "text-emerald-400" : item.energy >= 4 ? "text-amber-400" : "text-error"}`}>
-                                        ⚡ {item.energy}
-                                    </span>
-                                </div>
-                            )}
-                            <div className="w-20 text-center">
-                                <div className="inline-flex items-center gap-1">
-                                    <div className="w-12 h-1.5 bg-surface-container rounded-full overflow-hidden">
-                                        <div className="h-full rounded-full bg-primary" style={{ width: `${item.confidence * 100}%` }} />
-                                    </div>
-                                    <span className="text-[10px] text-on-surface-variant font-mono">{(item.confidence * 100).toFixed(0)}%</span>
-                                </div>
-                            </div>
-                            <div className="w-24 text-right">
-                                <span className={`badge ${statusStyles[item.status]}`}>{statusLabels[item.status]}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </ScrollReveal>
-
-            {/* Reward Function */}
-            <ScrollReveal index={3} className="glass-panel p-6 rounded-xl border border-white/5">
-                <h2 className="section-title mb-4">Reward Function Components</h2>
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                    {[
-                        { label: "Completion", weight: "+1.0", desc: "Task finished", color: "text-emerald-400" },
-                        { label: "Alignment", weight: "+0.5", desc: "Identity match", color: "text-primary" },
-                        { label: "Priority", weight: "+0.3", desc: "High-priority done", color: "text-secondary" },
-                        { label: "Burnout", weight: "−1.5", desc: "Risk penalty", color: "text-error" },
-                        { label: "Overload", weight: "−1.0", desc: "Energy mismatch", color: "text-amber-400" },
-                    ].map((r, i) => (
-                        <div key={i} className="text-center p-3 rounded-xl bg-surface-container-low border border-white/5">
-                            <span className={`font-mono text-xl font-bold ${r.color}`}>{r.weight}</span>
-                            <p className="text-xs text-on-surface mt-1 font-medium">{r.label}</p>
-                            <p className="text-[10px] text-on-surface-variant mt-0.5">{r.desc}</p>
-                        </div>
-                    ))}
-                </div>
+            {/* Global Action */}
+            <ScrollReveal index={4}>
+                <button
+                    onClick={async () => {
+                        if (userId) {
+                            try {
+                                await api.optimizeSchedule(userId);
+                                refetch();
+                            } catch { }
+                        }
+                    }}
+                    className={`w-full py-4 rounded-xl text-on-primary text-lg font-bold tracking-wide outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95 transition-all duration-200 bg-primary hover:bg-primary-dim shadow-glow`}
+                >
+                    Optimize My Schedule
+                </button>
             </ScrollReveal>
         </div>
     );
