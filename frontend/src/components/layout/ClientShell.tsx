@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import TopBar from "@/components/layout/Header";
 import SideNav from "@/components/layout/SideNav";
 import AuroraBackground from "@/components/ui/AuroraBackground";
@@ -8,6 +9,12 @@ import { UserProvider } from "@/lib/UserContext";
 
 export default function ClientShell({ children }: { children: React.ReactNode }) {
     const [menuOpen, setMenuOpen] = useState(false);
+    const router = useRouter();
+
+    useEffect(() => {
+        const routes = ['/energy', '/burnout', '/scheduler', '/identity', '/analytics'];
+        routes.forEach(route => router.prefetch(route));
+    }, [router]);
 
     return (
         <UserProvider>

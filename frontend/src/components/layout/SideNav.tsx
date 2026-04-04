@@ -42,6 +42,7 @@ export default function SideNav({ mobileOpen, onClose }: SideNavProps) {
                             <Link
                                 key={item.href}
                                 href={item.href}
+                                prefetch={true}
                                 title={item.label}
                                 className={`
                                     group relative outline-none transition-all duration-300 transform
@@ -70,6 +71,7 @@ export default function SideNav({ mobileOpen, onClose }: SideNavProps) {
                 <div className="mt-auto">
                     <Link
                         href="/analytics"
+                        prefetch={true}
                         className="text-on-surface-variant opacity-40 hover:opacity-100 hover:text-primary hover:scale-110 outline-none transition-all duration-300 inline-block transform"
                     >
                         <span className="material-symbols-outlined">settings</span>
@@ -113,6 +115,7 @@ export default function SideNav({ mobileOpen, onClose }: SideNavProps) {
                             <Link
                                 key={item.href}
                                 href={item.href}
+                                prefetch={true}
                                 onClick={onClose}
                                 className={`flex items-center gap-4 px-4 py-3 min-h-[44px] rounded-xl transition-all duration-300 ${
                                     isActive
