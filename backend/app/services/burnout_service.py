@@ -17,17 +17,14 @@ logger = logging.getLogger("aurora.services.burnout")
 
 
 class BurnoutService:
-    def __init__(self):
-        self.predictor = BurnoutPredictor()
-
     async def get_risk(
-        self, session: AsyncSession, user_id: UUID,
+        self, session: AsyncSession, user_id: UUID, predictor: BurnoutPredictor,
         sleep_trend: float = 7.0, deep_work_streak: int = 0,
         stress_trend: float = 0.3, energy_variance: float = 1.0,
         cognitive_load: float = 5.0,
     ) -> Dict:
         """Get current burnout risk prediction."""
-        result = self.predictor.predict(
+        result = predictor.predict(
             sleep_trend=sleep_trend,
             deep_work_streak=deep_work_streak,
             stress_trend=stress_trend,

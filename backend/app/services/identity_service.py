@@ -17,12 +17,8 @@ logger = logging.getLogger("aurora.services.identity")
 
 
 class IdentityService:
-    def __init__(self):
-        self.embedding_service = EmbeddingService()
-        self.scorer = AlignmentScorer(self.embedding_service)
-
     async def update_identity(
-        self, session: AsyncSession, user_id: UUID, identity_desc: str
+        self, session: AsyncSession, user_id: UUID, identity_desc: str, embedding_service: EmbeddingService
     ) -> Dict:
         """Update user's identity description and cache embedding."""
         # Update user record
@@ -31,14 +27,14 @@ class IdentityService:
         )
 
         # Compute and cache embedding
-        embedding = self.embedding_service.encode(identity_desc)
-        serialized = self.embedding_service.serialize_embedding(embedding)
+        embedding = embedding_service.encode(identity_desc)
+        serialized = embedding_service.serialize_embedding(embedding)
 
         identity_emb = IdentityEmbedding(
             user_id=user_id,
             text_input=identity_desc,
             embedding=serialized,
-            embedding_model=self.embedding_service.model_name,
+            embedding_model=embedding_service.model_name,
         )
         session.add(identity_emb)
 
@@ -47,6 +43,7 @@ class IdentityService:
     async def compute_alignment(
         self, session: AsyncSession, user_id: UUID,
         task_id: UUID = None, task_description: str = None,
+        embedding_service: EmbeddingService = None
     ) -> Dict:
         """Compute alignment score for a single task."""
         # Get identity description
@@ -65,7 +62,8 @@ class IdentityService:
         else:
             return {"error": "Either task_id or task_description is required"}
 
-        result = self.scorer.compute_alignment(user.identity_desc, task_desc)
+        scorer = AlignmentScorer(embedding_service)
+        result = scorer.compute_alignment(user.identity_desc, task_desc)
         result["user_id"] = str(user_id)
         if task_id:
             result["task_id"] = str(task_id)
@@ -78,7 +76,7 @@ class IdentityService:
         return result
 
     async def get_all_scores(
-        self, session: AsyncSession, user_id: UUID
+        self, session: AsyncSession, user_id: UUID, embedding_service: EmbeddingService
     ) -> Dict:
         """Compute alignment scores for all user tasks."""
         user = await session.get(User, user_id)
@@ -92,7 +90,8 @@ class IdentityService:
         descriptions = [f"{t.title}. {t.description or ''}" for t in tasks]
         task_ids = [str(t.id) for t in tasks]
 
-        scores = self.scorer.compute_batch_alignment(
+        scorer = AlignmentScorer(embedding_service)
+        scores = scorer.compute_batch_alignment(
             user.identity_desc, descriptions, task_ids
         )
 

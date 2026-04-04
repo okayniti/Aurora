@@ -17,11 +17,8 @@ logger = logging.getLogger("aurora.services.energy")
 
 
 class EnergyService:
-    def __init__(self):
-        self.predictor = EnergyPredictor()
-
     async def get_forecast(
-        self, session: AsyncSession, user_id: UUID
+        self, session: AsyncSession, user_id: UUID, predictor: EnergyPredictor
     ) -> Dict:
         """Get energy forecast for the current day."""
         # Fetch historical logs for LSTM input
@@ -53,7 +50,7 @@ class EnergyService:
         caffeine = historical[-1]["caffeine_intake"] if historical else 0
         exercise = historical[-1]["exercise_mins"] if historical else 0
 
-        forecast = self.predictor.predict(
+        forecast = predictor.predict(
             historical_logs=historical,
             sleep_hours=sleep,
             caffeine_intake=caffeine,

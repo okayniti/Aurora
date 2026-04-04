@@ -18,12 +18,9 @@ logger = logging.getLogger("aurora.services.scheduler")
 
 
 class SchedulerService:
-    def __init__(self):
-        self.optimizer = ScheduleOptimizer()
-        self.energy_predictor = EnergyPredictor()
-
     async def optimize_schedule(
         self, session: AsyncSession, user_id: UUID,
+        optimizer: ScheduleOptimizer, energy_predictor: EnergyPredictor,
         target_date: date = None,
     ) -> Dict:
         """Generate optimized schedule for a day."""
@@ -50,7 +47,7 @@ class SchedulerService:
         ]
 
         # Get energy forecast
-        energy_result = self.energy_predictor.predict()
+        energy_result = energy_predictor.predict()
         energy_forecast = [p["energy"] for p in energy_result["hourly_predictions"]]
 
         # Pad to 24 hours if needed
@@ -58,7 +55,7 @@ class SchedulerService:
             energy_forecast.append(5.0)
 
         # Optimize
-        schedule = self.optimizer.optimize(
+        schedule = optimizer.optimize(
             tasks=task_dicts,
             energy_forecast=energy_forecast,
             burnout_probability=0.3,
