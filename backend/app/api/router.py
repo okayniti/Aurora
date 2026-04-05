@@ -13,6 +13,8 @@ from app.api.tasks import router as tasks_router
 from app.api.replanning import router as replanning_router
 from app.api.analytics import router as analytics_router
 
+from app.api.chat import router as chat_router
+
 api_router = APIRouter(prefix="/api")
 
 api_router.include_router(energy_router)
@@ -22,3 +24,4 @@ api_router.include_router(identity_router)
 api_router.include_router(tasks_router)
 api_router.include_router(replanning_router)
 api_router.include_router(analytics_router)
+api_router.include_router(chat_router)
