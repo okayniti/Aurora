@@ -127,6 +127,42 @@ export default function Dashboard() {
     const { userId } = useUser();
     const [elapsed, setElapsed] = useState(0);
 
+    // Chat functionality
+    type ChatMessage = { role: "user" | "aurora"; content: string };
+    const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+    const [isChatLoading, setIsChatLoading] = useState(false);
+    const [chatError, setChatError] = useState(false);
+
+    const handleChatSubmit = async (message: string) => {
+        if (!userId || !message.trim() || isChatLoading) return;
+        
+        setChatError(false);
+        setIsChatLoading(true);
+        
+        // Add user message immediately
+        setChatHistory(prev => {
+            const next = [...prev, { role: "user", content: message } as ChatMessage];
+            // Keep last 3 pairs (6 messages)
+            if (next.length > 6) return next.slice(next.length - 6);
+            return next;
+        });
+
+        try {
+            // Using direct fetch rather than useApi for interactive one-off calls
+            const res: any = await api.chatWithAurora(userId, message);
+            setChatHistory(prev => {
+                const next = [...prev, { role: "aurora", content: res.response } as ChatMessage];
+                if (next.length > 6) return next.slice(next.length - 6);
+                return next;
+            });
+        } catch (error) {
+            console.error(error);
+            setChatError(true);
+        } finally {
+            setIsChatLoading(false);
+        }
+    };
+
     // ── API calls with automatic fallback ──────────────────
     const {
         data: tasks,
@@ -415,28 +451,73 @@ export default function Dashboard() {
                 )}
 
                 {/* Conversational AI Input */}
-                <div className="flex flex-col gap-4">
-                    <div className="flex items-start gap-4">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center shrink-0 shadow-lg">
-                            <span
-                                className="material-symbols-outlined text-background text-sm"
-                                style={{ fontVariationSettings: "'FILL' 1" }}
-                            >
-                                auto_awesome
-                            </span>
-                        </div>
-                        <div className="bg-surface-container-high/60 px-5 py-3 rounded-2xl rounded-tl-none text-sm text-on-surface leading-snug">
-                            Ready when you are. The environment has been optimized for deep work.
-                        </div>
+                <div className="flex flex-col gap-4 max-h-[40vh] md:max-h-none overflow-hidden relative">
+                    <div className="flex-1 overflow-y-auto pr-2 pb-2 space-y-4 flex flex-col justify-end" style={{ maskImage: "linear-gradient(to bottom, transparent, black 15%, black)" }}>
+                        {chatHistory.length === 0 && !isChatLoading && !chatError && (
+                            <div className="flex items-start gap-3 opacity-80">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center shrink-0 shadow-lg">
+                                    <span className="material-symbols-outlined text-background text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
+                                        auto_awesome
+                                    </span>
+                                </div>
+                                <div className="glass-panel border-white/5 border px-5 py-3 rounded-2xl rounded-tl-none text-sm text-on-surface leading-snug">
+                                    Ready when you are. The environment has been optimized for deep work.
+                                </div>
+                            </div>
+                        )}
+                        
+                        {chatHistory.map((msg: ChatMessage, idx: number) => (
+                            <div key={idx} className={`flex items-start gap-3 animate-fade-in ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
+                                {msg.role === "aurora" && (
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center shrink-0 shadow-lg">
+                                        <span className="material-symbols-outlined text-background text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
+                                            auto_awesome
+                                        </span>
+                                    </div>
+                                )}
+                                <div className={`px-5 py-3 text-sm leading-snug ${
+                                    msg.role === "user" 
+                                        ? "bg-primary/20 rounded-2xl rounded-tr-none text-on-surface" 
+                                        : "glass-panel border border-white/5 rounded-2xl rounded-tl-none text-on-surface"
+                                }`}>
+                                    {msg.content}
+                                </div>
+                            </div>
+                        ))}
+
+                        {isChatLoading && (
+                            <div className="flex items-start gap-3 animate-fade-in">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center shrink-0 shadow-lg">
+                                    <span className="material-symbols-outlined text-background text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
+                                        auto_awesome
+                                    </span>
+                                </div>
+                                <div className="glass-panel border border-white/5 px-5 py-3 rounded-2xl rounded-tl-none flex items-center gap-1 h-11">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                                    <div className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                                    <div className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+                                </div>
+                            </div>
+                        )}
+                        
+                        {chatError && (
+                            <div className="text-amber-500/80 text-xs text-center pb-1 animate-fade-in">
+                                Aurora is resting. Try again in a moment.
+                            </div>
+                        )}
                     </div>
-                    <TypingPlaceholder
-                        phrases={[
-                            "Speak to Aurora...",
-                            "How is my energy today?",
-                            "Schedule my deep work...",
-                            "What is my burnout risk?",
-                        ]}
-                    />
+                    
+                    <div className="shrink-0 pt-2 bg-background md:bg-transparent">
+                        <TypingPlaceholder
+                            phrases={[
+                                "Speak to Aurora...",
+                                "How is my energy today?",
+                                "Schedule my deep work...",
+                                "What is my burnout risk?",
+                            ]}
+                            onSubmit={handleChatSubmit}
+                        />
+                    </div>
                 </div>
             </section>
         </div>
