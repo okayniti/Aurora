@@ -77,4 +77,11 @@ export const api = {
 
     // Health
     healthCheck: () => fetchAPI("/health"),
+
+    // Chat
+    chatWithAurora: (userId: string, message: string) =>
+        fetchAPI("/chat/", {
+            method: "POST",
+            body: JSON.stringify({ userId, message }),
+        }),
 };
