@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 
 interface UseApiResult<T> {
     data: T | null;
@@ -26,11 +26,12 @@ export function useApi<T>(
             }
         },
         retry: false,
+        placeholderData: keepPreviousData,
         ...options
     });
 
     return { 
-        data: error ? fallback : (data !== undefined ? data : fallback), 
+        data: error ? fallback : (isLoading ? null : (data !== undefined ? data : fallback)), 
         loading: isLoading, 
         error: error ? error.message : null, 
         refetch 
