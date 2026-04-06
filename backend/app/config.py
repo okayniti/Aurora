@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     # Replanning thresholds
     ENERGY_DEVIATION_THRESHOLD: float = 2.0
     STRESS_SPIKE_THRESHOLD: float = 0.8
+    
+    # External APIs
+    GEMINI_API_KEY: Optional[str] = None
 
     class Config:
         env_file = ".env"
