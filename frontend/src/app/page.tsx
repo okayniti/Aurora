@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useUser } from "@/lib/UserContext";
 import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
@@ -162,6 +162,13 @@ export default function Dashboard() {
             setIsChatLoading(false);
         }
     };
+
+    const chatEndRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (chatEndRef.current) {
+            chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [chatHistory, isChatLoading]);
 
     // ── API calls with automatic fallback ──────────────────
     const {
@@ -505,6 +512,7 @@ export default function Dashboard() {
                                 Aurora is resting. Try again in a moment.
                             </div>
                         )}
+                        <div ref={chatEndRef} />
                     </div>
                     
                     <div className="shrink-0 pt-2 bg-background md:bg-transparent">
