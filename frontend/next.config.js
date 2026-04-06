@@ -1,9 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     output: "standalone",
-    experimental: {
+    jsexperimental: {
         optimisticClientCache: true,
     },
+    compress: true,
+    poweredByHeader: false,
 };
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
