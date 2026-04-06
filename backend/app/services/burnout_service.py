@@ -9,6 +9,7 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 import logging
+import asyncio
 
 from app.database.models import BurnoutSnapshot
 from app.ml.burnout_model.inference import BurnoutPredictor
@@ -24,6 +25,10 @@ class BurnoutService:
         cognitive_load: float = 5.0,
     ) -> Dict:
         """Get current burnout risk prediction."""
+        
+        # Yield to event loop before CPU-bound prediction
+        await asyncio.sleep(0)
+        
         result = predictor.predict(
             sleep_trend=sleep_trend,
             deep_work_streak=deep_work_streak,

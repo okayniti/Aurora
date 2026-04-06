@@ -8,6 +8,7 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, update
 import logging
+import asyncio
 
 from app.database.models import User, Task, IdentityEmbedding
 from app.ml.identity_engine.embeddings import EmbeddingService
@@ -26,7 +27,8 @@ class IdentityService:
             update(User).where(User.id == user_id).values(identity_desc=identity_desc)
         )
 
-        # Compute and cache embedding
+        # Compute and cache embedding (Yield to event loop before CPU-heavy operation)
+        await asyncio.sleep(0)
         embedding = embedding_service.encode(identity_desc)
         serialized = embedding_service.serialize_embedding(embedding)
 
@@ -63,6 +65,9 @@ class IdentityService:
             return {"error": "Either task_id or task_description is required"}
 
         scorer = AlignmentScorer(embedding_service)
+        
+        # Yield to event loop before CPU-heavy computation
+        await asyncio.sleep(0)
         result = scorer.compute_alignment(user.identity_desc, task_desc)
         result["user_id"] = str(user_id)
         if task_id:
@@ -91,6 +96,9 @@ class IdentityService:
         task_ids = [str(t.id) for t in tasks]
 
         scorer = AlignmentScorer(embedding_service)
+        
+        # Yield for complex batch alignment
+        await asyncio.sleep(0)
         scores = scorer.compute_batch_alignment(
             user.identity_desc, descriptions, task_ids
         )

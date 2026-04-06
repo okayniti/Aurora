@@ -9,6 +9,7 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 import logging
+import asyncio
 
 from app.database.models import EnergyLog, User
 from app.ml.energy_model.inference import EnergyPredictor
@@ -49,6 +50,9 @@ class EnergyService:
         sleep = historical[-1]["sleep_hours"] if historical else 7.0
         caffeine = historical[-1]["caffeine_intake"] if historical else 0
         exercise = historical[-1]["exercise_mins"] if historical else 0
+
+        # Yield to event loop before CPU-bound prediction
+        await asyncio.sleep(0)
 
         forecast = predictor.predict(
             historical_logs=historical,

@@ -54,6 +54,9 @@ class SchedulerService:
         while len(energy_forecast) < 24:
             energy_forecast.append(5.0)
 
+        import asyncio
+        await asyncio.sleep(0)
+
         # Optimize
         schedule = optimizer.optimize(
             tasks=task_dicts,
