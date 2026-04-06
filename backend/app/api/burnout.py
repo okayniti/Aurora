@@ -5,6 +5,9 @@ AURORA API — Burnout Endpoints
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
+import time
+
+MODEL_CACHE = {}
 
 from app.dependencies import get_db
 from app.database.schemas import BurnoutSnapshotCreate
@@ -30,10 +33,18 @@ async def get_burnout_risk(
 ):
     """Get current burnout risk prediction with explainability."""
     response.headers["Cache-Control"] = "max-age=30"
-    return await service.get_risk(
+    
+    cache_key = str(user_id)
+    now = time.time()
+    if cache_key in MODEL_CACHE and now - MODEL_CACHE[cache_key][0] < 60:
+        return MODEL_CACHE[cache_key][1]
+
+    result = await service.get_risk(
         db, user_id, request.app.state.burnout_predictor, sleep_trend, deep_work_streak,
         stress_trend, energy_variance, cognitive_load,
     )
+    MODEL_CACHE[cache_key] = (now, result)
+    return result
 
 
 @router.get("/trend/{user_id}")

@@ -6,6 +6,9 @@ from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from datetime import date
+import time
+
+MODEL_CACHE = {}
 
 from app.dependencies import get_db
 from app.database.schemas import EnergyLogCreate, EnergyForecastResponse
@@ -21,7 +24,15 @@ service = EnergyService()
 async def get_energy_forecast(request: Request, response: Response, user_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get 24-hour energy level predictions."""
     response.headers["Cache-Control"] = "max-age=30"
-    return await service.get_forecast(db, user_id, predictor=request.app.state.energy_predictor)
+    
+    cache_key = str(user_id)
+    now = time.time()
+    if cache_key in MODEL_CACHE and now - MODEL_CACHE[cache_key][0] < 60:
+        return MODEL_CACHE[cache_key][1]
+
+    result = await service.get_forecast(db, user_id, predictor=request.app.state.energy_predictor)
+    MODEL_CACHE[cache_key] = (now, result)
+    return result
 
 
 @router.post("/log")

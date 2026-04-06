@@ -6,6 +6,9 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from datetime import date
+import time
+
+MODEL_CACHE = {}
 
 from app.dependencies import get_db
 from app.database.schemas import ScheduleOptimizeRequest, SchedulerFeedback
@@ -25,12 +28,19 @@ async def optimize_schedule(
     db: AsyncSession = Depends(get_db),
 ):
     """Run RL agent to generate optimized daily schedule."""
-    return await service.optimize_schedule(
+    cache_key = str(user_id)
+    now = time.time()
+    if cache_key in MODEL_CACHE and now - MODEL_CACHE[cache_key][0] < 60:
+        return MODEL_CACHE[cache_key][1]
+
+    result = await service.optimize_schedule(
         db, user_id, 
         request.app.state.schedule_optimizer, 
         request.app.state.energy_predictor, 
         data.date
     )
+    MODEL_CACHE[cache_key] = (now, result)
+    return result
 
 
 @router.get("/schedule/{user_id}")
