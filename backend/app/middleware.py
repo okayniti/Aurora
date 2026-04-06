@@ -20,7 +20,7 @@ class RequestTimingMiddleware(BaseHTTPMiddleware):
         duration = time.time() - start_time
 
         logger.info(
-            "request_completed",
+            f"Endpoint {request.method} {request.url.path} took {round(duration * 1000, 2)}ms",
             extra={
                 "method": request.method,
                 "path": request.url.path,
