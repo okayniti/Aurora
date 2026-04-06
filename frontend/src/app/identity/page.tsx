@@ -5,10 +5,9 @@ import { useUser } from "@/lib/UserContext";
 import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
 import MetricCard from "@/components/layout/MetricCard";
-import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
+import { ErrorBanner, DemoBadge, ChartSkeleton, MetricSkeleton } from "@/components/ui/Skeleton";
 import { BackgroundBeams } from "@/components/ui/BackgroundBeams";
 import dynamic from "next/dynamic";
-import { ChartSkeleton } from "@/components/ui/Skeleton";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const IdentityAlignmentChart = dynamic(() => import("@/components/charts/IdentityAlignmentChart"), {
@@ -36,7 +35,7 @@ export default function IdentityPage() {
     const { userId } = useUser();
     const [identityText, setIdentityText] = useState(demoIdentity);
 
-    const { data: alignments, error, refetch } = useApi(
+    const { data: alignments, error, refetch, loading } = useApi(
         async () => {
             if (!userId) throw new Error("no user");
             const scores: any = await api.getAlignmentScores(userId);
@@ -66,15 +65,20 @@ export default function IdentityPage() {
 
             {isDemo && <ErrorBanner message="Using simulated alignment data" />}
 
-            {!isDemo && (!alignments || alignments.length === 0) && (
+            {loading && (!alignments || alignments.length === 0) ? (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:row-span-2"><MetricSkeleton /></div>
+                    <div className="lg:col-span-2"><ChartSkeleton height="h-[380px]" /></div>
+                    <div className="lg:col-span-2"><MetricSkeleton /></div>
+                </div>
+            ) : !isDemo && (!alignments || alignments.length === 0) ? (
                 <ScrollReveal className="glass-panel p-12 text-center rounded-xl border border-white/5 flex flex-col items-center gap-4">
                     <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 animate-pulse">fingerprint</span>
                     <h3 className="text-lg font-medium text-on-surface">No profile</h3>
                     <p className="text-sm text-on-surface-variant">Write your identity profile to begin alignment scoring.</p>
                 </ScrollReveal>
-            )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 {/* Who am I */}
                 <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col lg:row-span-2">
@@ -131,6 +135,7 @@ export default function IdentityPage() {
                 </ScrollReveal>
 
             </div>
+            )}
         </div>
     );
 }

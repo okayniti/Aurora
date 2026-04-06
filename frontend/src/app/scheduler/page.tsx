@@ -5,7 +5,7 @@ import { useUser } from "@/lib/UserContext";
 import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
 import MetricCard from "@/components/layout/MetricCard";
-import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
+import { ErrorBanner, DemoBadge, ChartSkeleton, MetricSkeleton, TableSkeleton } from "@/components/ui/Skeleton";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const demoSchedule = [
@@ -48,7 +48,7 @@ export default function SchedulerPage() {
         category: "coding",
     });
 
-    const { data: scheduleData, error, refetch } = useApi(
+    const { data: scheduleData, error, refetch, loading: scheduleLoading } = useApi(
         async () => {
             if (!userId) throw new Error("no user");
             const schedule: any = await api.getSchedule(userId);
@@ -67,7 +67,7 @@ export default function SchedulerPage() {
         [userId]
     );
 
-    const { data: tasks, refetch: refetchTasks } = useApi(
+    const { data: tasks, refetch: refetchTasks, loading: tasksLoading } = useApi(
         async () => {
             if (!userId) throw new Error("no user");
             return await api.getTasks(userId) as any[];
@@ -77,6 +77,7 @@ export default function SchedulerPage() {
     );
 
     const isDemo = !!error;
+    const loading = scheduleLoading || tasksLoading;
 
     async function handleCreateTask(e: React.FormEvent) {
         e.preventDefault();
@@ -111,16 +112,23 @@ export default function SchedulerPage() {
 
             {isDemo && <ErrorBanner message="Using simulated schedule data" />}
 
-            {/* Task List Fallback */}
-            {(!isDemo && (!tasks || (tasks as any[]).length === 0)) && (
+            {loading && (!tasks || (tasks as any[]).length === 0) ? (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <MetricSkeleton />
+                    <MetricSkeleton />
+                    <MetricSkeleton />
+                    <div className="lg:col-span-3">
+                        <TableSkeleton rows={4} />
+                    </div>
+                </div>
+            ) : (!isDemo && (!tasks || (tasks as any[]).length === 0)) ? (
                 <ScrollReveal className="glass-panel p-12 text-center rounded-xl border border-white/5 flex flex-col items-center gap-4">
                     <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 animate-pulse">check_circle</span>
                     <h3 className="text-lg font-medium text-on-surface">No tasks</h3>
                     <p className="text-sm text-on-surface-variant">No missions loaded yet. Add your first task below.</p>
                 </ScrollReveal>
-            )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 {/* Add a Task */}
                 <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col justify-between">
@@ -229,6 +237,7 @@ export default function SchedulerPage() {
                     </div>
                 </ScrollReveal>
             </div>
+            )}
 
             {/* Global Action */}
             <ScrollReveal index={4}>

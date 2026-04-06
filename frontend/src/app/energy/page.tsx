@@ -5,9 +5,8 @@ import { useUser } from "@/lib/UserContext";
 import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
 import MetricCard from "@/components/layout/MetricCard";
-import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
+import { ErrorBanner, DemoBadge, ChartSkeleton, MetricSkeleton } from "@/components/ui/Skeleton";
 import dynamic from "next/dynamic";
-import { ChartSkeleton } from "@/components/ui/Skeleton";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const EnergyForecastChart = dynamic(() => import("@/components/charts/EnergyForecastChart"), {
@@ -53,7 +52,7 @@ export default function EnergyPage() {
     const [logSuccess, setLogSuccess] = useState(false);
     const [energyModelType, setEnergyModelType] = useState("heuristic");
 
-    const { data: hourlyData, error, refetch } = useApi(
+    const { data: hourlyData, error, refetch, loading: hourlyLoading } = useApi(
         async () => {
             if (!userId) throw new Error("no user");
             const forecast: any = await api.getEnergyForecast(userId);
@@ -69,7 +68,7 @@ export default function EnergyPage() {
         { staleTime: 30000 }
     );
 
-    const { data: weeklyData } = useApi(
+    const { data: weeklyData, loading: weeklyLoading } = useApi(
         async () => {
             if (!userId) throw new Error("no user");
             const history: any = await api.getEnergyHistory(userId, 7);
@@ -88,6 +87,7 @@ export default function EnergyPage() {
     );
 
     const isDemo = !!error;
+    const loading = hourlyLoading || weeklyLoading;
     const currentHour = new Date().getHours();
     const current = hourlyData?.[currentHour];
     const peakHour = (hourlyData || demoHourly).reduce((max: any, d: any) => d.predicted > max.predicted ? d : max, (hourlyData || demoHourly)[0]);
@@ -137,15 +137,24 @@ export default function EnergyPage() {
 
             {isDemo && <ErrorBanner message="Using simulated energy data" />}
 
-            {!isDemo && (!hourlyData || hourlyData.length === 0) && (
+            {loading && (!hourlyData || hourlyData.length === 0) ? (
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                    <MetricSkeleton />
+                    <MetricSkeleton />
+                    <MetricSkeleton />
+                    <MetricSkeleton />
+                    <div className="col-span-2 lg:col-span-2 p-6 glass-card rounded-xl border border-white/5">
+                        <ChartSkeleton height="h-[220px]" />
+                    </div>
+                </div>
+            ) : !isDemo && (!hourlyData || hourlyData.length === 0) ? (
                 <ScrollReveal className="glass-panel p-12 text-center rounded-xl border border-white/5 flex flex-col items-center gap-4">
                     <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 animate-pulse">battery_0_bar</span>
                     <h3 className="text-lg font-medium text-on-surface">No logs</h3>
                     <p className="text-sm text-on-surface-variant">No energy data yet. Log your first reading.</p>
                 </ScrollReveal>
-            )}
-
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            ) : (
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Your Energy Right Now */}
                 <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col items-center justify-center text-center">
                     <span className="text-2xl mb-2">🔋</span>
@@ -207,6 +216,7 @@ export default function EnergyPage() {
                     </div>
                 </ScrollReveal>
             </div>
+            )}
 
             <ScrollReveal index={5}>
                 <button

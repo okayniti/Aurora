@@ -4,9 +4,8 @@ import { useUser } from "@/lib/UserContext";
 import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
 import MetricCard from "@/components/layout/MetricCard";
-import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
+import { ErrorBanner, DemoBadge, ChartSkeleton, MetricSkeleton } from "@/components/ui/Skeleton";
 import dynamic from "next/dynamic";
-import { ChartSkeleton } from "@/components/ui/Skeleton";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const AnalyticsDeepWorkChart = dynamic(() => import("@/components/charts/AnalyticsDeepWorkChart"), {
@@ -61,7 +60,7 @@ const demoCompletion = [
 export default function AnalyticsPage() {
     const { userId } = useUser();
 
-    const { data: dashboard, error } = useApi(
+    const { data: dashboard, error, loading } = useApi(
         () => {
             if (!userId) throw new Error("no user");
             return api.getDashboard(userId) as any;
@@ -84,15 +83,21 @@ export default function AnalyticsPage() {
 
             {isDemo && <ErrorBanner message="Using simulated analytics" />}
 
-            {!isDemo && (!dashboard) && (
+            {loading && !dashboard ? (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:row-span-2"><MetricSkeleton /></div>
+                    <div className="lg:col-span-2"><ChartSkeleton height="h-[260px]" /></div>
+                    <div className="lg:col-span-2"><ChartSkeleton height="h-[260px]" /></div>
+                    <div className="lg:col-span-3"><ChartSkeleton height="h-[250px]" /></div>
+                </div>
+            ) : !isDemo && !dashboard ? (
                 <ScrollReveal className="glass-panel p-12 text-center rounded-xl border border-white/5 flex flex-col items-center gap-4">
                     <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 animate-pulse">analytics</span>
                     <h3 className="text-lg font-medium text-on-surface">No data</h3>
                     <p className="text-sm text-on-surface-variant">Cognitive analytics will appear after 3 days of tracking.</p>
                 </ScrollReveal>
-            )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 {/* Aurora's Deep Synthesis */}
                 <ScrollReveal index={0} className="glass-panel p-8 rounded-xl border border-white/5 flex flex-col lg:row-span-2 lg:col-span-1 bg-gradient-to-b from-surface-container to-surface-container-low">
@@ -141,6 +146,7 @@ export default function AnalyticsPage() {
                     <AnalyticsCompletionChart data={demoCompletion} />
                 </ScrollReveal>
             </div>
+            )}
         </div>
     );
 }

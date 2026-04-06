@@ -5,9 +5,8 @@ import { useUser } from "@/lib/UserContext";
 import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
 import MetricCard from "@/components/layout/MetricCard";
-import { ErrorBanner, DemoBadge } from "@/components/ui/Skeleton";
+import { ErrorBanner, DemoBadge, ChartSkeleton, MetricSkeleton } from "@/components/ui/Skeleton";
 import dynamic from "next/dynamic";
-import { ChartSkeleton } from "@/components/ui/Skeleton";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const BurnoutTrendChart = dynamic(() => import("@/components/charts/BurnoutTrendChart"), {
@@ -46,7 +45,7 @@ export default function BurnoutPage() {
     const [cogLoad, setCogLoad] = useState(5);
     const [analyzing, setAnalyzing] = useState(false);
 
-    const { data: trendData, error } = useApi(
+    const { data: trendData, error, loading: trendLoading } = useApi(
         async () => {
             if (!userId) throw new Error("no user");
             const trend: any = await api.getBurnoutTrend(userId, 30);
@@ -62,7 +61,7 @@ export default function BurnoutPage() {
         { staleTime: 30000 }
     );
 
-    const { data: featureData } = useApi(
+    const { data: featureData, loading: featureLoading } = useApi(
         async () => {
             if (!userId) throw new Error("no user");
             const risk: any = await api.getBurnoutRisk(userId);
@@ -79,6 +78,7 @@ export default function BurnoutPage() {
     );
 
     const isDemo = !!error;
+    const loading = trendLoading || featureLoading;
     const latest = (trendData || demoTrend)[(trendData || demoTrend).length - 1]?.probability || 0.34;
     const riskLevel = latest < 0.25 ? "Low" : latest < 0.5 ? "Moderate" : latest < 0.75 ? "High" : "Critical";
     const riskColor = latest < 0.25 ? "green" : latest < 0.5 ? "amber" : "rose";
@@ -112,15 +112,24 @@ export default function BurnoutPage() {
 
             {isDemo && <ErrorBanner message="Using simulated burnout data" />}
 
-            {!isDemo && (!trendData || trendData.length === 0) && (
+            {loading && (!trendData || trendData.length === 0) ? (
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                    <MetricSkeleton />
+                    <MetricSkeleton />
+                    <MetricSkeleton />
+                    <MetricSkeleton />
+                    <div className="col-span-2 p-6 glass-card rounded-xl border border-white/5">
+                        <ChartSkeleton height="h-[220px]" />
+                    </div>
+                </div>
+            ) : !isDemo && (!trendData || trendData.length === 0) ? (
                 <ScrollReveal className="glass-panel p-12 text-center rounded-xl border border-white/5 flex flex-col items-center gap-4">
                     <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 animate-pulse">monitor_heart</span>
                     <h3 className="text-lg font-medium text-on-surface">Warming Up</h3>
                     <p className="text-sm text-on-surface-variant">30-day monitor is warming up. Check back after logging energy data.</p>
                 </ScrollReveal>
-            )}
-
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            ) : (
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Burnout Risk */}
                 <ScrollReveal index={0} className="glass-panel p-6 rounded-xl border border-white/5 flex flex-col items-center justify-center text-center">
                     <span className="text-2xl mb-2">🧨</span>
@@ -193,6 +202,7 @@ export default function BurnoutPage() {
                     </div>
                 </ScrollReveal>
             </div>
+            )}
 
             <ScrollReveal index={5}>
                 <button
