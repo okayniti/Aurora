@@ -2,7 +2,7 @@
 AURORA API — Energy Endpoints
 """
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from datetime import date
@@ -18,8 +18,9 @@ service = EnergyService()
 
 
 @router.get("/forecast/{user_id}")
-async def get_energy_forecast(request: Request, user_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_energy_forecast(request: Request, response: Response, user_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get 24-hour energy level predictions."""
+    response.headers["Cache-Control"] = "max-age=30"
     return await service.get_forecast(db, user_id, predictor=request.app.state.energy_predictor)
 
 

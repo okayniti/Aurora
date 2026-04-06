@@ -2,7 +2,7 @@
 AURORA API — Burnout Endpoints
 """
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
@@ -19,6 +19,7 @@ service = BurnoutService()
 @router.get("/risk/{user_id}")
 async def get_burnout_risk(
     request: Request,
+    response: Response,
     user_id: UUID,
     sleep_trend: float = 7.0,
     deep_work_streak: int = 0,
@@ -28,6 +29,7 @@ async def get_burnout_risk(
     db: AsyncSession = Depends(get_db),
 ):
     """Get current burnout risk prediction with explainability."""
+    response.headers["Cache-Control"] = "max-age=30"
     return await service.get_risk(
         db, user_id, request.app.state.burnout_predictor, sleep_trend, deep_work_streak,
         stress_trend, energy_variance, cognitive_load,

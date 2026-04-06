@@ -25,8 +25,8 @@ async def trigger_replan(request: Request, data: ReplanTriggerRequest, db: Async
     from sqlalchemy import select, and_
     from datetime import datetime
 
-    engine = ReplanEngine()
-    predictor = EnergyPredictor()
+    engine = request.app.state.replan_engine if hasattr(request.app.state, 'replan_engine') else ReplanEngine()
+    predictor = request.app.state.energy_predictor
 
     # Get remaining tasks
     query = select(Task).where(
