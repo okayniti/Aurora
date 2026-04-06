@@ -27,7 +27,7 @@ async def create_task(request: Request, data: TaskCreate, db: AsyncSession = Dep
     )
 
 
-@router.get("/{user_id}")
+@router.get("/user/{user_id}")
 async def get_tasks(
     user_id: UUID, status: str = None, category: str = None,
     db: AsyncSession = Depends(get_db),

@@ -56,7 +56,7 @@ export const api = {
         fetchAPI("/tasks/", { method: "POST", body: JSON.stringify(data) }),
     getTasks: (userId: string, status?: string) => {
         const query = status ? `?status=${status}` : "";
-        return fetchAPI(`/tasks/${userId}${query}`);
+        return fetchAPI(`/tasks/user/${userId}${query}`);
     },
     updateTaskStatus: (taskId: string, status: string) =>
         fetchAPI(`/tasks/${taskId}/status`, {
