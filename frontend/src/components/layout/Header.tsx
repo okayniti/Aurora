@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatedGradientText } from "@/components/ui/AnimatedGradientText";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -11,6 +12,10 @@ interface TopBarProps {
 
 export default function TopBar({ onMenuToggle }: TopBarProps) {
     const [status, setStatus] = useState<"online" | "offline">("offline");
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [userEmail, setUserEmail] = useState("");
+    const router = useRouter();
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         async function checkBackend() {
@@ -26,8 +31,27 @@ export default function TopBar({ onMenuToggle }: TopBarProps) {
         }
         checkBackend();
         const interval = setInterval(checkBackend, 30000);
-        return () => clearInterval(interval);
+        
+        setUserEmail(localStorage.getItem("aurora_user_email") || "User@aurora.app");
+
+        function close(e: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                setDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", close);
+
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener("mousedown", close);
+        };
     }, []);
+
+    const handleSignOut = () => {
+        localStorage.removeItem("aurora_token");
+        localStorage.removeItem("aurora_user_email");
+        router.push("/login");
+    };
 
     return (
         <header className="fixed top-0 w-full h-20 md:h-24 flex justify-between items-center px-4 md:pl-32 md:pr-8 lg:pr-16 z-40 bg-transparent font-sans tracking-[0.02em] font-light">
@@ -74,9 +98,30 @@ export default function TopBar({ onMenuToggle }: TopBarProps) {
                     <span className="material-symbols-outlined">blur_on</span>
                 </button>
 
-                {/* Avatar */}
-                <div className="w-10 h-10 md:w-10 md:h-10 rounded-full overflow-hidden border border-primary/20 bg-surface-container-high flex items-center justify-center shrink-0">
-                    <span className="text-primary text-lg font-bold">A</span>
+                {/* Avatar with Dropdown */}
+                <div className="relative" ref={dropdownRef}>
+                    <button 
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                        className="w-10 h-10 md:w-10 md:h-10 rounded-full overflow-hidden border border-primary/20 bg-surface-container-high flex items-center justify-center shrink-0 hover:border-primary transition-colors duration-300"
+                    >
+                        <span className="text-primary text-lg font-bold uppercase">{userEmail.charAt(0)}</span>
+                    </button>
+                    
+                    {dropdownOpen && (
+                        <div className="absolute right-0 mt-3 w-56 rounded-xl glass-panel border border-primary/20 shadow-2xl py-2 flex flex-col z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="px-4 py-3 border-b border-primary/10 mb-1">
+                                <p className="text-sm font-medium text-on-surface truncate">{userEmail}</p>
+                                <p className="text-xs text-on-surface-variant mt-0.5">Aurora User</p>
+                            </div>
+                            <button 
+                                onClick={handleSignOut}
+                                className="mx-2 px-3 py-2 text-left text-sm text-error hover:bg-error/10 hover:text-error rounded-lg transition-colors flex items-center gap-2 mt-1"
+                            >
+                                <span className="material-symbols-outlined text-[18px]">logout</span>
+                                Sign Out
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </header>

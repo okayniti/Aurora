@@ -5,9 +5,18 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
     
+    const token = typeof window !== "undefined" ? localStorage.getItem("aurora_token") : null;
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+    }
+    
     try {
         const res = await fetch(`${API_BASE}${endpoint}`, {
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                ...headers,
+                ...(options?.headers as Record<string, string> || {})
+            },
             signal: controller.signal,
             ...options,
         });
