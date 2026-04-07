@@ -95,6 +95,9 @@ app.add_middleware(RequestTimingMiddleware)
 # Mount routes
 app.include_router(api_router)
 
+from app.api.auth import router as auth_router
+app.include_router(auth_router, prefix="/api")
+
 
 # Health check
 @app.get("/api/health", tags=["System"])
