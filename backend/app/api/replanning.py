@@ -19,13 +19,12 @@ router = APIRouter(prefix="/replan", tags=["Dynamic Replanning"])
 @limiter.limit("20/minute")
 async def trigger_replan(request: Request, data: ReplanTriggerRequest, db: AsyncSession = Depends(get_db)):
     """Manually trigger a schedule replan."""
-    from app.ml.replanning.engine import ReplanEngine
     from app.ml.energy_model.inference import EnergyPredictor
     from app.database.models import Task
     from sqlalchemy import select, and_
     from datetime import datetime
 
-    engine = request.app.state.replan_engine if hasattr(request.app.state, 'replan_engine') else ReplanEngine()
+    engine = request.app.state.replan_engine
     predictor = request.app.state.energy_predictor
 
     # Get remaining tasks

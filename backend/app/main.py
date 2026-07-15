@@ -23,6 +23,7 @@ from app.ml.energy_model.inference import EnergyPredictor
 from app.ml.burnout_model.inference import BurnoutPredictor
 from app.ml.identity_engine.embeddings import EmbeddingService
 from app.ml.rl_scheduler.inference import ScheduleOptimizer
+from app.ml.replanning.engine import ReplanEngine
 
 logger = setup_logger("aurora.main")
 
@@ -43,6 +44,7 @@ async def lifespan(app: FastAPI):
     app.state.embedding_service = embedding_service
     
     app.state.schedule_optimizer = ScheduleOptimizer()
+    app.state.replan_engine = ReplanEngine()
     logger.info("✅ ML Models loaded into memory")
 
     logger.info(f"🚀 AURORA v{settings.APP_VERSION} is ready")
