@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     LOG_LEVEL: str = "INFO"
 
+    # Auth
+    SECRET_KEY: str = "dev_secret_key_123"
+    ALGORITHM: str = "HS256"
+
     # Database — SQLite for dev, PostgreSQL for production
     DATABASE_URL: str = "sqlite+aiosqlite:///./aurora_dev.db"
     DATABASE_ECHO: bool = False

@@ -41,6 +41,7 @@ class User(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), unique=True, nullable=False, index=True)
     name = Column(String(255), nullable=False)
+    password_hash = Column(String(255), nullable=True)
     identity_desc = Column(Text, nullable=True)
     created_at = Column(TZDateTime, default=datetime.utcnow)
     updated_at = Column(TZDateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
