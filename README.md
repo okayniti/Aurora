@@ -14,7 +14,7 @@
 
 <br />
 
-![Aurora Dashboard](./docs/screenshot.png)
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/448428a5-28b5-4bb6-b2dd-c0160a8bae0e" />
 
 ## What is Aurora?
 
