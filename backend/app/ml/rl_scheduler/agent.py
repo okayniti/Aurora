@@ -227,7 +227,7 @@ class DQNAgent:
     def load(self, path: str) -> bool:
         """Load agent from checkpoint."""
         try:
-            checkpoint = torch.load(path, map_location=self.device)
+            checkpoint = torch.load(path, map_location=self.device, weights_only=False)
             self.policy_net.load_state_dict(checkpoint["policy_net"])
             self.target_net.load_state_dict(checkpoint["target_net"])
             self.optimizer.load_state_dict(checkpoint["optimizer"])

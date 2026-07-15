@@ -47,13 +47,13 @@ class EmbeddingService:
             self._init_tfidf_fallback()
 
     def _init_tfidf_fallback(self):
-        """Initialize a simple TF-IDF-based embedding fallback."""
+        """Initialize a simple HashingVectorizer-based embedding fallback."""
         try:
-            from sklearn.feature_extraction.text import TfidfVectorizer
-            self.tfidf = TfidfVectorizer(max_features=384)
+            from sklearn.feature_extraction.text import HashingVectorizer
+            self.tfidf = HashingVectorizer(n_features=384, alternate_sign=False, stop_words="english")
             self.is_loaded = True
             self.model = None  # Mark as fallback mode
-            logger.info("Using TF-IDF fallback for embeddings")
+            logger.info("Using HashingVectorizer fallback for embeddings with English stop words filtered")
         except ImportError:
             logger.error("Neither sentence-transformers nor sklearn available.")
 
@@ -98,27 +98,12 @@ class EmbeddingService:
             return np.stack([self._tfidf_encode(t) for t in texts])
 
     def _tfidf_encode(self, text: str) -> np.ndarray:
-        """Fallback TF-IDF encoding."""
+        """Fallback Hashing-based encoding."""
         try:
-            if not hasattr(self.tfidf, 'vocabulary_'):
-                # Fit on the input text as a minimal corpus
-                self.tfidf.fit([text, "placeholder document for vocabulary"])
             vector = self.tfidf.transform([text]).toarray()[0]
-
-            # Pad or truncate to 384 dimensions
-            if len(vector) < 384:
-                vector = np.pad(vector, (0, 384 - len(vector)))
-            else:
-                vector = vector[:384]
-
-            # L2 normalize
-            norm = np.linalg.norm(vector)
-            if norm > 0:
-                vector = vector / norm
-
             return vector.astype(np.float32)
         except Exception as e:
-            logger.error(f"TF-IDF fallback failed: {e}")
+            logger.error(f"Hashing fallback failed: {e}")
             return np.zeros(384, dtype=np.float32)
 
     def serialize_embedding(self, embedding: np.ndarray) -> bytes:
