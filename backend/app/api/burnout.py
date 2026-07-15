@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 import time
 
-MODEL_CACHE = {}
+from app.utils.cache import api_cache
 
 from app.dependencies import get_db
 from app.database.schemas import BurnoutSnapshotCreate
@@ -34,16 +34,16 @@ async def get_burnout_risk(
     """Get current burnout risk prediction with explainability."""
     response.headers["Cache-Control"] = "max-age=30"
     
-    cache_key = str(user_id)
-    now = time.time()
-    if cache_key in MODEL_CACHE and now - MODEL_CACHE[cache_key][0] < 60:
-        return MODEL_CACHE[cache_key][1]
+    cache_key = f"burnout_risk_{user_id}_{sleep_trend}_{deep_work_streak}_{stress_trend}_{energy_variance}_{cognitive_load}"
+    cached = api_cache.get(cache_key)
+    if cached:
+        return cached
 
     result = await service.get_risk(
         db, user_id, request.app.state.burnout_predictor, sleep_trend, deep_work_streak,
         stress_trend, energy_variance, cognitive_load,
     )
-    MODEL_CACHE[cache_key] = (now, result)
+    api_cache.set(cache_key, result)
     return result
 
 

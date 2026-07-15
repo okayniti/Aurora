@@ -8,7 +8,7 @@ from uuid import UUID
 from datetime import date
 import time
 
-MODEL_CACHE = {}
+from app.utils.cache import api_cache
 
 from app.dependencies import get_db
 from app.database.schemas import EnergyLogCreate, EnergyForecastResponse
@@ -25,13 +25,13 @@ async def get_energy_forecast(request: Request, response: Response, user_id: UUI
     """Get 24-hour energy level predictions."""
     response.headers["Cache-Control"] = "max-age=30"
     
-    cache_key = str(user_id)
-    now = time.time()
-    if cache_key in MODEL_CACHE and now - MODEL_CACHE[cache_key][0] < 60:
-        return MODEL_CACHE[cache_key][1]
+    cache_key = f"energy_forecast_{user_id}"
+    cached = api_cache.get(cache_key)
+    if cached:
+        return cached
 
     result = await service.get_forecast(db, user_id, predictor=request.app.state.energy_predictor)
-    MODEL_CACHE[cache_key] = (now, result)
+    api_cache.set(cache_key, result)
     return result
 
 

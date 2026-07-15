@@ -8,7 +8,7 @@ from uuid import UUID
 from datetime import date
 import time
 
-MODEL_CACHE = {}
+from app.utils.cache import api_cache
 
 from app.dependencies import get_db
 from app.database.schemas import ScheduleOptimizeRequest, SchedulerFeedback
@@ -28,10 +28,10 @@ async def optimize_schedule(
     db: AsyncSession = Depends(get_db),
 ):
     """Run RL agent to generate optimized daily schedule."""
-    cache_key = str(user_id)
-    now = time.time()
-    if cache_key in MODEL_CACHE and now - MODEL_CACHE[cache_key][0] < 60:
-        return MODEL_CACHE[cache_key][1]
+    cache_key = f"scheduler_optimize_{user_id}_{data.date or 'today'}"
+    cached = api_cache.get(cache_key)
+    if cached:
+        return cached
 
     result = await service.optimize_schedule(
         db, user_id, 
@@ -39,7 +39,7 @@ async def optimize_schedule(
         request.app.state.energy_predictor, 
         data.date
     )
-    MODEL_CACHE[cache_key] = (now, result)
+    api_cache.set(cache_key, result)
     return result
 
 
