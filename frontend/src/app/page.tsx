@@ -297,6 +297,40 @@ export default function Dashboard() {
         return () => clearInterval(interval);
     }, []);
 
+    // WebSocket real-time updates connection
+    useEffect(() => {
+        if (!userId) return;
+
+        const wsUrl = process.env.NEXT_PUBLIC_API_URL
+            ? process.env.NEXT_PUBLIC_API_URL.replace("http", "ws").replace("/api", "/ws/replan")
+            : "ws://localhost:8000/api/ws/replan";
+
+        const socket = new WebSocket(wsUrl);
+
+        socket.onmessage = (event) => {
+            try {
+                const message = JSON.parse(event.data);
+                if (message.type === "replan" && message.user_id === userId) {
+                    console.log("Replan event received! Refreshing dashboard...");
+                    refetchTasks();
+                    refetchDash();
+                    refetchBurnout();
+                    refetchForecast();
+                }
+            } catch (err) {
+                console.error("Failed to parse WebSocket message:", err);
+            }
+        };
+
+        socket.onerror = (err) => {
+            console.error("WebSocket connection error:", err);
+        };
+
+        return () => {
+            socket.close();
+        };
+    }, [userId, refetchTasks, refetchDash, refetchBurnout, refetchForecast]);
+
     // ── Derived state ──────────────────────────────────────
     const remaining = TOTAL_SECONDS - elapsed;
     const minutes = Math.floor(remaining / 60);
@@ -400,10 +434,19 @@ export default function Dashboard() {
                     {forecastLoading ? (
                         <Skeleton className="h-10 w-64 mx-auto rounded-full" />
                     ) : (
-                        <div className="inline-block px-6 py-2 rounded-full glass-panel border border-secondary/20 mb-4">
+                        <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full glass-panel border border-secondary/20 mb-4">
                             <span className="text-secondary text-xs uppercase tracking-[0.3em]">
                                 Energy Resonance: {energyResonance}%
                             </span>
+                            {f.model_type === "lstm" ? (
+                                <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] uppercase tracking-wider font-semibold">
+                                    Neural LSTM
+                                </span>
+                            ) : (
+                                <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] uppercase tracking-wider font-semibold">
+                                    Circadian Baseline
+                                </span>
+                            )}
                             {forecastError && (
                                 <button onClick={refetchForecast} className="ml-2 text-amber-400 text-[10px]">↻</button>
                             )}
@@ -494,9 +537,20 @@ export default function Dashboard() {
                     <div className="glass-panel p-5 md:p-8 rounded-xl border border-white/5 space-y-6">
                         <div className="flex justify-between items-end">
                             <div className="space-y-1">
-                                <span className="text-on-surface-variant text-[0.625rem] uppercase tracking-widest">
-                                    Vibe Status
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-on-surface-variant text-[0.625rem] uppercase tracking-widest">
+                                        Vibe Status
+                                    </span>
+                                    {b.model_type === "xgboost" ? (
+                                        <span className="px-1.5 py-0.2 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[8px] uppercase tracking-wider font-semibold">
+                                            XGBoost
+                                        </span>
+                                    ) : (
+                                        <span className="px-1.5 py-0.2 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[8px] uppercase tracking-wider font-semibold">
+                                            Heuristic
+                                        </span>
+                                    )}
+                                </div>
                                 <div className="text-xl font-medium text-on-surface">
                                     {burnoutProb < 0.2 ? "Flow State" : burnoutProb < 0.5 ? "Active Mode" : "Recovery Needed"}
                                 </div>
