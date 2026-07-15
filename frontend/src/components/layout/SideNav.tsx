@@ -7,6 +7,7 @@ const navItems = [
     { href: "/", icon: "bubble_chart", label: "Neural Hub", filled: true },
     { href: "/energy", icon: "auto_awesome", label: "Energy Flow" },
     { href: "/scheduler", icon: "timeline", label: "Task Journey" },
+    { href: "/calendar", icon: "calendar_month", label: "Cognitive Calendar" },
     { href: "/burnout", icon: "psychology", label: "AI Insights" },
     { href: "/identity", icon: "fingerprint", label: "Identity" },
     { href: "/analytics", icon: "settings", label: "Analytics" },
@@ -36,7 +37,7 @@ export default function SideNav({ mobileOpen, onClose }: SideNavProps) {
 
                 {/* Nav links */}
                 <div className="flex flex-col gap-10 items-center">
-                    {navItems.slice(0, 4).map((item) => {
+                    {navItems.slice(0, 5).map((item) => {
                         const isActive = pathname === item.href;
                         return (
                             <Link
