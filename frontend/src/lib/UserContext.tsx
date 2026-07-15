@@ -53,10 +53,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
             localStorage.setItem("aurora_user_name", user.name);
             setLoading(false);
             return;
+          } else {
+            // Auto-create a demo user if database is empty
+            const createRes = await fetch(`${API_BASE}/api/users?email=demo@aurora.ai&name=Demo%20User&identity_desc=Disciplined%20engineer%20focusing%20on%20deep%20work`, {
+              method: "POST"
+            });
+            if (createRes.ok) {
+              const user = await createRes.json();
+              setUserId(user.id);
+              setUserName(user.name);
+              localStorage.setItem("aurora_user_id", user.id);
+              localStorage.setItem("aurora_user_name", user.name);
+              setLoading(false);
+              return;
+            }
           }
         }
-        // Backend is up but no users
-        setError("no_user");
       } catch {
         // Backend is offline
         setError("backend_offline");
