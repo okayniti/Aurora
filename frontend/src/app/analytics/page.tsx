@@ -32,6 +32,9 @@ const demoDashboard = {
     decision_fatigue_index: 0.42,
     tasks_completed: 6,
     tasks_total: 10,
+    weekly_deep_work: [] as any[],
+    friction_timeline: [] as any[],
+    mission_breakdown: [] as any[],
 };
 
 const demoWeeklyDeepWork = Array.from({ length: 7 }, (_, i) => ({
@@ -125,7 +128,7 @@ export default function AnalyticsPage() {
                         <span className="text-xl">🌊</span>
                         <h2 className="text-sm font-medium text-on-surface-variant">Flow States (7 Days)</h2>
                     </div>
-                    <AnalyticsDeepWorkChart data={demoWeeklyDeepWork} />
+                    <AnalyticsDeepWorkChart data={d.weekly_deep_work || demoWeeklyDeepWork} />
                 </ScrollReveal>
 
                 {/* Risk Indicators */}
@@ -134,7 +137,7 @@ export default function AnalyticsPage() {
                         <span className="text-xl">⚕️</span>
                         <h2 className="text-sm font-medium text-on-surface-variant">Cognitive Friction</h2>
                     </div>
-                    <AnalyticsRiskChart data={demoRiskTimeline} />
+                    <AnalyticsRiskChart data={d.friction_timeline || demoRiskTimeline} />
                 </ScrollReveal>
 
                 {/* Task Distribution */}
@@ -143,7 +146,7 @@ export default function AnalyticsPage() {
                         <span className="text-xl">📊</span>
                         <h2 className="text-sm font-medium text-on-surface-variant">Mission Breakdown</h2>
                     </div>
-                    <AnalyticsCompletionChart data={demoCompletion} />
+                    <AnalyticsCompletionChart data={d.mission_breakdown || demoCompletion} />
                 </ScrollReveal>
             </div>
             )}
