@@ -31,7 +31,7 @@ class UserResponse(BaseModel):
 
 class EnergyLogCreate(BaseModel):
     user_id: UUID
-    energy_level: float = Field(..., ge=0, le=100)
+    energy_level: float = Field(..., ge=0, le=10)
     sleep_hours: Optional[float] = None
     caffeine_intake: Optional[int] = None
     exercise_mins: Optional[int] = None
@@ -115,11 +115,11 @@ class TaskResponse(BaseModel):
 
 class BurnoutSnapshotCreate(BaseModel):
     user_id: UUID
-    sleep_trend: Optional[float] = Field(None, ge=0, le=1)
+    sleep_trend: Optional[float] = Field(None, ge=0)
     deep_work_streak: Optional[int] = Field(None, ge=0)
     stress_trend: Optional[float] = Field(None, ge=0, le=1)
-    energy_variance: Optional[float] = Field(None, ge=0, le=1)
-    cognitive_load: Optional[float] = Field(None, ge=0, le=1)
+    energy_variance: Optional[float] = Field(None, ge=0)
+    cognitive_load: Optional[float] = Field(None, ge=0)
 
 class BurnoutRiskResponse(BaseModel):
     user_id: UUID

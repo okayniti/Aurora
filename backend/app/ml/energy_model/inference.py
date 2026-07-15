@@ -41,7 +41,7 @@ class EnergyPredictor:
             return
 
         try:
-            checkpoint = torch.load(self.model_path, map_location=self.device)
+            checkpoint = torch.load(self.model_path, map_location=self.device, weights_only=False)
             config = checkpoint.get("model_config", {})
 
             self.lstm_model = EnergyLSTM(
