@@ -100,6 +100,18 @@ app.include_router(api_router)
 from app.api.auth import router as auth_router
 app.include_router(auth_router, prefix="/api")
 
+from app.utils.websocket import manager
+from fastapi import WebSocket, WebSocketDisconnect
+
+@app.websocket("/api/ws/replan")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
 
 # Health check
 @app.get("/api/health", tags=["System"])

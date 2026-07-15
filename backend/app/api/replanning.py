@@ -70,6 +70,15 @@ async def trigger_replan(request: Request, data: ReplanTriggerRequest, db: Async
     )
     db.add(event)
 
+    # Broadcast replan event to frontend via WebSocket
+    from app.utils.websocket import manager
+    await manager.broadcast({
+        "type": "replan",
+        "user_id": str(data.user_id),
+        "trigger_type": data.trigger_type,
+        "tasks_affected": replan_result.get("tasks_affected", 0),
+    })
+
     return replan_result
 
 
