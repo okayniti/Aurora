@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useUser } from "@/lib/UserContext";
 import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
@@ -45,7 +45,7 @@ export default function BurnoutPage() {
     const [cogLoad, setCogLoad] = useState(5);
     const [analyzing, setAnalyzing] = useState(false);
 
-    const { data: trendData, error, loading: trendLoading } = useApi(
+    const { data: trendData, error, loading: trendLoading, refetch: refetchTrend } = useApi(
         async () => {
             if (!userId) throw new Error("no user");
             const trend: any = await api.getBurnoutTrend(userId, 30);
@@ -61,7 +61,7 @@ export default function BurnoutPage() {
         { staleTime: 30000 }
     );
 
-    const { data: featureData, loading: featureLoading } = useApi(
+    const { data: featureData, loading: featureLoading, refetch: refetchFeatures } = useApi(
         async () => {
             if (!userId) throw new Error("no user");
             const risk: any = await api.getBurnoutRisk(userId);
@@ -100,6 +100,25 @@ export default function BurnoutPage() {
 
     const stressEmoji = stressLevel >= 8 ? "😤" : stressLevel >= 5 ? "😬" : "😌";
     const plainEnglishRisk = latest < 0.25 ? "You're doing great!" : latest < 0.5 ? "Take it easy" : "Rest now";
+
+    // On mount: load latest snapshot to initialize sliders
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                if (!userId) return;
+                const res: any = await api.getLatestBurnoutSnapshot(userId);
+                if (!mounted) return;
+                if (res?.snapshot) {
+                    if (typeof res.snapshot.stress_trend === 'number') setStressLevel(Math.round(res.snapshot.stress_trend));
+                    if (typeof res.snapshot.cognitive_load === 'number') setCogLoad(Math.round(res.snapshot.cognitive_load));
+                }
+            } catch (e) {
+                // ignore — will use defaults/demo
+            }
+        })();
+        return () => { mounted = false; };
+    }, [userId]);
 
     return (
         <div className="space-y-8 animate-fade-in">
@@ -206,7 +225,25 @@ export default function BurnoutPage() {
 
             <ScrollReveal index={5}>
                 <button
-                    onClick={() => { setAnalyzing(true); setTimeout(() => setAnalyzing(false), 1000); }}
+                    onClick={async () => {
+                        setAnalyzing(true);
+                        try {
+                            if (userId) {
+                                await api.recordBurnoutSnapshot({
+                                    user_id: userId,
+                                    stress_trend: stressLevel,
+                                    cognitive_load: cogLoad,
+                                });
+                                // Refresh charts
+                                try { refetchTrend(); } catch {}
+                                try { refetchFeatures(); } catch {}
+                            }
+                        } catch (err) {
+                            // ignore for now
+                        } finally {
+                            setAnalyzing(false);
+                        }
+                    }}
                     disabled={analyzing}
                     className={`w-full py-4 rounded-xl text-on-primary text-lg font-bold tracking-wide outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-95 transition-all duration-200 bg-primary hover:bg-primary-dim shadow-glow disabled:opacity-40`}
                 >
