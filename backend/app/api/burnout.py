@@ -24,11 +24,11 @@ async def get_burnout_risk(
     request: Request,
     response: Response,
     user_id: UUID,
-    sleep_trend: float = 7.0,
-    deep_work_streak: int = 0,
-    stress_trend: float = 0.3,
-    energy_variance: float = 1.0,
-    cognitive_load: float = 5.0,
+    sleep_trend: float = None,
+    deep_work_streak: int = None,
+    stress_trend: float = None,
+    energy_variance: float = None,
+    cognitive_load: float = None,
     db: AsyncSession = Depends(get_db),
 ):
     """Get current burnout risk prediction with explainability."""
@@ -65,3 +65,9 @@ async def record_burnout_snapshot(
         db, data.user_id, request.app.state.burnout_predictor, data.sleep_trend, data.deep_work_streak,
         data.stress_trend, data.energy_variance, data.cognitive_load,
     )
+
+
+@router.get("/snapshot/{user_id}/latest")
+async def get_latest_burnout_snapshot(user_id: UUID, db: AsyncSession = Depends(get_db)):
+    """Return the latest raw burnout snapshot for UI initialization."""
+    return await service.get_latest_snapshot(db, user_id)
