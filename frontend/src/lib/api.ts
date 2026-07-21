@@ -50,6 +50,10 @@ export const api = {
     },
     getBurnoutTrend: (userId: string, days = 30) =>
         fetchAPI(`/burnout/trend/${userId}?days=${days}`),
+    getLatestBurnoutSnapshot: (userId: string) =>
+        fetchAPI(`/burnout/snapshot/${userId}/latest`),
+    recordBurnoutSnapshot: (data: any) =>
+        fetchAPI("/burnout/snapshot", { method: "POST", body: JSON.stringify(data) }),
 
     // Scheduler
     optimizeSchedule: (userId: string) =>
@@ -63,6 +67,8 @@ export const api = {
             method: "POST",
             body: JSON.stringify({ user_id: userId, identity_desc: desc }),
         }),
+    getIdentityProfile: (userId: string) =>
+        fetchAPI(`/identity/profile/${userId}`),
     computeAlignment: (userId: string, taskId?: string, desc?: string) =>
         fetchAPI("/identity/align", {
             method: "POST",
