@@ -9,6 +9,11 @@ from datetime import datetime, date
 from uuid import UUID
 
 
+# NOTE: request bodies never carry `user_id` — the owning user is always derived
+# from the bearer token (see app.dependencies.get_current_user). Response models
+# still echo it back so clients can key their caches.
+
+
 # ── User Schemas ──────────────────────────────────────────────
 
 class UserCreate(BaseModel):
@@ -30,7 +35,6 @@ class UserResponse(BaseModel):
 # ── Energy Schemas ────────────────────────────────────────────
 
 class EnergyLogCreate(BaseModel):
-    user_id: UUID
     energy_level: float = Field(..., ge=0, le=10)
     sleep_hours: Optional[float] = None
     caffeine_intake: Optional[int] = None
@@ -66,7 +70,6 @@ class EnergyComparisonResponse(BaseModel):
 # ── Task Schemas ──────────────────────────────────────────────
 
 class TaskCreate(BaseModel):
-    user_id: UUID
     title: str
     description: Optional[str] = None
     difficulty: Optional[float] = Field(None, ge=0, le=10)
@@ -114,7 +117,6 @@ class TaskResponse(BaseModel):
 # ── Burnout Schemas ───────────────────────────────────────────
 
 class BurnoutSnapshotCreate(BaseModel):
-    user_id: UUID
     sleep_trend: Optional[float] = Field(None, ge=0)
     deep_work_streak: Optional[int] = Field(None, ge=0)
     stress_trend: Optional[float] = Field(None, ge=0, le=1)
@@ -174,11 +176,9 @@ class RLEfficiencyResponse(BaseModel):
 # ── Identity Schemas ──────────────────────────────────────────
 
 class IdentityProfileUpdate(BaseModel):
-    user_id: UUID
     identity_desc: str
 
 class IdentityAlignRequest(BaseModel):
-    user_id: UUID
     task_id: Optional[UUID] = None
     task_description: Optional[str] = None  # ad-hoc check
 
@@ -197,7 +197,6 @@ class IdentityScoresResponse(BaseModel):
 # ── Replanning Schemas ────────────────────────────────────────
 
 class ReplanTriggerRequest(BaseModel):
-    user_id: UUID
     trigger_type: str = Field(..., pattern="^(missed_task|energy_deviation|stress_spike|manual)$")
     trigger_data: Optional[Dict[str, Any]] = None
 
