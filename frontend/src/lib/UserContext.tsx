@@ -1,93 +1,92 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { api, getToken, clearSession, ApiError, type AuthUser } from "@/lib/api";
+
+/** Pages that render without a session. */
+const PUBLIC_ROUTES = ["/login", "/register"];
 
 interface UserState {
+  user: AuthUser | null;
   userId: string | null;
   userName: string | null;
+  userEmail: string | null;
   loading: boolean;
   error: string | null;
-  setUserId: (id: string) => void;
+  setUser: (user: AuthUser) => void;
+  refresh: () => Promise<void>;
+  signOut: () => void;
 }
 
 const UserContext = createContext<UserState>({
+  user: null,
   userId: null,
   userName: null,
+  userEmail: null,
   loading: true,
   error: null,
-  setUserId: () => { },
+  setUser: () => { },
+  refresh: async () => { },
+  signOut: () => { },
 });
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+  const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
 
-  useEffect(() => {
-    // Try to discover a user from the backend
-    async function discover() {
-      try {
-        // Check localStorage first
-        const stored = localStorage.getItem("aurora_user_id");
-        if (stored) {
-          setUserId(stored);
-          setUserName(localStorage.getItem("aurora_user_name") || "User");
-          setLoading(false);
-          return;
-        }
-
-        // Try to fetch users list from backend
-        const res = await fetch(`${API_BASE}/api/users`, {
-          signal: AbortSignal.timeout(3000),
-        });
-        if (res.ok) {
-          const users = await res.json();
-          if (users.length > 0) {
-            const user = users[0]; // Use first user (demo user)
-            setUserId(user.id);
-            setUserName(user.name);
-            localStorage.setItem("aurora_user_id", user.id);
-            localStorage.setItem("aurora_user_name", user.name);
-            setLoading(false);
-            return;
-          } else {
-            // Auto-create a demo user if database is empty
-            const createRes = await fetch(`${API_BASE}/api/users?email=demo@aurora.ai&name=Demo%20User&identity_desc=Disciplined%20engineer%20focusing%20on%20deep%20work`, {
-              method: "POST"
-            });
-            if (createRes.ok) {
-              const user = await createRes.json();
-              setUserId(user.id);
-              setUserName(user.name);
-              localStorage.setItem("aurora_user_id", user.id);
-              localStorage.setItem("aurora_user_name", user.name);
-              setLoading(false);
-              return;
-            }
-          }
-        }
-      } catch {
-        // Backend is offline
-        setError("backend_offline");
-      }
+  /** The signed-in user is whoever the token says it is — never "the first row in the users table". */
+  const refresh = useCallback(async () => {
+    if (!getToken()) {
+      setUser(null);
       setLoading(false);
+      if (!isPublicRoute) router.replace("/login");
+      return;
     }
 
-    discover();
-  }, []);
+    try {
+      setUser(await api.getMe());
+      setError(null);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        // api.ts already cleared the session and redirected.
+        setUser(null);
+      } else {
+        setError("backend_offline");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [isPublicRoute, router]);
 
-  const handleSetUserId = (id: string) => {
-    setUserId(id);
-    localStorage.setItem("aurora_user_id", id);
-    setError(null);
-  };
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  const signOut = useCallback(() => {
+    clearSession();
+    setUser(null);
+    router.push("/login");
+  }, [router]);
 
   return (
     <UserContext.Provider
-      value={{ userId, userName, loading, error, setUserId: handleSetUserId }}
+      value={{
+        user,
+        userId: user?.id ?? null,
+        userName: user?.name ?? null,
+        userEmail: user?.email ?? null,
+        loading,
+        error,
+        setUser,
+        refresh,
+        signOut,
+      }}
     >
       {children}
     </UserContext.Provider>
