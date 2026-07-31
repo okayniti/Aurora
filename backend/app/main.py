@@ -32,6 +32,8 @@ logger = setup_logger("aurora.main")
 async def lifespan(app: FastAPI):
     """Application lifecycle: startup and shutdown events."""
     logger.info("🌅 AURORA starting up...")
+    # Ensure models are imported so Base.metadata is populated before creating tables
+    from app.database import models  # noqa: F401
     await init_db()
     logger.info("✅ Database initialized")
 
@@ -80,15 +82,20 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # Validation Error Handler
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    # Never echo exc.body back: on a failed registration or login it contains the
+    # submitted plaintext password. Report which field failed and why, nothing more.
     errors = exc.errors()
-    field = ".".join(str(loc) for loc in errors[0]["loc"]) if errors else "unknown"
+    first = errors[0] if errors else {}
+    field = ".".join(str(loc) for loc in first.get("loc", ())) or "unknown"
+    reason = first.get("msg", "Invalid value")
     return JSONResponse(
         status_code=422,
         content={
             "error": "Validation Error",
             "field": field,
-            "received": exc.body
-        }
+            # `detail` matches FastAPI's HTTPException shape so clients read one key.
+            "detail": f"{field}: {reason}",
+        },
     )
 
 # Request timing
@@ -104,13 +111,24 @@ from app.utils.websocket import manager
 from fastapi import WebSocket, WebSocketDisconnect
 
 @app.websocket("/api/ws/replan")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
+async def websocket_endpoint(websocket: WebSocket, token: str = ""):
+    """Replan event stream. The token is passed as a query param because the
+    browser WebSocket API cannot set an Authorization header."""
+    from fastapi import HTTPException
+    from app.dependencies import decode_token_subject
+
+    try:
+        user_id = decode_token_subject(token)
+    except HTTPException:
+        await websocket.close(code=1008)
+        return
+
+    await manager.connect(websocket, user_id)
     try:
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        manager.disconnect(websocket, user_id)
 
 
 # Health check
@@ -138,34 +156,9 @@ async def health_check():
     }
 
 
-# User creation endpoint (for bootstrapping)
-@app.post("/api/users", tags=["Users"])
-@limiter.limit("20/minute")
-async def create_user(request: Request, email: str, name: str, identity_desc: str = None):
-    """Create a new user."""
-    from app.database.connection import async_session_factory
-    from app.database.models import User
-
-    async with async_session_factory() as session:
-        user = User(email=email, name=name, identity_desc=identity_desc)
-        session.add(user)
-        await session.commit()
-        await session.refresh(user)
-        return {"id": str(user.id), "email": email, "name": name}
-
-
-@app.get("/api/users", tags=["Users"])
-async def list_users():
-    """List all users — used by frontend to auto-discover demo user."""
-    from sqlalchemy import select
-    from app.database.connection import async_session_factory
-    from app.database.models import User
-
-    async with async_session_factory() as session:
-        result = await session.execute(select(User))
-        users = result.scalars().all()
-        return [
-            {"id": str(u.id), "email": u.email, "name": u.name}
-            for u in users
-        ]
+# NOTE: the former unauthenticated /api/users endpoints were removed. Listing every
+# user's email let any caller enumerate accounts, and the POST variant created
+# password-less users the login flow could never own. Accounts are now created
+# through POST /api/auth/register, and the client identifies itself via
+# GET /api/auth/me.
 
