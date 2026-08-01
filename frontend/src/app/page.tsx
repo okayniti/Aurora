@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useUser } from "@/lib/UserContext";
 import { useApi } from "@/lib/useApi";
-import { api } from "@/lib/api";
+import { api, getToken, WS_BASE } from "@/lib/api";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ShimmerButton } from "@/components/ui/ShimmerButton";
 import { TypingPlaceholder } from "@/components/ui/TypingPlaceholder";
@@ -36,7 +36,7 @@ const AuroraChat = React.memo(({ userId }: { userId: string | null }) => {
         });
 
         try {
-            const res: any = await api.chatWithAurora(userId, message);
+            const res: any = await api.chatWithAurora(message);
             setChatHistory(prev => {
                 const next = [...prev, { role: "aurora", content: res.response } as ChatMessage];
                 if (next.length > 6) return next.slice(next.length - 6);
@@ -301,11 +301,11 @@ export default function Dashboard() {
     useEffect(() => {
         if (!userId) return;
 
-        const wsUrl = process.env.NEXT_PUBLIC_API_URL
-            ? process.env.NEXT_PUBLIC_API_URL.replace("http", "ws").replace("/api", "/ws/replan")
-            : "ws://localhost:8000/api/ws/replan";
-
-        const socket = new WebSocket(wsUrl);
+        // The browser WebSocket API cannot set headers, so the token rides as a
+        // query param; the server rejects the handshake without a valid one.
+        const token = getToken();
+        if (!token) return;
+        const socket = new WebSocket(`${WS_BASE}/ws/replan?token=${encodeURIComponent(token)}`);
 
         socket.onmessage = (event) => {
             try {
