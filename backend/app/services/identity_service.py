@@ -112,3 +112,10 @@ class IdentityService:
                     task.identity_alignment = alignment
 
         return {"user_id": str(user_id), "scores": scores}
+
+    async def get_identity(self, session: AsyncSession, user_id: UUID) -> Dict:
+        """Get user identity description."""
+        user = await session.get(User, user_id)
+        if not user:
+            return {"user_id": str(user_id), "identity_desc": ""}
+        return {"user_id": str(user_id), "identity_desc": user.identity_desc or ""}
