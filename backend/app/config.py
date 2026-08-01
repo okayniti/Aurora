@@ -72,3 +72,10 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+if not settings.DEBUG and settings.SECRET_KEY == "dev_secret_key_123":
+    raise RuntimeError(
+        "SECRET_KEY is still the development default with DEBUG=false. "
+        "Set a real SECRET_KEY env var before running in production — "
+        "otherwise every issued JWT can be forged."
+    )
