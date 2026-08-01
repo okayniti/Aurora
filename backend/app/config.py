@@ -3,6 +3,7 @@ AURORA Configuration Module
 Loads environment variables using Pydantic BaseSettings.
 """
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 from typing import Optional
 
@@ -30,6 +31,18 @@ class Settings(BaseSettings):
     # Database — SQLite for dev, PostgreSQL for production
     DATABASE_URL: str = "sqlite+aiosqlite:///./aurora_dev.db"
     DATABASE_ECHO: bool = False
+
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def _use_async_postgres_driver(cls, v: str) -> str:
+        # Managed Postgres providers (Render, Heroku, Supabase pooler links, ...)
+        # hand out plain postgres:// / postgresql:// URLs, but SQLAlchemy's async
+        # engine requires an async driver in the scheme or it fails at startup.
+        if v.startswith("postgres://"):
+            return "postgresql+asyncpg://" + v[len("postgres://"):]
+        if v.startswith("postgresql://"):
+            return "postgresql+asyncpg://" + v[len("postgresql://"):]
+        return v
 
     # CORS
     FRONTEND_URL: Optional[str] = None
