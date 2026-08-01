@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AnimatedGradientText } from "@/components/ui/AnimatedGradientText";
 import { ShimmerButton } from "@/components/ui/ShimmerButton";
+import { api } from "@/lib/api";
+import { useUser } from "@/lib/UserContext";
 
 export default function RegisterPage() {
     const [email, setEmail] = useState("");
@@ -14,6 +16,7 @@ export default function RegisterPage() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const { setUser } = useUser();
 
     const handleRegister = async () => {
         if (!email || !password || !confirmPassword || !name) {
@@ -24,39 +27,19 @@ export default function RegisterPage() {
             setError("Passwords do not match");
             return;
         }
+        if (password.length < 8) {
+            setError("Password must be at least 8 characters");
+            return;
+        }
         setIsLoading(true);
         setError("");
 
         try {
-            const res = await fetch("http://localhost:8000/api/auth/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password, name })
-            });
-
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.detail || "Registration failed");
-            }
-
-            // Successfully registered, now login
-            const loginRes = await fetch("http://localhost:8000/api/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
-            });
-
-            if (!loginRes.ok) {
-                throw new Error("Registered successfully but login failed. Please login manually.");
-            }
-
-            const data = await loginRes.json();
-            localStorage.setItem("aurora_token", data.access_token);
-            localStorage.setItem("aurora_user_email", email);
-            
+            // Registering returns a session directly — no second login round-trip.
+            setUser(await api.register(email, password, name));
             router.push("/energy");
         } catch (err: any) {
-            setError(err.message);
+            setError(err.message || "Registration failed");
         } finally {
             setIsLoading(false);
         }

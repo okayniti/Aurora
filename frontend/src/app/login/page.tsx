@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AnimatedGradientText } from "@/components/ui/AnimatedGradientText";
 import { ShimmerButton } from "@/components/ui/ShimmerButton";
 import { api } from "@/lib/api";
+import { useUser } from "@/lib/UserContext";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -13,6 +14,7 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const { setUser } = useUser();
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -23,32 +25,11 @@ export default function LoginPage() {
         setError("");
 
         try {
-            const res = await fetch("http://localhost:8000/api/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
-            });
-
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.detail || "Login failed");
-            }
-
-            const data = await res.json();
-            localStorage.setItem("aurora_token", data.access_token);
-            
-            // Fetch initial user data
-            const meRes = await fetch("http://localhost:8000/api/auth/me", {
-                headers: { "Authorization": `Bearer ${data.access_token}` }
-            });
-            if (meRes.ok) {
-                const meData = await meRes.json();
-                localStorage.setItem("aurora_user_email", meData.email);
-            }
-
+            // api.login stores the token and returns the account it belongs to.
+            setUser(await api.login(email, password));
             router.push("/energy");
         } catch (err: any) {
-            setError(err.message);
+            setError(err.message || "Login failed");
         } finally {
             setIsLoading(false);
         }
