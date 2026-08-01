@@ -52,8 +52,9 @@ export default function SchedulerPage() {
         async () => {
             if (!userId) throw new Error("no user");
             const schedule: any = await api.getSchedule(userId);
-            if (!schedule?.entries?.length) return demoSchedule;
-            return schedule.entries.map((entry: any) => ({
+            // No entries yet is a real, common state (before the optimizer has
+            // run today) — pass it through rather than showing invented tasks.
+            return (schedule?.entries || []).map((entry: any) => ({
                 time: `${String(entry.time_slot_start_hour).padStart(2, "0")}:00 – ${String(entry.time_slot_end_hour).padStart(2, "0")}:00`,
                 task: entry.task_title,
                 difficulty: 5,
@@ -77,6 +78,7 @@ export default function SchedulerPage() {
     );
 
     const isDemo = !!error;
+    const hasSchedule = !!scheduleData && scheduleData.length > 0;
     const loading = scheduleLoading || tasksLoading;
 
     async function handleCreateTask(e: React.FormEvent) {
@@ -95,8 +97,11 @@ export default function SchedulerPage() {
         }
     }
 
-    const bestFocusWindow = (scheduleData || demoSchedule).reduce((max: any, cur: any) => cur.energy > max.energy && cur.status !== "break" ? cur : max, (scheduleData || demoSchedule)[0]);
-    const nextTask = (scheduleData || demoSchedule).find((s: any) => s.status !== "done" && s.status !== "break") || (scheduleData || demoSchedule)[0];
+    const displaySchedule = hasSchedule ? scheduleData : (isDemo ? demoSchedule : []);
+    const bestFocusWindow = displaySchedule.length
+        ? displaySchedule.reduce((max: any, cur: any) => cur.energy > max.energy && cur.status !== "break" ? cur : max, displaySchedule[0])
+        : null;
+    const nextTask = displaySchedule.find((s: any) => s.status !== "done" && s.status !== "break") || displaySchedule[0];
 
     return (
         <div className="space-y-8 animate-fade-in">
@@ -211,13 +216,18 @@ export default function SchedulerPage() {
                                     <span className="text-sm font-medium text-on-surface-variant">Optimized Routine Timeline</span>
                                 </div>
                                 <span className="text-xs px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary uppercase font-mono tracking-wider">
-                                    {scheduleData && scheduleData.length > 0 && scheduleData !== demoSchedule ? "DQN Active" : "Baseline"}
+                                    {hasSchedule && !isDemo ? "DQN Active" : "Baseline"}
                                 </span>
                             </div>
-                            
+
                             <div className="p-6 overflow-y-auto max-h-[450px]">
+                                {!isDemo && !hasSchedule ? (
+                                    <div className="py-10 text-center text-sm text-on-surface-variant">
+                                        No optimized schedule for today yet — run the optimizer below.
+                                    </div>
+                                ) : (
                                 <div className="relative pl-6 border-l border-white/10 space-y-6">
-                                    {(scheduleData || demoSchedule).map((entry: any, index: number) => {
+                                    {displaySchedule.map((entry: any, index: number) => {
                                         const isBreak = entry.status === "break";
                                         return (
                                             <div key={index} className="relative group">
@@ -258,6 +268,7 @@ export default function SchedulerPage() {
                                         );
                                     })}
                                 </div>
+                                )}
                             </div>
                         </ScrollReveal>
 
