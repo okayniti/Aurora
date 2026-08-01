@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { AnimatedGradientText } from "@/components/ui/AnimatedGradientText";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { api } from "@/lib/api";
+import { useUser } from "@/lib/UserContext";
 
 interface TopBarProps {
     onMenuToggle?: () => void;
@@ -13,26 +12,21 @@ interface TopBarProps {
 export default function TopBar({ onMenuToggle }: TopBarProps) {
     const [status, setStatus] = useState<"online" | "offline">("offline");
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [userEmail, setUserEmail] = useState("");
-    const router = useRouter();
+    const { userEmail, signOut } = useUser();
+    const displayEmail = userEmail || "…";
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         async function checkBackend() {
             try {
-                const res = await fetch(`${API_BASE}/api/health`, {
-                    signal: AbortSignal.timeout(3000),
-                });
-                if (res.ok) setStatus("online");
-                else setStatus("offline");
+                await api.healthCheck();
+                setStatus("online");
             } catch {
                 setStatus("offline");
             }
         }
         checkBackend();
         const interval = setInterval(checkBackend, 30000);
-        
-        setUserEmail(localStorage.getItem("aurora_user_email") || "User@aurora.app");
 
         function close(e: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -48,9 +42,8 @@ export default function TopBar({ onMenuToggle }: TopBarProps) {
     }, []);
 
     const handleSignOut = () => {
-        localStorage.removeItem("aurora_token");
-        localStorage.removeItem("aurora_user_email");
-        router.push("/login");
+        setDropdownOpen(false);
+        signOut();
     };
 
     return (
@@ -104,13 +97,13 @@ export default function TopBar({ onMenuToggle }: TopBarProps) {
                         onClick={() => setDropdownOpen(!dropdownOpen)}
                         className="w-10 h-10 md:w-10 md:h-10 rounded-full overflow-hidden border border-primary/20 bg-surface-container-high flex items-center justify-center shrink-0 hover:border-primary transition-colors duration-300"
                     >
-                        <span className="text-primary text-lg font-bold uppercase">{userEmail.charAt(0)}</span>
+                        <span className="text-primary text-lg font-bold uppercase">{displayEmail.charAt(0)}</span>
                     </button>
                     
                     {dropdownOpen && (
                         <div className="absolute right-0 mt-3 w-56 rounded-xl glass-panel border border-primary/20 shadow-2xl py-2 flex flex-col z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                             <div className="px-4 py-3 border-b border-primary/10 mb-1">
-                                <p className="text-sm font-medium text-on-surface truncate">{userEmail}</p>
+                                <p className="text-sm font-medium text-on-surface truncate">{displayEmail}</p>
                                 <p className="text-xs text-on-surface-variant mt-0.5">Aurora User</p>
                             </div>
                             <button 
