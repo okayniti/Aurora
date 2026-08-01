@@ -2,15 +2,14 @@
 AURORA API — Scheduler Endpoints
 """
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from datetime import date
-import time
 
 from app.utils.cache import api_cache
 
-from app.dependencies import get_db
+from app.dependencies import get_db, get_current_user, require_path_user
 from app.database.schemas import ScheduleOptimizeRequest, SchedulerFeedback
 from app.services.scheduler_service import SchedulerService
 
@@ -26,6 +25,7 @@ async def optimize_schedule(
     request: Request, user_id: UUID,
     data: ScheduleOptimizeRequest = ScheduleOptimizeRequest(),
     db: AsyncSession = Depends(get_db),
+    _owner=Depends(require_path_user),
 ):
     """Run RL agent to generate optimized daily schedule."""
     cache_key = f"scheduler_optimize_{user_id}_{data.date or 'today'}"
@@ -34,9 +34,9 @@ async def optimize_schedule(
         return cached
 
     result = await service.optimize_schedule(
-        db, user_id, 
-        request.app.state.schedule_optimizer, 
-        request.app.state.energy_predictor, 
+        db, user_id,
+        request.app.state.schedule_optimizer,
+        request.app.state.energy_predictor,
         data.date
     )
     api_cache.set(cache_key, result)
@@ -45,7 +45,10 @@ async def optimize_schedule(
 
 @router.get("/schedule/{user_id}")
 async def get_schedule(
-    user_id: UUID, target_date: date = None, db: AsyncSession = Depends(get_db)
+    user_id: UUID,
+    target_date: date = None,
+    db: AsyncSession = Depends(get_db),
+    _owner=Depends(require_path_user),
 ):
     """Get optimized schedule for a given day."""
     return await service.get_schedule(db, user_id, target_date)
@@ -53,18 +56,30 @@ async def get_schedule(
 
 @router.post("/feedback")
 @limiter.limit("20/minute")
-async def submit_feedback(request: Request, data: SchedulerFeedback, db: AsyncSession = Depends(get_db)):
+async def submit_feedback(
+    request: Request,
+    data: SchedulerFeedback,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
     """Submit reward signal (task completed or missed)."""
     from app.database.models import ScheduleEntry
     entry = await db.get(ScheduleEntry, data.schedule_entry_id)
-    if entry:
-        entry.was_completed = data.was_completed
-        return {"status": "feedback_recorded"}
-    return {"error": "Schedule entry not found"}
+    if entry is None:
+        raise HTTPException(status_code=404, detail="Schedule entry not found")
+    if entry.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this resource")
+
+    entry.was_completed = data.was_completed
+    return {"status": "feedback_recorded"}
 
 
 @router.get("/efficiency/{user_id}")
-async def get_rl_efficiency(user_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_rl_efficiency(
+    user_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    _owner=Depends(require_path_user),
+):
     """Get RL strategy efficiency metrics."""
     from app.database.models import ScheduleEntry
     from sqlalchemy import select, and_

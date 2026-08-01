@@ -17,7 +17,7 @@ try:
 except ImportError:
     genai = None
 
-from app.dependencies import get_db
+from app.dependencies import get_db, get_current_user
 from app.utils.limiter import limiter
 from app.services.energy_service import EnergyService
 from app.services.burnout_service import BurnoutService
@@ -35,21 +35,26 @@ if api_key and api_key != "your_gemini_api_key_here" and genai:
 
 class ChatRequest(BaseModel):
     message: str
-    userId: UUID
 
 
 @router.post("/")
 @limiter.limit("10/minute")
-async def chat_with_aurora(request: Request, data: ChatRequest, db: AsyncSession = Depends(get_db)):
+async def chat_with_aurora(
+    request: Request,
+    data: ChatRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
     """Talk to the Aurora AI assistant with active context."""
     energy_service = EnergyService()
     burnout_service = BurnoutService()
     task_service = TaskService()
+    user_id = current_user.id
 
     # 1. Fetch Energy
     energy_pct = 70
     try:
-        energy_data = await energy_service.get_forecast(db, data.userId, request.app.state.energy_predictor)
+        energy_data = await energy_service.get_forecast(db, user_id, request.app.state.energy_predictor)
         hr_preds = energy_data.get("hourly_predictions", [])
         current_hour = datetime.utcnow().hour
         if hr_preds and len(hr_preds) > current_hour:
@@ -64,7 +69,7 @@ async def chat_with_aurora(request: Request, data: ChatRequest, db: AsyncSession
     burnout_pct = 0
     try:
         burnout_data = await burnout_service.get_risk(
-            db, data.userId, request.app.state.burnout_predictor,
+            db, user_id, request.app.state.burnout_predictor,
             7.0, 0, 0.3, 1.0, 5.0
         )
         burnout_pct = int(burnout_data.get("burnout_probability", 0.0) * 100)
@@ -74,9 +79,9 @@ async def chat_with_aurora(request: Request, data: ChatRequest, db: AsyncSession
     # 3. Fetch Active Tasks
     active_tasks = "None right now"
     try:
-        tasks = await task_service.get_tasks(db, data.userId, status="in_progress")
+        tasks = await task_service.get_tasks(db, user_id, status="in_progress")
         if not tasks:
-            tasks = await task_service.get_tasks(db, data.userId, status="pending")
+            tasks = await task_service.get_tasks(db, user_id, status="pending")
         if tasks:
             active_tasks = ", ".join([
                 t.get("title", t.title) if isinstance(t, dict) else t.title
@@ -88,7 +93,7 @@ async def chat_with_aurora(request: Request, data: ChatRequest, db: AsyncSession
     # 4. Fetch Identity Profile
     identity = "General professional focusing on deep work."
     try:
-        result = await db.execute(select(User).where(User.id == data.userId))
+        result = await db.execute(select(User).where(User.id == user_id))
         user = result.scalar_one_or_none()
         if user and user.identity_desc:
             identity = user.identity_desc

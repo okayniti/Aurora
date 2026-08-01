@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
-from app.dependencies import get_db
+from app.dependencies import get_db, get_current_user, require_path_user
 from app.database.schemas import ReplanTriggerRequest
 from app.database.models import ReplanEvent
 
@@ -17,7 +17,12 @@ router = APIRouter(prefix="/replan", tags=["Dynamic Replanning"])
 
 @router.post("/trigger")
 @limiter.limit("20/minute")
-async def trigger_replan(request: Request, data: ReplanTriggerRequest, db: AsyncSession = Depends(get_db)):
+async def trigger_replan(
+    request: Request,
+    data: ReplanTriggerRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
     """Manually trigger a schedule replan."""
     from app.ml.energy_model.inference import EnergyPredictor
     from app.database.models import Task
@@ -26,10 +31,11 @@ async def trigger_replan(request: Request, data: ReplanTriggerRequest, db: Async
 
     engine = request.app.state.replan_engine
     predictor = request.app.state.energy_predictor
+    user_id = current_user.id
 
     # Get remaining tasks
     query = select(Task).where(
-        and_(Task.user_id == data.user_id, Task.status.in_(["pending", "in_progress"]))
+        and_(Task.user_id == user_id, Task.status.in_(["pending", "in_progress"]))
     )
     result = await db.execute(query)
     tasks = result.scalars().all()
@@ -63,18 +69,18 @@ async def trigger_replan(request: Request, data: ReplanTriggerRequest, db: Async
 
     # Log replan event
     event = ReplanEvent(
-        user_id=data.user_id,
+        user_id=user_id,
         trigger_type=data.trigger_type,
         trigger_data=data.trigger_data,
         tasks_affected=replan_result.get("tasks_affected", 0),
     )
     db.add(event)
 
-    # Broadcast replan event to frontend via WebSocket
+    # Push the replan event to this user's own sockets only
     from app.utils.websocket import manager
-    await manager.broadcast({
+    await manager.send_to_user(str(user_id), {
         "type": "replan",
-        "user_id": str(data.user_id),
+        "user_id": str(user_id),
         "trigger_type": data.trigger_type,
         "tasks_affected": replan_result.get("tasks_affected", 0),
     })
@@ -83,7 +89,11 @@ async def trigger_replan(request: Request, data: ReplanTriggerRequest, db: Async
 
 
 @router.get("/events/{user_id}")
-async def get_replan_events(user_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_replan_events(
+    user_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    _owner=Depends(require_path_user),
+):
     """Get replan event history."""
     from sqlalchemy import select
     query = select(ReplanEvent).where(

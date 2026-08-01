@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
-from app.dependencies import get_db
+from app.dependencies import get_db, get_current_user, require_path_user, require_task_owner
 from app.database.schemas import TaskCreate, TaskUpdate, TaskStatusUpdate
 from app.services.task_service import TaskService
 
@@ -18,10 +18,15 @@ service = TaskService()
 
 @router.post("/")
 @limiter.limit("20/minute")
-async def create_task(request: Request, data: TaskCreate, db: AsyncSession = Depends(get_db)):
+async def create_task(
+    request: Request,
+    data: TaskCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
     """Create a new task."""
     return await service.create_task(
-        db, data.user_id, data.title, data.description,
+        db, current_user.id, data.title, data.description,
         data.difficulty, data.estimated_minutes, data.priority,
         data.category, data.scheduled_start, data.scheduled_end,
     )
@@ -31,6 +36,7 @@ async def create_task(request: Request, data: TaskCreate, db: AsyncSession = Dep
 async def get_tasks(
     user_id: UUID, status: str = None, category: str = None,
     db: AsyncSession = Depends(get_db),
+    _owner=Depends(require_path_user),
 ):
     """List user tasks with optional filters."""
     return await service.get_tasks(db, user_id, status, category)
@@ -38,7 +44,10 @@ async def get_tasks(
 
 @router.put("/{task_id}")
 async def update_task(
-    task_id: UUID, data: TaskUpdate, db: AsyncSession = Depends(get_db)
+    task_id: UUID,
+    data: TaskUpdate,
+    db: AsyncSession = Depends(get_db),
+    _task=Depends(require_task_owner),
 ):
     """Update task details."""
     return await service.update_task(db, task_id, **data.model_dump(exclude_unset=True))
@@ -46,7 +55,10 @@ async def update_task(
 
 @router.patch("/{task_id}/status")
 async def update_task_status(
-    task_id: UUID, data: TaskStatusUpdate, db: AsyncSession = Depends(get_db)
+    task_id: UUID,
+    data: TaskStatusUpdate,
+    db: AsyncSession = Depends(get_db),
+    _task=Depends(require_task_owner),
 ):
     """Update task status (pending/in_progress/done/missed)."""
     return await service.update_status(db, task_id, data.status, data.actual_minutes)

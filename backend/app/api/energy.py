@@ -6,11 +6,10 @@ from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from datetime import date
-import time
 
 from app.utils.cache import api_cache
 
-from app.dependencies import get_db
+from app.dependencies import get_db, get_current_user, require_path_user
 from app.database.schemas import EnergyLogCreate, EnergyForecastResponse
 from app.services.energy_service import EnergyService
 
@@ -21,10 +20,16 @@ service = EnergyService()
 
 
 @router.get("/forecast/{user_id}")
-async def get_energy_forecast(request: Request, response: Response, user_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_energy_forecast(
+    request: Request,
+    response: Response,
+    user_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    _owner=Depends(require_path_user),
+):
     """Get 24-hour energy level predictions."""
     response.headers["Cache-Control"] = "max-age=30"
-    
+
     cache_key = f"energy_forecast_{user_id}"
     cached = api_cache.get(cache_key)
     if cached:
@@ -37,24 +42,37 @@ async def get_energy_forecast(request: Request, response: Response, user_id: UUI
 
 @router.post("/log")
 @limiter.limit("20/minute")
-async def log_energy(request: Request, data: EnergyLogCreate, db: AsyncSession = Depends(get_db)):
+async def log_energy(
+    request: Request,
+    data: EnergyLogCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
     """Log an actual energy level reading."""
     return await service.log_energy(
-        db, data.user_id, data.energy_level,
+        db, current_user.id, data.energy_level,
         data.sleep_hours, data.caffeine_intake, data.exercise_mins,
         data.timestamp,
     )
 
 
 @router.get("/history/{user_id}")
-async def get_energy_history(user_id: UUID, days: int = 7, db: AsyncSession = Depends(get_db)):
+async def get_energy_history(
+    user_id: UUID,
+    days: int = 7,
+    db: AsyncSession = Depends(get_db),
+    _owner=Depends(require_path_user),
+):
     """Get historical energy data."""
     return await service.get_history(db, user_id, days)
 
 
 @router.get("/comparison/{user_id}")
 async def get_energy_comparison(
-    user_id: UUID, target_date: date = None, db: AsyncSession = Depends(get_db)
+    user_id: UUID,
+    target_date: date = None,
+    db: AsyncSession = Depends(get_db),
+    _owner=Depends(require_path_user),
 ):
     """Get predicted vs actual energy comparison."""
     return await service.get_comparison(db, user_id, target_date)

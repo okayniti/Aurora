@@ -5,11 +5,10 @@ AURORA API — Burnout Endpoints
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
-import time
 
 from app.utils.cache import api_cache
 
-from app.dependencies import get_db
+from app.dependencies import get_db, get_current_user, require_path_user
 from app.database.schemas import BurnoutSnapshotCreate
 from app.services.burnout_service import BurnoutService
 
@@ -30,10 +29,11 @@ async def get_burnout_risk(
     energy_variance: float = None,
     cognitive_load: float = None,
     db: AsyncSession = Depends(get_db),
+    _owner=Depends(require_path_user),
 ):
     """Get current burnout risk prediction with explainability."""
     response.headers["Cache-Control"] = "max-age=30"
-    
+
     cache_key = f"burnout_risk_{user_id}_{sleep_trend}_{deep_work_streak}_{stress_trend}_{energy_variance}_{cognitive_load}"
     cached = api_cache.get(cache_key)
     if cached:
@@ -49,7 +49,10 @@ async def get_burnout_risk(
 
 @router.get("/trend/{user_id}")
 async def get_burnout_trend(
-    user_id: UUID, days: int = 30, db: AsyncSession = Depends(get_db)
+    user_id: UUID,
+    days: int = 30,
+    db: AsyncSession = Depends(get_db),
+    _owner=Depends(require_path_user),
 ):
     """Get burnout trend over past N days."""
     return await service.get_trend(db, user_id, days)
@@ -58,16 +61,24 @@ async def get_burnout_trend(
 @router.post("/snapshot")
 @limiter.limit("20/minute")
 async def record_burnout_snapshot(
-    request: Request, data: BurnoutSnapshotCreate, db: AsyncSession = Depends(get_db)
+    request: Request,
+    data: BurnoutSnapshotCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Record burnout indicator values."""
     return await service.get_risk(
-        db, data.user_id, request.app.state.burnout_predictor, data.sleep_trend, data.deep_work_streak,
+        db, current_user.id, request.app.state.burnout_predictor,
+        data.sleep_trend, data.deep_work_streak,
         data.stress_trend, data.energy_variance, data.cognitive_load,
     )
 
 
 @router.get("/snapshot/{user_id}/latest")
-async def get_latest_burnout_snapshot(user_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_latest_burnout_snapshot(
+    user_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    _owner=Depends(require_path_user),
+):
     """Return the latest raw burnout snapshot for UI initialization."""
     return await service.get_latest_snapshot(db, user_id)
