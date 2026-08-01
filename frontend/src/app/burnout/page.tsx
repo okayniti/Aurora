@@ -50,8 +50,9 @@ export default function BurnoutPage() {
             if (!userId) throw new Error("no user");
             const trend: any = await api.getBurnoutTrend(userId, 30);
             const points = trend.data_points || trend;
-            if (!Array.isArray(points) || points.length === 0) return demoTrend;
-            return points.map((t: any, i: number) => ({
+            // A real, still-short history is a legitimate state, not a fetch
+            // failure — pass it through instead of replacing it with a fake curve.
+            return (Array.isArray(points) ? points : []).map((t: any, i: number) => ({
                 day: i + 1,
                 probability: +(t.probability ?? t.burnout_probability ?? 0).toFixed(3),
             }));
@@ -65,8 +66,7 @@ export default function BurnoutPage() {
         async () => {
             if (!userId) throw new Error("no user");
             const risk: any = await api.getBurnoutRisk(userId);
-            if (!risk.feature_importance) return demoFeatures;
-            return Object.entries(risk.feature_importance).map(([name, value], i) => ({
+            return Object.entries(risk.feature_importance || {}).map(([name, value], i) => ({
                 name: name.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()),
                 value: +(value as number).toFixed(3),
                 color: ["#ff6e84", "#9093ff", "#fbbf24", "#34d399", "#cc97ff"][i % 5],
@@ -78,13 +78,14 @@ export default function BurnoutPage() {
     );
 
     const isDemo = !!error;
+    const hasTrend = !!trendData && trendData.length > 0;
     const loading = trendLoading || featureLoading;
-    const latest = (trendData || demoTrend)[(trendData || demoTrend).length - 1]?.probability || 0.34;
+    const latest = (hasTrend ? trendData : demoTrend)[(hasTrend ? trendData : demoTrend).length - 1]?.probability || 0.34;
     const riskLevel = latest < 0.25 ? "Low" : latest < 0.5 ? "Moderate" : latest < 0.75 ? "High" : "Critical";
     const riskColor = latest < 0.25 ? "green" : latest < 0.5 ? "amber" : "rose";
 
     // Compute risk distribution from trend
-    const riskDist = (trendData || demoTrend).reduce(
+    const riskDist = (hasTrend ? trendData : demoTrend).reduce(
         (acc: any[], d: any) => {
             const level = d.probability < 0.25 ? 0 : d.probability < 0.5 ? 1 : d.probability < 0.75 ? 2 : 3;
             acc[level] = { ...acc[level], value: acc[level].value + 1 };
