@@ -39,7 +39,10 @@ class Settings(BaseSettings):
     def cors_origins_list(self) -> list[str]:
         if self.FRONTEND_URL:
             return [self.FRONTEND_URL]
-        return self.CORS_ORIGINS.split(",")
+        # Deployed CORS_ORIGINS values are commonly written as a
+        # comma-and-space separated list (prod + preview URLs) — an
+        # unstripped entry silently fails origin matching.
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
     # ML Models
     ENERGY_MODEL_PATH: str = "models/energy_model.pt"
