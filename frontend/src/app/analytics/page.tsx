@@ -23,20 +23,10 @@ const AnalyticsCompletionChart = dynamic(() => import("@/components/charts/Analy
     loading: () => <ChartSkeleton height="h-[250px]" />
 });
 
-const demoDashboard = {
-    deep_work_hours: 4.2,
-    identity_alignment_avg: 73.5,
-    burnout_trend: 0.34,
-    rl_strategy_efficiency: 0.82,
-    energy_forecast_mae: 0.8,
-    decision_fatigue_index: 0.42,
-    tasks_completed: 6,
-    tasks_total: 10,
-    weekly_deep_work: [] as any[],
-    friction_timeline: [] as any[],
-    mission_breakdown: [] as any[],
-};
-
+// Only ever shown when the dashboard fetch itself fails (isDemo) — never as a
+// silent substitute for a real, still-sparse response. The backend already
+// returns honest zero-valued arrays for a new account, so a genuine empty
+// state renders as zeros, not as this fabricated shape.
 const demoWeeklyDeepWork = Array.from({ length: 7 }, (_, i) => ({
     day: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i],
     deepWork: +(2 + Math.random() * 4).toFixed(1),
@@ -57,6 +47,20 @@ const demoCompletion = [
     { category: "DevOps", completed: 2, total: 4, color: "#ff6e84" },
     { category: "Review", completed: 4, total: 5, color: "#3adffa" },
 ];
+
+const demoDashboard = {
+    deep_work_hours: 4.2,
+    identity_alignment_avg: 73.5,
+    burnout_trend: 0.34,
+    rl_strategy_efficiency: 0.82,
+    energy_forecast_mae: 0.8,
+    decision_fatigue_index: 0.42,
+    tasks_completed: 6,
+    tasks_total: 10,
+    weekly_deep_work: demoWeeklyDeepWork as any[],
+    friction_timeline: demoRiskTimeline as any[],
+    mission_breakdown: demoCompletion as any[],
+};
 
 // CustomTooltip moved
 
@@ -128,7 +132,7 @@ export default function AnalyticsPage() {
                         <span className="text-xl">🌊</span>
                         <h2 className="text-sm font-medium text-on-surface-variant">Flow States (7 Days)</h2>
                     </div>
-                    <AnalyticsDeepWorkChart data={d.weekly_deep_work || demoWeeklyDeepWork} />
+                    <AnalyticsDeepWorkChart data={d.weekly_deep_work} />
                 </ScrollReveal>
 
                 {/* Risk Indicators */}
@@ -137,7 +141,7 @@ export default function AnalyticsPage() {
                         <span className="text-xl">⚕️</span>
                         <h2 className="text-sm font-medium text-on-surface-variant">Cognitive Friction</h2>
                     </div>
-                    <AnalyticsRiskChart data={d.friction_timeline || demoRiskTimeline} />
+                    <AnalyticsRiskChart data={d.friction_timeline} />
                 </ScrollReveal>
 
                 {/* Task Distribution */}
@@ -146,7 +150,7 @@ export default function AnalyticsPage() {
                         <span className="text-xl">📊</span>
                         <h2 className="text-sm font-medium text-on-surface-variant">Mission Breakdown</h2>
                     </div>
-                    <AnalyticsCompletionChart data={d.mission_breakdown || demoCompletion} />
+                    <AnalyticsCompletionChart data={d.mission_breakdown} />
                 </ScrollReveal>
             </div>
             )}
