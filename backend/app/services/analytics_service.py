@@ -109,20 +109,16 @@ class AnalyticsService:
         friction_res = await session.execute(friction_query)
         snapshots = friction_res.scalars().all()
         
-        friction_timeline = []
-        for index, snap in enumerate(snapshots):
-            friction_timeline.append({
+        # Real snapshots only — a user with fewer than 3 gets a short (or empty)
+        # timeline rather than fabricated points presented as history.
+        friction_timeline = [
+            {
                 "day": index + 1,
                 "burnout": round(snap.burnout_probability, 2),
-                "fatigue": round(snap.cognitive_load, 2)
-            })
-            
-        if len(friction_timeline) < 3:
-            import random
-            friction_timeline = [
-                {"day": i + 1, "burnout": round(0.2 + random.random() * 0.3, 2), "fatigue": round(0.3 + random.random() * 0.4, 2)}
-                for i in range(14)
-            ]
+                "fatigue": round(snap.cognitive_load, 2),
+            }
+            for index, snap in enumerate(snapshots)
+        ]
 
         # Mission breakdown grouped by task category
         category_breakdown = []
