@@ -20,5 +20,6 @@ RUN mkdir -p models
 # Expose port
 EXPOSE 8000
 
-# Run with uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Render (and most PaaS hosts) inject the port to bind via $PORT at runtime —
+# exec-form CMD can't expand env vars, so this needs the shell form.
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
