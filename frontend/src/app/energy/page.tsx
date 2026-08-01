@@ -14,27 +14,12 @@ const EnergyForecastChart = dynamic(() => import("@/components/charts/EnergyFore
     loading: () => <ChartSkeleton height="h-[350px]" />
 });
 
-const EnergyWeeklyChart = dynamic(() => import("@/components/charts/EnergyWeeklyChart"), {
-    ssr: false,
-    loading: () => <ChartSkeleton height="h-[250px]" />
-});
-
 const demoHourly = Array.from({ length: 24 }, (_, i) => {
     const base = [3, 2.5, 2, 1.5, 1, 1.5, 3, 5, 7, 8, 8.5, 8, 7, 6, 5.5, 6.5, 7, 7.5, 7, 6.5, 6, 5, 4, 3.5];
     return {
         hour: `${String(i).padStart(2, "0")}:00`,
         predicted: +(base[i] + (Math.random() - 0.5) * 0.5).toFixed(1),
         actual: i < new Date().getHours() ? +(base[i] + (Math.random() - 0.5) * 1.5).toFixed(1) : null,
-    };
-});
-
-const demoWeekly = Array.from({ length: 7 }, (_, i) => {
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    return {
-        day: days[i],
-        avgEnergy: +(5 + Math.random() * 3).toFixed(1),
-        peakEnergy: +(7 + Math.random() * 2.5).toFixed(1),
-        lowEnergy: +(2 + Math.random() * 2).toFixed(1),
     };
 });
 
@@ -68,26 +53,8 @@ export default function EnergyPage() {
         { staleTime: 30000 }
     );
 
-    const { data: weeklyData, loading: weeklyLoading } = useApi(
-        async () => {
-            if (!userId) throw new Error("no user");
-            const history: any = await api.getEnergyHistory(userId, 7);
-            if (!Array.isArray(history) || history.length === 0) return demoWeekly;
-            const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-            return days.map((day) => ({
-                day,
-                avgEnergy: +(5 + Math.random() * 3).toFixed(1),
-                peakEnergy: +(7 + Math.random() * 2.5).toFixed(1),
-                lowEnergy: +(2 + Math.random() * 2).toFixed(1),
-            }));
-        },
-        demoWeekly,
-        [userId],
-        { staleTime: 30000 }
-    );
-
     const isDemo = !!error;
-    const loading = hourlyLoading || weeklyLoading;
+    const loading = hourlyLoading;
     const currentHour = new Date().getHours();
     const current = hourlyData?.[currentHour];
     const peakHour = (hourlyData || demoHourly).reduce((max: any, d: any) => d.predicted > max.predicted ? d : max, (hourlyData || demoHourly)[0]);
