@@ -230,7 +230,6 @@ export default function BurnoutPage() {
                         try {
                             if (userId) {
                                 await api.recordBurnoutSnapshot({
-                                    user_id: userId,
                                     stress_trend: stressLevel,
                                     cognitive_load: cogLoad,
                                 });

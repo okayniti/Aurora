@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@/lib/UserContext";
 import { useApi } from "@/lib/useApi";
 import { api } from "@/lib/api";
@@ -34,6 +34,21 @@ const demoIdentity = `I am a disciplined machine learning engineer who values de
 export default function IdentityPage() {
     const { userId } = useUser();
     const [identityText, setIdentityText] = useState(demoIdentity);
+
+    const { data: profileData } = useApi(
+        async () => {
+            if (!userId) throw new Error("no user");
+            return await api.getIdentityProfile(userId) as any;
+        },
+        { identity_desc: demoIdentity },
+        [userId]
+    );
+
+    useEffect(() => {
+        if (profileData?.identity_desc) {
+            setIdentityText(profileData.identity_desc);
+        }
+    }, [profileData]);
 
     const { data: alignments, error, refetch, loading } = useApi(
         async () => {
@@ -95,7 +110,7 @@ export default function IdentityPage() {
                         onClick={async () => {
                             if (userId) {
                                 try {
-                                    await api.updateIdentity(userId, identityText);
+                                    await api.updateIdentity(identityText);
                                     refetch();
                                 } catch { }
                             }

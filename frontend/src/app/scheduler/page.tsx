@@ -84,10 +84,7 @@ export default function SchedulerPage() {
         if (!userId || !formData.title.trim()) return;
         setSaving(true);
         try {
-            await api.createTask({
-                user_id: userId,
-                ...formData,
-            });
+            await api.createTask({ ...formData });
             setFormData({ title: "", description: "", difficulty: 5, estimated_minutes: 60, priority: 3, category: "coding" });
             setShowForm(false);
             refetchTasks();

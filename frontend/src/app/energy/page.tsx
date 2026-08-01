@@ -99,7 +99,6 @@ export default function EnergyPage() {
         setLogSuccess(false);
         try {
             await api.logEnergy({
-                user_id: userId,
                 energy_level: logData.energy_level,
                 sleep_hours: logData.sleep_hours,
                 caffeine_intake: logData.caffeine_intake,
