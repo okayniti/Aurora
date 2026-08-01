@@ -10,6 +10,13 @@ from typing import Optional
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
+    # Configuration for Pydantic v2: read .env and ignore unknown keys
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "extra": "ignore",
+    }
+
     # App
     APP_NAME: str = "AURORA"
     APP_VERSION: str = "1.0.0"
@@ -58,9 +65,7 @@ class Settings(BaseSettings):
     # External APIs
     GEMINI_API_KEY: Optional[str] = None
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    # (model_config above replaces class-based Config for Pydantic v2)
 
 
 settings = Settings()
