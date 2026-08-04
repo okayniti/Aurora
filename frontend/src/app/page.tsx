@@ -129,6 +129,73 @@ const AuroraChat = React.memo(({ userId }: { userId: string | null }) => {
     );
 });
 
+// ── Focus ring + countdown ────────────────────────────────────
+// Isolated so its once-a-second tick only re-renders this small subtree
+// instead of the entire dashboard page.
+const RING_RADIUS = 110;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+
+const FocusRing = React.memo(function FocusRing() {
+    const [elapsed, setElapsed] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setElapsed((prev) => (prev + 1) % TOTAL_SECONDS);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const remaining = TOTAL_SECONDS - elapsed;
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    const progress = remaining / TOTAL_SECONDS;
+    const strokeDashoffset = useMemo(
+        () => RING_CIRCUMFERENCE * (1 - progress),
+        [progress]
+    );
+
+    return (
+        <div className="relative w-48 h-48 md:w-64 md:h-64 mx-auto mt-8 md:mt-12 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full border-2 border-primary/10 scale-110" />
+
+            <svg
+                className="absolute inset-0 w-full h-full -rotate-90"
+                viewBox="0 0 256 256"
+                style={{ filter: "drop-shadow(0 0 8px rgba(204, 151, 255, 0.3))" }}
+            >
+                <defs>
+                    <linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#cc97ff" />
+                        <stop offset="100%" stopColor="#8a5cbf" />
+                    </linearGradient>
+                </defs>
+                <circle cx="128" cy="128" r={RING_RADIUS} fill="none" stroke="rgba(204, 151, 255, 0.08)" strokeWidth="3" />
+                <circle
+                    cx="128" cy="128" r={RING_RADIUS} fill="none"
+                    stroke="url(#ring-gradient)" strokeWidth="3" strokeLinecap="round"
+                    strokeDasharray={RING_CIRCUMFERENCE} strokeDashoffset={strokeDashoffset}
+                    style={{ transition: "stroke-dashoffset 1s linear" }}
+                />
+            </svg>
+
+            <div className="absolute inset-4 rounded-full border border-secondary/20 rotate-45" />
+
+            <div className="w-36 h-36 md:w-48 md:h-48 rounded-full glass-panel border border-white/5 flex flex-col items-center justify-center p-6 md:p-8 shadow-2xl z-10">
+                <span className="text-[0.625rem] text-on-surface-variant uppercase tracking-widest mb-1">
+                    Time to Peak
+                </span>
+                <span
+                    className="text-3xl md:text-4xl font-light tracking-tighter text-on-surface tabular-nums"
+                    aria-live="off"
+                >
+                    {String(minutes).padStart(2, "0")}:
+                    {String(seconds).padStart(2, "0")}
+                </span>
+            </div>
+        </div>
+    );
+});
+
 // ── Fallback demo data (used when API is unavailable) ────────
 const demoDashboard = {
     deep_work_hours: 4.2,
@@ -239,7 +306,6 @@ function getNeuralMessage(burnoutProb: number): string {
 
 export default function Dashboard() {
     const { userId } = useUser();
-    const [elapsed, setElapsed] = useState(0);
 
     const {
         data: tasks,
@@ -289,14 +355,6 @@ export default function Dashboard() {
         { staleTime: 60000, refetchInterval: false }
     );
 
-    // Countdown timer
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setElapsed((prev) => (prev + 1) % TOTAL_SECONDS);
-        }, 1000);
-        return () => clearInterval(interval);
-    }, []);
-
     // WebSocket real-time updates connection
     useEffect(() => {
         if (!userId) return;
@@ -332,11 +390,6 @@ export default function Dashboard() {
     }, [userId, refetchTasks, refetchDash, refetchBurnout, refetchForecast]);
 
     // ── Derived state ──────────────────────────────────────
-    const remaining = TOTAL_SECONDS - elapsed;
-    const minutes = Math.floor(remaining / 60);
-    const seconds = remaining % 60;
-    const progress = remaining / TOTAL_SECONDS;
-
     const d = dashboard || demoDashboard;
     const b = burnout || demoBurnout;
     const f = forecast || demoForecast;
@@ -353,14 +406,6 @@ export default function Dashboard() {
     const activeTaskName = tasks && tasks.length > 0 ? getActiveTaskName(tasks) : "Architecture";
 
     const isDemo = !!(tasksError && dashError);
-
-    // SVG ring
-    const RING_RADIUS = 110;
-    const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
-    const strokeDashoffset = useMemo(
-        () => RING_CIRCUMFERENCE * (1 - progress),
-        [progress, RING_CIRCUMFERENCE]
-    );
 
     return (
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 min-h-[calc(100vh-8rem)] animate-fade-in">
@@ -466,42 +511,8 @@ export default function Dashboard() {
                         support complex synthesis.
                     </p>
 
-                    {/* Alignment Ring with SVG Progress */}
-                    <div className="relative w-48 h-48 md:w-64 md:h-64 mx-auto mt-8 md:mt-12 flex items-center justify-center">
-                        <div className="absolute inset-0 rounded-full border-2 border-primary/10 scale-110" />
-
-                        <svg
-                            className="absolute inset-0 w-full h-full -rotate-90"
-                            viewBox="0 0 256 256"
-                            style={{ filter: "drop-shadow(0 0 8px rgba(204, 151, 255, 0.3))" }}
-                        >
-                            <defs>
-                                <linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#cc97ff" />
-                                    <stop offset="100%" stopColor="#8a5cbf" />
-                                </linearGradient>
-                            </defs>
-                            <circle cx="128" cy="128" r={RING_RADIUS} fill="none" stroke="rgba(204, 151, 255, 0.08)" strokeWidth="3" />
-                            <circle
-                                cx="128" cy="128" r={RING_RADIUS} fill="none"
-                                stroke="url(#ring-gradient)" strokeWidth="3" strokeLinecap="round"
-                                strokeDasharray={RING_CIRCUMFERENCE} strokeDashoffset={strokeDashoffset}
-                                style={{ transition: "stroke-dashoffset 1s linear" }}
-                            />
-                        </svg>
-
-                        <div className="absolute inset-4 rounded-full border border-secondary/20 rotate-45" />
-
-                        <div className="w-36 h-36 md:w-48 md:h-48 rounded-full glass-panel border border-white/5 flex flex-col items-center justify-center p-6 md:p-8 shadow-2xl z-10">
-                            <span className="text-[0.625rem] text-on-surface-variant uppercase tracking-widest mb-1">
-                                Time to Peak
-                            </span>
-                            <span className="text-3xl md:text-4xl font-light tracking-tighter text-on-surface tabular-nums">
-                                {String(minutes).padStart(2, "0")}:
-                                {String(seconds).padStart(2, "0")}
-                            </span>
-                        </div>
-                    </div>
+                    {/* Alignment Ring with SVG Progress — isolated component, ticks on its own */}
+                    <FocusRing />
                 </div>
             </section>
 
