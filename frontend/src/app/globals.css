@@ -58,9 +58,14 @@
   /* ── Glass Panel (core building block) ────────── */
   .glass-panel {
     background: rgba(15, 20, 25, 0.4);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    /* backdrop-filter has to resample whatever's behind it on every frame
+       that content changes — with ~50 of these panels on screen sitting over
+       the continuously-animating aurora orbs, the blur radius here is a
+       direct, multiplied cost. 14px still reads as glass; 24px was
+       measurably more expensive for no visible difference. */
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: background-color 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   .glass-panel:hover {
@@ -70,7 +75,10 @@
 
   /* ── Aurora Blur Orbs ─────────────────────────── */
   .aurora-blur {
-    filter: blur(120px);
+    /* Large-radius filter: blur() scales roughly quadratically with radius,
+       and this runs continuously (CSS keyframe drift) behind every page.
+       60px keeps the same soft ambient look at a fraction of the cost. */
+    filter: blur(60px);
     opacity: 0.15;
     pointer-events: none;
   }
@@ -102,8 +110,8 @@
   /* ── Backward-compatible classes for sub-pages ── */
   .glass-card {
     background: rgba(15, 20, 25, 0.5);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 1rem;
     box-shadow: 0px 20px 40px rgba(204, 151, 255, 0.04);
@@ -327,5 +335,37 @@
   /* Ensure no overflow from large charts */
   .recharts-responsive-container {
     max-width: 100vw;
+  }
+}
+
+/* ── Reduced motion ───────────────────────────────────
+   Disables the continuously-running CSS animations (orb drift, shimmer,
+   border-glow pulse) and the glass-panel hover transform for anyone who has
+   asked the OS for reduced motion. framer-motion's own animations are
+   handled separately via <MotionConfig reducedMotion="user"> in providers.tsx. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .animate-orb-drift-1,
+  .animate-orb-drift-2,
+  .animate-orb-drift-3,
+  .animate-shimmer,
+  .animate-border-glow {
+    animation: none;
+  }
+
+  .glass-panel:hover {
+    transform: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

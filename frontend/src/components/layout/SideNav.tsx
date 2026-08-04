@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 const navItems = [
     { href: "/", icon: "bubble_chart", label: "Neural Hub", filled: true },
@@ -21,10 +22,21 @@ interface SideNavProps {
 export default function SideNav({ mobileOpen, onClose }: SideNavProps) {
     const pathname = usePathname();
 
+    // Escape-to-close — the drawer was previously only dismissible by
+    // clicking the backdrop or the close button, unreachable from the keyboard.
+    useEffect(() => {
+        if (!mobileOpen) return;
+        function handleKey(e: KeyboardEvent) {
+            if (e.key === "Escape") onClose?.();
+        }
+        document.addEventListener("keydown", handleKey);
+        return () => document.removeEventListener("keydown", handleKey);
+    }, [mobileOpen, onClose]);
+
     return (
         <>
             {/* ── Desktop: Vertical pill sidebar ── */}
-            <nav className="hidden md:flex fixed left-6 top-1/2 -translate-y-1/2 h-[716px] w-20 rounded-full bg-[#0a0e13]/60 backdrop-blur-2xl flex-col items-center justify-around py-12 z-50 shadow-glow border border-primary/10">
+            <nav aria-label="Primary" className="hidden md:flex fixed left-6 top-1/2 -translate-y-1/2 h-[716px] w-20 rounded-full bg-[#0a0e13]/60 backdrop-blur-lg flex-col items-center justify-around py-12 z-50 shadow-glow border border-primary/10">
                 {/* Top icon */}
                 <div className="mb-4">
                     <span
@@ -45,6 +57,8 @@ export default function SideNav({ mobileOpen, onClose }: SideNavProps) {
                                 href={item.href}
                                 prefetch={true}
                                 title={item.label}
+                                aria-label={item.label}
+                                aria-current={isActive ? "page" : undefined}
                                 className={`
                                     group relative outline-none transition-all duration-300 transform
                                     ${isActive
@@ -54,6 +68,7 @@ export default function SideNav({ mobileOpen, onClose }: SideNavProps) {
                                 `}
                             >
                                 <span
+                                    aria-hidden="true"
                                     className="material-symbols-outlined"
                                     style={isActive && item.filled !== false ? { fontVariationSettings: "'FILL' 1" } : undefined}
                                 >
@@ -73,9 +88,10 @@ export default function SideNav({ mobileOpen, onClose }: SideNavProps) {
                     <Link
                         href="/analytics"
                         prefetch={true}
+                        aria-label="Settings"
                         className="text-on-surface-variant opacity-40 hover:opacity-100 hover:text-primary hover:scale-110 outline-none transition-all duration-300 inline-block transform"
                     >
-                        <span className="material-symbols-outlined">settings</span>
+                        <span aria-hidden="true" className="material-symbols-outlined">settings</span>
                     </Link>
                 </div>
             </nav>
@@ -91,16 +107,18 @@ export default function SideNav({ mobileOpen, onClose }: SideNavProps) {
 
             {/* Drawer panel */}
             <nav
-                className={`md:hidden fixed left-0 top-0 bottom-0 w-72 bg-[#0a0e13]/95 backdrop-blur-2xl z-[70] border-r border-primary/10 flex flex-col p-6 pt-24 transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
+                aria-label="Primary"
+                className={`md:hidden fixed left-0 top-0 bottom-0 w-72 bg-[#0a0e13]/95 backdrop-blur-lg z-[70] border-r border-primary/10 flex flex-col p-6 pt-24 transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
                     mobileOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
             >
                 {/* Close button */}
                 <button
                     onClick={onClose}
+                    aria-label="Close navigation menu"
                     className="absolute top-6 right-6 w-11 h-11 flex items-center justify-center rounded-xl text-on-surface-variant hover:text-on-surface transition-colors"
                 >
-                    <span className="material-symbols-outlined">close</span>
+                    <span aria-hidden="true" className="material-symbols-outlined">close</span>
                 </button>
 
                 {/* Logo */}
@@ -118,6 +136,7 @@ export default function SideNav({ mobileOpen, onClose }: SideNavProps) {
                                 href={item.href}
                                 prefetch={true}
                                 onClick={onClose}
+                                aria-current={isActive ? "page" : undefined}
                                 className={`flex items-center gap-4 px-4 py-3 min-h-[44px] rounded-xl transition-all duration-300 ${
                                     isActive
                                         ? "text-primary bg-primary/10 border border-primary/20"
@@ -125,6 +144,7 @@ export default function SideNav({ mobileOpen, onClose }: SideNavProps) {
                                 }`}
                             >
                                 <span
+                                    aria-hidden="true"
                                     className="material-symbols-outlined text-xl"
                                     style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
                                 >

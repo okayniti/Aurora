@@ -40,6 +40,8 @@ export default function AuroraBackground() {
     const wrapperRefs = useRef<(HTMLDivElement | null)[]>([]);
 
     useEffect(() => {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
         let ticking = false;
 
         function onScroll() {
@@ -80,7 +82,7 @@ export default function AuroraBackground() {
             </div>
 
             {/* Ambient bottom-right glow */}
-            <div className="fixed bottom-0 right-0 w-[40vw] h-[40vw] bg-tertiary/5 rounded-full blur-[150px] pointer-events-none z-0" />
+            <div className="fixed bottom-0 right-0 w-[40vw] h-[40vw] bg-tertiary/5 rounded-full blur-[80px] pointer-events-none z-0" />
         </>
     );
 }
