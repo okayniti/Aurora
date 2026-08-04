@@ -33,11 +33,16 @@ export default function TopBar({ onMenuToggle }: TopBarProps) {
                 setDropdownOpen(false);
             }
         }
+        function closeOnEscape(e: KeyboardEvent) {
+            if (e.key === "Escape") setDropdownOpen(false);
+        }
         document.addEventListener("mousedown", close);
+        document.addEventListener("keydown", closeOnEscape);
 
         return () => {
             clearInterval(interval);
             document.removeEventListener("mousedown", close);
+            document.removeEventListener("keydown", closeOnEscape);
         };
     }, []);
 
@@ -82,35 +87,39 @@ export default function TopBar({ onMenuToggle }: TopBarProps) {
                 </div>
 
                 {/* Notification icon */}
-                <button className="w-11 h-11 flex items-center justify-center rounded-xl text-primary hover:text-secondary hover:blur-[1px] transition-all duration-500">
-                    <span className="material-symbols-outlined">notifications_paused</span>
+                <button aria-label="Notifications" className="w-11 h-11 flex items-center justify-center rounded-xl text-primary hover:text-secondary hover:blur-[1px] transition-all duration-500">
+                    <span aria-hidden="true" className="material-symbols-outlined">notifications_paused</span>
                 </button>
 
                 {/* Grid icon — hidden on mobile */}
-                <button className="hidden md:flex w-11 h-11 items-center justify-center rounded-xl text-primary hover:text-secondary hover:blur-[1px] transition-all duration-500">
-                    <span className="material-symbols-outlined">blur_on</span>
+                <button aria-label="Grid view" className="hidden md:flex w-11 h-11 items-center justify-center rounded-xl text-primary hover:text-secondary hover:blur-[1px] transition-all duration-500">
+                    <span aria-hidden="true" className="material-symbols-outlined">blur_on</span>
                 </button>
 
                 {/* Avatar with Dropdown */}
                 <div className="relative" ref={dropdownRef}>
-                    <button 
+                    <button
                         onClick={() => setDropdownOpen(!dropdownOpen)}
+                        aria-label="Account menu"
+                        aria-haspopup="menu"
+                        aria-expanded={dropdownOpen}
                         className="w-10 h-10 md:w-10 md:h-10 rounded-full overflow-hidden border border-primary/20 bg-surface-container-high flex items-center justify-center shrink-0 hover:border-primary transition-colors duration-300"
                     >
-                        <span className="text-primary text-lg font-bold uppercase">{displayEmail.charAt(0)}</span>
+                        <span aria-hidden="true" className="text-primary text-lg font-bold uppercase">{displayEmail.charAt(0)}</span>
                     </button>
-                    
+
                     {dropdownOpen && (
-                        <div className="absolute right-0 mt-3 w-56 rounded-xl glass-panel border border-primary/20 shadow-2xl py-2 flex flex-col z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div role="menu" aria-label="Account" className="absolute right-0 mt-3 w-56 rounded-xl glass-panel border border-primary/20 shadow-2xl py-2 flex flex-col z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                             <div className="px-4 py-3 border-b border-primary/10 mb-1">
                                 <p className="text-sm font-medium text-on-surface truncate">{displayEmail}</p>
                                 <p className="text-xs text-on-surface-variant mt-0.5">Aurora User</p>
                             </div>
-                            <button 
+                            <button
+                                role="menuitem"
                                 onClick={handleSignOut}
                                 className="mx-2 px-3 py-2 text-left text-sm text-error hover:bg-error/10 hover:text-error rounded-lg transition-colors flex items-center gap-2 mt-1"
                             >
-                                <span className="material-symbols-outlined text-[18px]">logout</span>
+                                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">logout</span>
                                 Sign Out
                             </button>
                         </div>
