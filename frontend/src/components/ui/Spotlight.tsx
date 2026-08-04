@@ -17,20 +17,25 @@ export function Spotlight({
 }: SpotlightProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [position, setPosition] = useState({ x: 0, y: 0 });
+    // Latest raw mouse coords, written on every event but only read once per
+    // animation frame — this is what actually throttles the render rate.
+    const targetRef = useRef({ x: 0, y: 0 });
 
     useEffect(() => {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
         const handleMouse = (e: MouseEvent) => {
             if (!containerRef.current) return;
             const rect = containerRef.current.getBoundingClientRect();
-            // Lerp towards mouse for smooth trailing
-            setPosition((prev) => ({
-                x: prev.x + (e.clientX - rect.left - prev.x) * 0.08,
-                y: prev.y + (e.clientY - rect.top - prev.y) * 0.08,
-            }));
+            targetRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
         };
 
         let raf: number;
         const loop = () => {
+            setPosition((prev) => ({
+                x: prev.x + (targetRef.current.x - prev.x) * 0.08,
+                y: prev.y + (targetRef.current.y - prev.y) * 0.08,
+            }));
             raf = requestAnimationFrame(loop);
         };
 
@@ -50,7 +55,7 @@ export function Spotlight({
             style={{ opacity }}
         >
             <div
-                className="absolute rounded-full transition-[left,top] duration-[2000ms] ease-out"
+                className="absolute rounded-full"
                 style={{
                     width: size,
                     height: size,
